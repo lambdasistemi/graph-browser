@@ -1,8 +1,6 @@
-import cytoscape from "cytoscape";
-import fcose from "cytoscape-fcose";
-
-cytoscape.use(fcose);
-
+// cytoscape and fcose are loaded via the bootstrap
+// script (dist/bootstrap.js) before this module runs.
+// They register themselves as globals.
 var _cy = null;
 
 function hexToRgba(hex, alpha) {
