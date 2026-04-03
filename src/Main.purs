@@ -340,11 +340,48 @@ renderTutorialContent state =
             Nothing -> false
         in
           HH.div [ cls "tutorial-content" ]
-          [ HH.div [ cls "tutorial-progress" ]
-              [ HH.text
-                  ( show stepNum <> " / "
-                      <> show total
-                  )
+          [ HH.div [ cls "tutorial-topbar" ]
+              [ HH.div [ cls "tutorial-nav" ]
+                  [ if state.tutorialStep > 0 then
+                      HH.button
+                        [ cls "tutorial-nav-btn"
+                        , HE.onClick \_ -> TutorialPrev
+                        ]
+                        [ HH.text "Prev" ]
+                    else HH.text ""
+                  , HH.span [ cls "tutorial-progress" ]
+                      [ HH.text
+                          ( show stepNum <> " / "
+                              <> show total
+                          )
+                      ]
+                  , if onDetour then
+                      HH.button
+                        [ cls "tutorial-nav-btn recenter"
+                        , HE.onClick \_ ->
+                            TutorialRecenter
+                        ]
+                        [ HH.text "Refocus" ]
+                    else HH.text ""
+                  , if stepNum < total then
+                      HH.button
+                        [ cls
+                            "tutorial-nav-btn active"
+                        , HE.onClick \_ -> TutorialNext
+                        ]
+                        [ HH.text "Next" ]
+                    else
+                      HH.button
+                        [ cls "tutorial-nav-btn"
+                        , HE.onClick \_ -> ExitTutorial
+                        ]
+                        [ HH.text "Finish" ]
+                  , HH.button
+                      [ cls "tutorial-exit"
+                      , HE.onClick \_ -> ExitTutorial
+                      ]
+                      [ HH.text "Exit" ]
+                  ]
               ]
           , HH.div [ cls "tutorial-narrative" ]
               ( map
@@ -354,39 +391,6 @@ renderTutorialContent state =
                   )
                   (splitParagraphs stop.narrative)
               )
-          , HH.div [ cls "tutorial-nav" ]
-              [ if state.tutorialStep > 0 then
-                  HH.button
-                    [ cls "tutorial-nav-btn"
-                    , HE.onClick \_ -> TutorialPrev
-                    ]
-                    [ HH.text "Prev" ]
-                else HH.text ""
-              , if onDetour then
-                  HH.button
-                    [ cls "tutorial-nav-btn recenter"
-                    , HE.onClick \_ -> TutorialRecenter
-                    ]
-                    [ HH.text "Refocus" ]
-                else HH.text ""
-              , if stepNum < total then
-                  HH.button
-                    [ cls "tutorial-nav-btn active"
-                    , HE.onClick \_ -> TutorialNext
-                    ]
-                    [ HH.text "Next" ]
-                else
-                  HH.button
-                    [ cls "tutorial-nav-btn"
-                    , HE.onClick \_ -> ExitTutorial
-                    ]
-                    [ HH.text "Finish" ]
-              ]
-          , HH.button
-              [ cls "tutorial-exit"
-              , HE.onClick \_ -> ExitTutorial
-              ]
-              [ HH.text "Exit tour" ]
           , case state.hoveredNode of
               Nothing -> HH.text ""
               Just node ->
