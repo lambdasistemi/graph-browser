@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+  pull_request:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -31,4 +32,5 @@ jobs:
         with:
           path: dist
       - id: deployment
+        if: github.ref == 'refs/heads/main'
         uses: actions/deploy-pages@v5
