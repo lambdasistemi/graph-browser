@@ -92,6 +92,18 @@ function baseStyle(kinds) {
 
 function runLayout(callback) {
   if (!_cy) return;
+  // Suppress edge warnings during layout by temporarily muting console.warn
+  var origWarn = console.warn;
+  console.warn = function (msg) {
+    if (typeof msg === "string" && msg.indexOf("invalid endpoints") !== -1)
+      return;
+    if (
+      typeof msg === "string" &&
+      msg.indexOf("custom wheel sensitivity") !== -1
+    )
+      return;
+    origWarn.apply(console, arguments);
+  };
   var n = _cy.nodes().length;
   var edgeLen = n <= 10 ? 350 : n <= 20 ? 250 : 180;
   var repulsion = n <= 10 ? 50000 : n <= 20 ? 25000 : 8000;
@@ -113,6 +125,8 @@ function runLayout(callback) {
       gravityRange: 1.2,
       numIter: 5000,
       stop: function () {
+        // Restore console.warn
+        console.warn = origWarn;
         if (callback) callback();
       },
     })
@@ -132,7 +146,6 @@ export const initCytoscape = (containerId) => (kinds) => () => {
     elements: [],
     style: baseStyle(kinds),
     layout: { name: "preset" },
-    wheelSensitivity: 1,
     minZoom: 0.15,
     maxZoom: 3,
   });
