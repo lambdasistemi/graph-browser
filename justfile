@@ -3,6 +3,8 @@ build:
 
 bundle:
     spago bundle
+    esbuild dist/index.js --bundle --outfile=dist/bundle.js --format=iife --platform=browser --minify
+    mv dist/bundle.js dist/index.js
 
 dev:
     spago build --watch
@@ -22,4 +24,4 @@ serve: bundle
     npx serve dist -p 10002
 
 clean:
-    rm -rf output/ dist/index.js dist/data
+    rm -rf output/ dist/index.js dist/bundle.js dist/data
