@@ -92,6 +92,8 @@ function baseStyle(kinds) {
 
 function runLayout(callback) {
   if (!_cy) return;
+  // Hide edges during layout to prevent overlap warnings
+  _cy.edges().style("display", "none");
   var n = _cy.nodes().length;
   var edgeLen = n <= 10 ? 350 : n <= 20 ? 250 : 180;
   var repulsion = n <= 10 ? 50000 : n <= 20 ? 25000 : 8000;
@@ -113,6 +115,8 @@ function runLayout(callback) {
       gravityRange: 1.2,
       numIter: 5000,
       stop: function () {
+        // Show edges after nodes are positioned
+        _cy.edges().style("display", "element");
         if (callback) callback();
       },
     })
@@ -132,7 +136,6 @@ export const initCytoscape = (containerId) => (kinds) => () => {
     elements: [],
     style: baseStyle(kinds),
     layout: { name: "preset" },
-    wheelSensitivity: 1,
     minZoom: 0.15,
     maxZoom: 3,
   });
