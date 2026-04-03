@@ -20,6 +20,7 @@ package:
     - refs
     - aff-promise
     - web-events
+    - web-storage
     - foreign
     - foreign-object
     - dom-indexed
