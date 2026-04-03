@@ -114,11 +114,25 @@ nix develop -c just serve   # serve example on port 10002
 nix develop -c just dev     # watch mode
 ```
 
+## JSON Schemas
+
+Validate your data against the schemas in [`schema/`](schema/):
+
+- [`config.schema.json`](schema/config.schema.json) — configuration
+- [`graph.schema.json`](schema/graph.schema.json) — nodes and edges
+- [`tutorial.schema.json`](schema/tutorial.schema.json) — guided tour
+- [`tutorial-index.schema.json`](schema/tutorial-index.schema.json) — tour list
+
+## Generating Data with an LLM
+
+See [`GENERATE.md`](GENERATE.md) for prompt templates to generate graph data, tutorials, and configuration using Claude, ChatGPT, or any AI assistant with web access. The prompts are designed to produce valid JSON matching the schemas above.
+
 ## Tech Stack
 
 - **PureScript** + **Halogen** — typed functional UI
 - **Cytoscape.js** + **fCoSE** — graph visualization
 - **Nix flake** — reproducible dev environment
+- **mkSpagoDerivation** — sandboxed Nix build
 - **Spago** — PureScript build
 
 ## Projects Using Graph Browser

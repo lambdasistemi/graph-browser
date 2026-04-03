@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lambdasistemi.github.io/graph-browser/schema/config.schema.json",
+  "title": "Graph Browser Configuration",
+  "description": "Configuration for a graph-browser instance: title, source URL, and node kind definitions.",
+  "type": "object",
+  "required": ["title", "description", "sourceUrl", "kinds"],
+  "additionalProperties": false,
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Display title for the graph. Shown in the sidebar header, browser tab, and used as the localStorage namespace."
+    },
+    "description": {
+      "type": "string",
+      "description": "Short description of what this graph covers."
+    },
+    "sourceUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the source repository. Shown as a 'Source' link in the legend. Set to empty string to hide."
+    },
+    "kinds": {
+      "type": "object",
+      "description": "Node kind definitions. Keys are kind IDs used in graph.json nodes. Each kind defines how nodes of that type are displayed.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["label", "color", "shape"],
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Human-readable label for this kind (e.g. 'Actor', 'Process')."
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$",
+            "description": "Hex color for this kind's nodes (e.g. '#58a6ff')."
+          },
+          "shape": {
+            "type": "string",
+            "enum": ["ellipse", "round-rectangle", "diamond", "round-hexagon", "rectangle", "round-octagon", "barrel", "round-pentagon", "triangle", "star"],
+            "description": "Cytoscape.js node shape."
+          }
+        }
+      }
+    }
+  }
+}

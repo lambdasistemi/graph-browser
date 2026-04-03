@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lambdasistemi.github.io/graph-browser/schema/graph.schema.json",
+  "title": "Knowledge Graph Data",
+  "description": "Nodes and edges of a knowledge graph for the graph-browser.",
+  "type": "object",
+  "required": ["nodes", "edges"],
+  "additionalProperties": false,
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "description": "All nodes in the graph.",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "kind", "group", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$",
+            "description": "Unique kebab-case identifier."
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable display name."
+          },
+          "kind": {
+            "type": "string",
+            "description": "Kind ID matching a key in config.json kinds."
+          },
+          "group": {
+            "type": "string",
+            "description": "Logical grouping for organization (e.g. 'core', 'actors', 'lifecycle')."
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "description": "3-6 sentence description explaining what this node IS and WHY it matters."
+          },
+          "links": {
+            "type": "array",
+            "description": "External reference links.",
+            "items": {
+              "type": "object",
+              "required": ["label", "url"],
+              "additionalProperties": false,
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "Link display text."
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "URL (must be verified working)."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "description": "All directed edges in the graph.",
+      "items": {
+        "type": "object",
+        "required": ["source", "target", "label", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "Source node ID."
+          },
+          "target": {
+            "type": "string",
+            "description": "Target node ID."
+          },
+          "label": {
+            "type": "string",
+            "description": "Short relationship label (2-5 words)."
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "description": "2-4 sentence explanation of WHY this relationship exists."
+          }
+        }
+      }
+    }
+  }
+}
