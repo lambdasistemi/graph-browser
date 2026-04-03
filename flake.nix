@@ -1,7 +1,6 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    # Use fork with nodePackages fix until upstream merges PR #139
     purescript-overlay = {
       url = "github:paolino/purescript-overlay/fix/remove-nodePackages";
       inputs.nixpkgs.follows = "nixpkgs";
