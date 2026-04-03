@@ -1,0 +1,37 @@
+{
+  "id": "getting-started",
+  "title": "How This Works",
+  "description": "A quick tour of the graph browser itself.",
+  "stops": [
+    {
+      "node": "graph-browser",
+      "depth": 99,
+      "title": "Welcome",
+      "narrative": "This is an interactive knowledge graph browser. You're looking at a graph where nodes represent concepts and edges represent relationships between them.\n\nHover any node to see its description in this sidebar. Click a node to re-center the graph on it. Use the depth buttons (1, 2, 3, All) to control how many hops from the selected node are visible."
+    },
+    {
+      "node": "config",
+      "depth": 1,
+      "title": "Configuration",
+      "narrative": "Every graph browser instance is configured by a [config.json](node:config) file. It defines the title, source URL, and — most importantly — the node kind definitions.\n\nKinds determine how nodes look: each kind has a label, color, and shape. The browser reads these at startup and generates Cytoscape styles dynamically. No kind is hardcoded."
+    },
+    {
+      "node": "graph-data",
+      "depth": 1,
+      "title": "The Graph Data",
+      "narrative": "The actual knowledge graph lives in [graph.json](node:graph-data). It has two arrays: nodes and edges.\n\nEach node has an id, label, kind (matching a kind from config), group, description, and optional links to external resources. Each edge has source, target, label, and description explaining why the relationship exists."
+    },
+    {
+      "node": "tutorials",
+      "depth": 1,
+      "title": "Guided Tours",
+      "narrative": "Tutorials are optional. If `data/tutorials/index.json` exists, the Guided Tours dropdown appears.\n\nEach tutorial is a JSON file with a sequence of stops. Each stop names a node and a depth, plus narrative text that can include inline links: `[text](node:id)` for graph navigation and `[text](https://url)` for external links."
+    },
+    {
+      "node": "search",
+      "depth": 1,
+      "title": "Search Everything",
+      "narrative": "The search box (top right) matches against all text in the graph: node labels, descriptions, kinds, edge labels, and edge descriptions.\n\nResults show up to 12 matches. Click a result to navigate to it — nodes re-center the graph, edges show the relationship detail."
+    }
+  ]
+}

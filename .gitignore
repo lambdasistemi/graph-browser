@@ -2,6 +2,6 @@ WIP.md
 .llm/
 output/
 dist/index.js
+dist/data/
 .spago/
 node_modules/
-purescript-overlay/

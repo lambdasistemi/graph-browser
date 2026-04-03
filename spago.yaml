@@ -1,5 +1,5 @@
 package:
-  name: cardano-governance-graph
+  name: graph-browser
   dependencies:
     - prelude
     - effect

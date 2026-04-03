@@ -1,0 +1,22 @@
+{
+  "title": "Example Graph",
+  "description": "A minimal example showing the graph browser data format.",
+  "sourceUrl": "https://github.com/lambdasistemi/graph-browser",
+  "kinds": {
+    "concept": {
+      "label": "Concept",
+      "color": "#79c0ff",
+      "shape": "round-octagon"
+    },
+    "entity": {
+      "label": "Entity",
+      "color": "#58a6ff",
+      "shape": "ellipse"
+    },
+    "process": {
+      "label": "Process",
+      "color": "#3fb950",
+      "shape": "diamond"
+    }
+  }
+}
