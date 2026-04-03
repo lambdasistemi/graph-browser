@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lambdasistemi.github.io/graph-browser/schema/tutorial-index.schema.json",
+  "title": "Tutorial Index",
+  "description": "List of available tutorials. Loaded from data/tutorials/index.json.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "title", "description", "file"],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$",
+        "description": "Tutorial ID matching the tutorial file's id field."
+      },
+      "title": {
+        "type": "string",
+        "description": "Display title in the tour selection menu."
+      },
+      "description": {
+        "type": "string",
+        "description": "Short description in the tour selection menu."
+      },
+      "file": {
+        "type": "string",
+        "description": "Path to the tutorial JSON file relative to the site root (e.g. 'data/tutorials/my-tour.json')."
+      }
+    }
+  }
+}
