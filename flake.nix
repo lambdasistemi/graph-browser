@@ -5,12 +5,17 @@
       url = "github:paolino/purescript-overlay/fix/remove-nodePackages";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    mkSpagoDerivation = {
+      url = "github:jeslie0/mkSpagoDerivation";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
     {
       nixpkgs,
       purescript-overlay,
+      mkSpagoDerivation,
       ...
     }:
     let
@@ -21,6 +26,57 @@
       forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f system);
     in
     {
+      packages = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [
+              purescript-overlay.overlays.default
+              mkSpagoDerivation.overlays.default
+            ];
+          };
+        in
+        {
+          default =
+            let
+              nodeModules = pkgs.importNpmLock.buildNodeModules {
+                npmRoot = ./.;
+                nodejs = pkgs.nodejs_20;
+              };
+            in
+              pkgs.mkSpagoDerivation {
+                pname = "graph-browser";
+                version = "1.0.0";
+                src = ./.;
+                spagoYaml = ./spago.yaml;
+                spagoLock = ./spago.lock;
+                nativeBuildInputs = [
+                  pkgs.purs
+                  pkgs.spago-unstable
+                  pkgs.esbuild
+                  pkgs.nodejs_20
+                ];
+                buildPhase = ''
+                  ln -s ${nodeModules}/node_modules node_modules
+                  spago bundle --offline
+                  esbuild dist/index.js \
+                    --bundle \
+                    --outfile=dist/bundle.js \
+                    --format=iife \
+                    --platform=browser \
+                    --minify
+                  mv dist/bundle.js dist/index.js
+                '';
+                installPhase = ''
+                  mkdir -p $out
+                  cp dist/index.html $out/
+                  cp dist/index.js $out/
+                '';
+              };
+        }
+      );
+
       devShells = forAllSystems (
         system:
         let
