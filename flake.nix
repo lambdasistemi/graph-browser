@@ -59,14 +59,19 @@
                 ];
                 buildPhase = ''
                   ln -s ${nodeModules}/node_modules node_modules
-                  spago bundle --offline
-                  esbuild dist/index.js \
+                  # 1. Bundle npm deps (cytoscape → global)
+                  esbuild src/bootstrap.js \
                     --bundle \
-                    --outfile=dist/bundle.js \
+                    --outfile=dist/deps.js \
                     --format=iife \
                     --platform=browser \
                     --minify
+                  # 2. Bundle PureScript app (uses global)
+                  spago bundle --offline
+                  # 3. Concatenate: deps first, then app
+                  cat dist/deps.js dist/index.js > dist/bundle.js
                   mv dist/bundle.js dist/index.js
+                  rm dist/deps.js
                 '';
                 installPhase = ''
                   mkdir -p $out
