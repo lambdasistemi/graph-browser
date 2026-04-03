@@ -12,6 +12,9 @@ import Data.Set as Set
 import Data.String as String
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
+import Web.HTML as Web.HTML
+import Web.HTML.Window as Web.HTML.Window
+import Web.HTML.HTMLDocument as Web.HTML.HTMLDocument
 import Effect.Aff (Aff)
 import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
@@ -25,6 +28,7 @@ import Data.Argonaut.Parser as AP
 import Foreign (Foreign, unsafeToForeign)
 import Foreign.Object as FO
 import Graph.Search (SearchResult(..), search)
+import Persist as Persist
 import Tutorial (Tutorial, TutorialStop, decodeTutorial)
 import Graph.Decode (decodeConfig, decodeGraph)
 import Graph.Types
@@ -672,8 +676,9 @@ handleAction = case _ of
     cfgResult <- liftAff loadConfig
     case cfgResult of
       Left _ -> pure unit
-      Right cfg ->
+      Right cfg -> do
         H.modify_ _ { config = cfg }
+        liftEffect $ setDocTitle cfg.title
     state <- H.get
     liftEffect $ Cy.initCytoscape "cy"
       (kindsToForeign state.config)
@@ -703,22 +708,63 @@ handleAction = case _ of
           { graph = graph
           , selected = start
           }
-        renderGraph
     -- Load tutorial index
     idxResult <- liftAff loadTutorialIndex
     case idxResult of
       Left _ -> pure unit
       Right idx ->
         H.modify_ _ { tutorialIndex = idx }
+    -- Restore persisted state (before first render)
+    state2 <- H.get
+    mPersisted <- liftEffect $ Persist.restore
+      state2.config.title
+    case mPersisted of
+      Nothing -> pure unit
+      Just ps -> do
+        let
+          node = ps.selectedNodeId >>=
+            \nid -> Map.lookup nid state2.graph.nodes
+        H.modify_ _
+          { selected = node
+          , depth = ps.depth
+          }
+        -- Restore tutorial if it was active
+        case ps.tutorialId of
+          Nothing -> pure unit
+          Just tid -> do
+            let
+              mEntry = Array.find
+                (\e -> e.id == tid)
+                state2.tutorialIndex
+            case mEntry of
+              Nothing -> pure unit
+              Just entry -> do
+                tutResult <- liftAff
+                  (loadTutorialFile entry.file)
+                case tutResult of
+                  Left _ -> pure unit
+                  Right tut -> do
+                    let
+                      step = case ps.tutorialStep of
+                        Just s -> s
+                        Nothing -> 0
+                    H.modify_ _
+                      { tutorial = Just tut
+                      , tutorialStep = step
+                      , tutorialActive = true
+                      }
+    -- First render (will also persist)
+    renderGraph
 
   NodeTapped nodeId -> do
     state <- H.get
     let node = Map.lookup nodeId state.graph.nodes
     H.modify_ _ { selected = node }
-    if state.tutorialActive then
+    if state.tutorialActive then do
       -- In tutorial mode: update selected (shows Refocus)
       -- but don't re-layout the graph
       liftEffect $ Cy.markRoot nodeId
+      persistState
     else
       renderGraph
 
@@ -890,6 +936,7 @@ renderGraph = do
     (GCy.toElements visible)
   for_ state.selected \node ->
     liftEffect $ Cy.markRoot node.id
+  persistState
 
 -- | Find the node with the most connections.
 mostConnectedNode :: Graph -> Maybe Node
@@ -972,7 +1019,30 @@ loadGraphData = do
     Left err -> Left err
     Right json -> decodeGraph json
 
+-- | Save current UI state to localStorage.
+persistState
+  :: forall o
+   . H.HalogenM State Action () o Aff Unit
+persistState = do
+  state <- H.get
+  liftEffect $ Persist.save state.config.title
+    { selectedNodeId: map _.id state.selected
+    , depth: state.depth
+    , tutorialId: case state.tutorial of
+        Just t -> Just t.id
+        Nothing -> Nothing
+    , tutorialStep:
+        if state.tutorialActive then Just state.tutorialStep
+        else Nothing
+    }
+
 -- Helpers
+
+setDocTitle :: String -> Effect Unit
+setDocTitle title = do
+  w <- Web.HTML.window
+  doc <- Web.HTML.Window.document w
+  Web.HTML.HTMLDocument.setTitle title doc
 
 depthBtn
   :: forall m
