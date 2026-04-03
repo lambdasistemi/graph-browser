@@ -15,8 +15,11 @@ lint:
 
 ci: lint build bundle
 
+# Serve the example graph locally
 serve: bundle
+    rm -rf dist/data
+    cp -r example/data dist/data
     npx serve dist -p 10002
 
 clean:
-    rm -rf output/ dist/index.js
+    rm -rf output/ dist/index.js dist/data
