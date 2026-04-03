@@ -1,3 +1,8 @@
+import cytoscape from "cytoscape";
+import fcose from "cytoscape-fcose";
+
+cytoscape.use(fcose);
+
 var _cy = null;
 
 function hexToRgba(hex, alpha) {
