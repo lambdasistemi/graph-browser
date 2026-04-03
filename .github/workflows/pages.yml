@@ -27,6 +27,7 @@ jobs:
       - run: |
           nix develop --quiet -c just bundle
           cp -r example/data dist/data
+          cp -r schema dist/schema
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist
