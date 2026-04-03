@@ -27,7 +27,8 @@
             "tuples",
             "web-dom",
             "web-events",
-            "web-html"
+            "web-html",
+            "web-storage"
           ]
         },
         "test": {
