@@ -12,6 +12,9 @@ import Data.Set as Set
 import Data.String as String
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
+import Web.HTML as Web.HTML
+import Web.HTML.Window as Web.HTML.Window
+import Web.HTML.HTMLDocument as Web.HTML.HTMLDocument
 import Effect.Aff (Aff)
 import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
@@ -672,8 +675,9 @@ handleAction = case _ of
     cfgResult <- liftAff loadConfig
     case cfgResult of
       Left _ -> pure unit
-      Right cfg ->
+      Right cfg -> do
         H.modify_ _ { config = cfg }
+        liftEffect $ setDocTitle cfg.title
     state <- H.get
     liftEffect $ Cy.initCytoscape "cy"
       (kindsToForeign state.config)
@@ -973,6 +977,12 @@ loadGraphData = do
     Right json -> decodeGraph json
 
 -- Helpers
+
+setDocTitle :: String -> Effect Unit
+setDocTitle title = do
+  w <- Web.HTML.window
+  doc <- Web.HTML.Window.document w
+  Web.HTML.HTMLDocument.setTitle title doc
 
 depthBtn
   :: forall m
