@@ -84,22 +84,37 @@ mkRepoSource owner repo =
 -- | Tries manifest first (main then master branch),
 -- | falls back to convention data/ paths on GitHub Pages.
 discoverDataUrls :: RepoSource -> Aff (Either String DataUrls)
-discoverDataUrls src = do
-  mainResult <- tryFetchManifest
+discoverDataUrls = discoverDataUrlsAuth Nothing
+
+-- | Discover with optional auth token.
+discoverDataUrlsAuth
+  :: Maybe String
+  -> RepoSource
+  -> Aff (Either String DataUrls)
+discoverDataUrlsAuth mToken src = do
+  mainResult <- tryFetchManifest mToken
     (src.rawBaseUrl <> "/main/.graph-browser.json")
   case mainResult of
     Right urls -> pure (Right urls)
     Left _ -> do
-      masterResult <- tryFetchManifest
+      masterResult <- tryFetchManifest mToken
         (src.rawBaseUrl <> "/master/.graph-browser.json")
       case masterResult of
         Right urls -> pure (Right urls)
         Left _ -> pure (Right (conventionUrls src))
 
-tryFetchManifest :: String -> Aff (Either String DataUrls)
-tryFetchManifest url = do
+tryFetchManifest
+  :: Maybe String
+  -> String
+  -> Aff (Either String DataUrls)
+tryFetchManifest mToken url = do
   result <- try do
-    resp <- fetch url { method: GET }
+    resp <- case mToken of
+      Nothing -> fetch url { method: GET }
+      Just tok -> fetch url
+        { method: GET
+        , headers: { "Authorization": "token " <> tok }
+        }
     body <- resp.text
     pure body
   case result of
