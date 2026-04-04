@@ -53,6 +53,7 @@ type DataUrls =
   { configUrl :: String
   , graphUrl :: String
   , tutorialIndexUrl :: String
+  , baseUrl :: String
   }
 
 -- | Edge detail shown on hover.
@@ -735,8 +736,10 @@ handleAction = case _ of
             case mEntry of
               Nothing -> pure unit
               Just entry -> do
+                let tUrl = resolveUrl
+                      urls.baseUrl entry.file
                 tutResult <- liftAff
-                  (loadTutorialFile entry.file)
+                  (loadTutorialFile tUrl)
                 case tutResult of
                   Left _ -> pure unit
                   Right tut -> do
@@ -855,7 +858,9 @@ handleAction = case _ of
       { showTutorialMenu = not s.showTutorialMenu }
 
   StartTutorial file -> do
-    result <- liftAff (loadTutorialFile file)
+    state <- H.get
+    let url = resolveUrl state.dataUrls.baseUrl file
+    result <- liftAff (loadTutorialFile url)
     case result of
       Left _ -> pure unit
       Right tut -> do
@@ -1051,6 +1056,14 @@ depthBtn n current =
 lmapShow :: forall a. Either _ a -> Either String a
 lmapShow (Left e) = Left (printJsonDecodeError e)
 lmapShow (Right a) = Right a
+
+-- | Resolve a possibly-relative path against a base URL.
+-- | If the path starts with "http" it's returned as-is.
+-- | Otherwise it's appended to the base URL.
+resolveUrl :: String -> String -> String
+resolveUrl base path =
+  if String.take 4 path == "http" then path
+  else base <> path
 
 cls
   :: forall r i
