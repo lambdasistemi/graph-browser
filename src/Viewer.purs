@@ -399,43 +399,74 @@ renderTutorialContent state =
                   )
                   (splitParagraphs stop.narrative)
               )
-          , case state.hoveredNode of
-              Nothing -> HH.text ""
-              Just node ->
+          , case state.hoveredEdge of
+              Just edge ->
                 HH.div [ cls "tutorial-hovered-node" ]
                   [ HH.div [ cls "tutorial-hovered-divider" ]
                       []
                   , HH.span
-                      [ cls
-                          ( "badge badge-"
-                              <> node.kind
-                          )
+                      [ cls "badge badge-mechanism" ]
+                      [ HH.text "relationship" ]
+                  , HH.div [ cls "edge-detail" ]
+                      [ HH.div [ cls "edge-endpoint" ]
+                          [ HH.span [ cls "edge-role" ]
+                              [ HH.text "From" ]
+                          , HH.span [ cls "edge-name" ]
+                              [ HH.text edge.sourceLabel ]
+                          ]
+                      , HH.div [ cls "edge-label" ]
+                          [ HH.text edge.label ]
+                      , HH.div [ cls "edge-endpoint" ]
+                          [ HH.span [ cls "edge-role" ]
+                              [ HH.text "To" ]
+                          , HH.span [ cls "edge-name" ]
+                              [ HH.text edge.targetLabel ]
+                          ]
                       ]
-                      [ HH.text
-                          (kindLabel state.config node.kind)
-                      ]
-                  , HH.h3 [ cls "tutorial-hovered-label" ]
-                      [ HH.text node.label ]
                   , HH.p [ cls "tutorial-hovered-desc" ]
-                      [ HH.text node.description ]
-                  , if Array.null node.links then
-                      HH.text ""
-                    else
-                      HH.ul [ cls "links" ]
-                        ( map
-                            ( \l -> HH.li_
-                                [ HH.a
-                                    [ HP.href l.url
-                                    , HP.target "_blank"
-                                    , HP.rel "noopener"
-                                    ]
-                                    [ HH.text l.label
-                                    ]
-                                ]
-                            )
-                            node.links
-                        )
+                      [ HH.text edge.description ]
                   ]
+              Nothing -> case state.hoveredNode of
+                Nothing -> HH.text ""
+                Just node ->
+                  HH.div [ cls "tutorial-hovered-node" ]
+                    [ HH.div
+                        [ cls "tutorial-hovered-divider" ]
+                        []
+                    , HH.span
+                        [ cls
+                            ( "badge badge-"
+                                <> node.kind
+                            )
+                        ]
+                        [ HH.text
+                            ( kindLabel state.config
+                                node.kind
+                            )
+                        ]
+                    , HH.h3
+                        [ cls "tutorial-hovered-label" ]
+                        [ HH.text node.label ]
+                    , HH.p [ cls "tutorial-hovered-desc" ]
+                        [ HH.text node.description ]
+                    , if Array.null node.links then
+                        HH.text ""
+                      else
+                        HH.ul [ cls "links" ]
+                          ( map
+                              ( \l -> HH.li_
+                                  [ HH.a
+                                      [ HP.href l.url
+                                      , HP.target "_blank"
+                                      , HP.rel "noopener"
+                                      ]
+                                      [ HH.text l.label
+                                      ]
+                                  ]
+                              )
+                              node.links
+                          )
+                    ]
           ]
 
 currentStop :: State -> Maybe TutorialStop
