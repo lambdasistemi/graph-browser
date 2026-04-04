@@ -1,9 +1,14 @@
 -- | Persist and restore UI state via localStorage.
 -- | Storage key is namespaced: "graph-browser:<title>"
+-- | Repo list stored at "graph-browser:repos"
 module Persist
   ( PersistedState
   , save
   , restore
+  , RepoListEntry
+  , saveRepoList
+  , loadRepoList
+  , deleteRepo
   ) where
 
 import Prelude
@@ -13,8 +18,9 @@ import Data.Argonaut.Decode.Class (decodeJson)
 import Data.Argonaut.Decode.Combinators ((.:), (.:?))
 import Data.Argonaut.Encode.Class (encodeJson)
 import Data.Argonaut.Parser (jsonParser)
+import Data.Array as Array
 import Data.Either (hush)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Effect (Effect)
 import Web.HTML as Web.HTML
 import Web.HTML.Window as Window
@@ -27,8 +33,17 @@ type PersistedState =
   , tutorialStep :: Maybe Int
   }
 
+type RepoListEntry =
+  { id :: String
+  , title :: String
+  , hasToken :: Boolean
+  }
+
 storageKey :: String -> String
 storageKey title = "graph-browser:" <> title
+
+repoListKey :: String
+repoListKey = "graph-browser:repos"
 
 save :: String -> PersistedState -> Effect Unit
 save title st = do
@@ -58,3 +73,45 @@ restore title = do
     tutorialId <- hush (obj .:? "tutorialId")
     tutorialStep <- hush (obj .:? "tutorialStep")
     pure { selectedNodeId, depth, tutorialId, tutorialStep }
+
+saveRepoList :: Array RepoListEntry -> Effect Unit
+saveRepoList repos = do
+  w <- Web.HTML.window
+  storage <- Window.localStorage w
+  let
+    json = encodeJson $ map
+      ( \r -> encodeJson
+          { id: r.id
+          , title: r.title
+          , hasToken: r.hasToken
+          }
+      )
+      repos
+  Storage.setItem repoListKey (stringify json) storage
+
+loadRepoList :: Effect (Array RepoListEntry)
+loadRepoList = do
+  w <- Web.HTML.window
+  storage <- Window.localStorage w
+  mRaw <- Storage.getItem repoListKey storage
+  pure $ fromMaybe [] do
+    raw <- mRaw
+    json <- hush (jsonParser raw)
+    arr <- hush (decodeJson json)
+    pure $ Array.mapMaybe decodeEntry arr
+  where
+  decodeEntry json = hush do
+    obj <- decodeJson json
+    id <- obj .: "id"
+    title <- obj .: "title"
+    hasToken <- fromMaybe false <$> obj .:? "hasToken"
+    pure { id, title, hasToken }
+
+deleteRepo :: String -> Effect Unit
+deleteRepo repoId = do
+  w <- Web.HTML.window
+  storage <- Window.localStorage w
+  Storage.removeItem (storageKey repoId) storage
+  repos <- loadRepoList
+  let filtered = Array.filter (\r -> r.id /= repoId) repos
+  saveRepoList filtered
