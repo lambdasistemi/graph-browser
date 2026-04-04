@@ -9,6 +9,9 @@ module Persist
   , saveRepoList
   , loadRepoList
   , deleteRepo
+  , saveToken
+  , loadToken
+  , deleteToken
   ) where
 
 import Prelude
@@ -112,6 +115,28 @@ deleteRepo repoId = do
   w <- Web.HTML.window
   storage <- Window.localStorage w
   Storage.removeItem (storageKey repoId) storage
+  Storage.removeItem (tokenKey repoId) storage
   repos <- loadRepoList
   let filtered = Array.filter (\r -> r.id /= repoId) repos
   saveRepoList filtered
+
+tokenKey :: String -> String
+tokenKey repoId = "graph-browser:token:" <> repoId
+
+saveToken :: String -> String -> Effect Unit
+saveToken repoId encryptedToken = do
+  w <- Web.HTML.window
+  storage <- Window.localStorage w
+  Storage.setItem (tokenKey repoId) encryptedToken storage
+
+loadToken :: String -> Effect (Maybe String)
+loadToken repoId = do
+  w <- Web.HTML.window
+  storage <- Window.localStorage w
+  Storage.getItem (tokenKey repoId) storage
+
+deleteToken :: String -> Effect Unit
+deleteToken repoId = do
+  w <- Web.HTML.window
+  storage <- Window.localStorage w
+  Storage.removeItem (tokenKey repoId) storage
