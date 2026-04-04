@@ -12,6 +12,12 @@ An interactive knowledge graph browser with guided tours. Point it at any reposi
 - Full-text search across all labels and descriptions
 - Guided tours with narrative text and inline links
 - Fully data-driven: title, kinds, colors, shapes all from config
+- **Universal viewer**: browse any repo's graph via `?repo=owner/repo`
+- **Repo management**: add, switch, and delete repos from a left panel
+- **Per-repo state**: each repo remembers selected node, depth, tutorial progress
+- **Dual output**: `lib` (embeddable viewer) and `app` (hosted universal viewer)
+- **Deep-linking**: share `?repo=owner/repo` URLs that auto-load
+- **Token support**: encrypted storage for private repo access
 
 ## Data Format
 
@@ -104,14 +110,42 @@ Your repository needs a `data/` directory with:
 
 ### Option 2: Use the hosted version
 
-Coming soon: `https://lambdasistemi.github.io/graph-browser/?repo=owner/repo` will load data from any GitHub Pages site.
+Visit `https://lambdasistemi.github.io/graph-browser/?repo=owner/repo` to load data from any repo's GitHub Pages.
+
+### Option 3: Use as a Nix flake input
+
+```nix
+# In your flake.nix
+inputs.graph-browser.url = "github:lambdasistemi/graph-browser";
+
+# Use the lib output (viewer only, no repo management)
+packages.default = graph-browser.packages.${system}.lib;
+```
+
+### Manifest (optional)
+
+Add `.graph-browser.json` to your repo root to customize data paths:
+
+```json
+{
+  "config": "data/config.json",
+  "graph": "data/graph.json",
+  "tutorials": "data/tutorials/index.json"
+}
+```
+
+Without a manifest, the app uses the convention `data/` path on GitHub Pages.
 
 ## Development
 
 ```bash
-nix develop -c just ci      # lint + build + bundle
-nix develop -c just serve   # serve example on port 10002
-nix develop -c just dev     # watch mode
+nix develop -c just ci          # lint + build + bundle
+nix develop -c just serve       # serve example on port 10002
+nix develop -c just dev         # watch mode
+nix develop -c just bundle-app  # bundle app (with repo panel)
+nix develop -c just bundle-lib  # bundle lib (viewer only)
+nix build .#app                 # nix build app output
+nix build .#lib                 # nix build lib output
 ```
 
 ## JSON Schemas
@@ -122,6 +156,7 @@ Validate your data against the schemas in [`schema/`](schema/):
 - [`graph.schema.json`](schema/graph.schema.json) — nodes and edges
 - [`tutorial.schema.json`](schema/tutorial.schema.json) — guided tour
 - [`tutorial-index.schema.json`](schema/tutorial-index.schema.json) — tour list
+- [`manifest.schema.json`](schema/manifest.schema.json) — `.graph-browser.json` manifest
 
 ## Generating Data with an LLM
 
