@@ -92,12 +92,13 @@ discoverDataUrlsAuth
   -> RepoSource
   -> Aff (Either String DataUrls)
 discoverDataUrlsAuth mToken src = do
-  mainResult <- tryFetchManifest mToken
+  let base = src.pagesBaseUrl
+  mainResult <- tryFetchManifest mToken base
     (src.rawBaseUrl <> "/main/.graph-browser.json")
   case mainResult of
     Right urls -> pure (Right urls)
     Left _ -> do
-      masterResult <- tryFetchManifest mToken
+      masterResult <- tryFetchManifest mToken base
         (src.rawBaseUrl <> "/master/.graph-browser.json")
       case masterResult of
         Right urls -> pure (Right urls)
@@ -106,8 +107,9 @@ discoverDataUrlsAuth mToken src = do
 tryFetchManifest
   :: Maybe String
   -> String
+  -> String
   -> Aff (Either String DataUrls)
-tryFetchManifest mToken url = do
+tryFetchManifest mToken baseUrl url = do
   result <- try do
     resp <- case mToken of
       Nothing -> fetch url { method: GET }
@@ -120,10 +122,10 @@ tryFetchManifest mToken url = do
   case result of
     Left _ -> pure (Left "fetch failed")
     Right body ->
-      pure $ parseManifest body
+      pure $ parseManifest baseUrl body
 
-parseManifest :: String -> Either String DataUrls
-parseManifest body =
+parseManifest :: String -> String -> Either String DataUrls
+parseManifest base body =
   case AP.jsonParser body of
     Left err -> Left err
     Right json ->
@@ -139,9 +141,10 @@ parseManifest body =
     graph <- obj .: "graph"
     tutorials <- obj .: "tutorials"
     pure
-      { configUrl: config
-      , graphUrl: graph
-      , tutorialIndexUrl: tutorials
+      { configUrl: base <> config
+      , graphUrl: base <> graph
+      , tutorialIndexUrl: base <> tutorials
+      , baseUrl: base
       }
 
 -- | Convention-based URLs when no manifest exists.
@@ -151,6 +154,7 @@ conventionUrls src =
   , graphUrl: src.pagesBaseUrl <> "data/graph.json"
   , tutorialIndexUrl: src.pagesBaseUrl
       <> "data/tutorials/index.json"
+  , baseUrl: src.pagesBaseUrl
   }
 
 -- String helpers

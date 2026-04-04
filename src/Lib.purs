@@ -15,5 +15,6 @@ main = HA.runHalogenAff do
     { configUrl: "data/config.json"
     , graphUrl: "data/graph.json"
     , tutorialIndexUrl: "data/tutorials/index.json"
+    , baseUrl: ""
     }
     body
