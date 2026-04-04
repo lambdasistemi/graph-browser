@@ -535,6 +535,149 @@
     color: #8b949e;
   }
 
+  /* App shell: repo panel + main area */
+  .app-shell {
+    display: flex;
+    height: 100vh;
+  }
+
+  .main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .empty-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #8b949e;
+    font-size: 16px;
+  }
+
+  /* Repo panel (left sidebar) */
+  .repo-panel {
+    width: 280px;
+    min-width: 200px;
+    background: #0d1117;
+    border-right: 1px solid #30363d;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .repo-form {
+    padding: 12px;
+    border-bottom: 1px solid #30363d;
+    display: flex;
+    gap: 8px;
+  }
+
+  .repo-input {
+    flex: 1;
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+  }
+
+  .repo-input:focus { border-color: #58a6ff; }
+
+  .repo-add-btn {
+    background: #1f3a5f;
+    border: 1px solid #58a6ff;
+    color: #58a6ff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+
+  .repo-add-btn:hover { background: #264a73; }
+
+  .repo-error {
+    padding: 8px 12px;
+    color: #f85149;
+    font-size: 12px;
+    background: #1a0000;
+    border-bottom: 1px solid #30363d;
+  }
+
+  .repo-list {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .repo-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #21262d;
+    transition: background 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: relative;
+  }
+
+  .repo-item:hover { background: #161b22; }
+  .repo-item.active { background: #1f3a5f; border-left: 3px solid #58a6ff; }
+
+  .repo-item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f0f6fc;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .repo-item-id {
+    font-size: 11px;
+    color: #8b949e;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .repo-delete-btn {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    background: none;
+    border: none;
+    color: #8b949e;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .repo-item:hover .repo-delete-btn { opacity: 1; }
+  .repo-delete-btn:hover { background: #21262d; color: #f85149; }
+
+  .repo-resize-handle {
+    position: absolute;
+    right: -3px;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    cursor: col-resize;
+    z-index: 10;
+  }
+
+  .repo-resize-handle:hover { background: #58a6ff40; }
+
   @media (max-width: 768px) {
     .sidebar {
       width: 100%;
@@ -542,6 +685,7 @@
       right: 0; top: 0; bottom: 0;
       z-index: 10;
     }
+    .repo-panel { display: none; }
   }
 </style>
 </head>
