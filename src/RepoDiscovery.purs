@@ -102,7 +102,12 @@ discoverDataUrlsAuth mToken src = do
         (src.rawBaseUrl <> "/master/.graph-browser.json")
       case masterResult of
         Right urls -> pure (Right urls)
-        Left _ -> pure (Right (conventionUrls src))
+        Left _ -> do
+          let urls = conventionUrls src
+          reachable <- tryFetchUrl mToken urls.configUrl
+          if reachable then pure (Right urls)
+          else pure (Left
+            "No graph data found. Enable GitHub Pages or add .graph-browser.json")
 
 tryFetchManifest
   :: Maybe String
@@ -156,6 +161,21 @@ conventionUrls src =
       <> "data/tutorials/index.json"
   , baseUrl: src.pagesBaseUrl
   }
+
+-- | Check if a URL is reachable (returns 2xx).
+tryFetchUrl :: Maybe String -> String -> Aff Boolean
+tryFetchUrl mToken url = do
+  result <- try do
+    resp <- case mToken of
+      Nothing -> fetch url { method: GET }
+      Just tok -> fetch url
+        { method: GET
+        , headers: { "Authorization": "token " <> tok }
+        }
+    pure resp.status
+  case result of
+    Left _ -> pure false
+    Right status -> pure (status >= 200 && status < 300)
 
 -- String helpers
 
