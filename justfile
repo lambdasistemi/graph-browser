@@ -1,15 +1,27 @@
 build:
     spago build
 
-bundle:
+bundle-app:
     # 1. Bundle npm deps into a single file
     esbuild src/bootstrap.js --bundle --outfile=dist/deps.js --format=iife --platform=browser --minify
-    # 2. Bundle PureScript app (uses cytoscape as global)
-    spago bundle
+    # 2. Bundle PureScript app (Main module)
+    spago bundle --module Main --outfile dist/index.js
     # 3. Concatenate: deps first, then app
     cat dist/deps.js dist/index.js > dist/bundle.js
     mv dist/bundle.js dist/index.js
     rm dist/deps.js
+
+bundle-lib:
+    # 1. Bundle npm deps into a single file
+    esbuild src/bootstrap.js --bundle --outfile=dist/deps.js --format=iife --platform=browser --minify
+    # 2. Bundle PureScript lib (Lib module)
+    spago bundle --module Lib --outfile dist/index.js
+    # 3. Concatenate: deps first, then app
+    cat dist/deps.js dist/index.js > dist/bundle.js
+    mv dist/bundle.js dist/index.js
+    rm dist/deps.js
+
+bundle: bundle-app
 
 dev:
     spago build --watch

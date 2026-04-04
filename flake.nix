@@ -37,48 +37,51 @@
             ];
           };
         in
+        let
+          nodeModules = pkgs.importNpmLock.buildNodeModules {
+            npmRoot = ./.;
+            nodejs = pkgs.nodejs_20;
+          };
+          mkBundle = { pname, module }:
+            pkgs.mkSpagoDerivation {
+              inherit pname;
+              version = "1.0.0";
+              src = ./.;
+              spagoYaml = ./spago.yaml;
+              spagoLock = ./spago.lock;
+              nativeBuildInputs = [
+                pkgs.purs
+                pkgs.spago-unstable
+                pkgs.esbuild
+                pkgs.nodejs_20
+              ];
+              buildPhase = ''
+                ln -s ${nodeModules}/node_modules node_modules
+                # 1. Bundle npm deps (cytoscape → global)
+                esbuild src/bootstrap.js \
+                  --bundle \
+                  --outfile=dist/deps.js \
+                  --format=iife \
+                  --platform=browser \
+                  --minify
+                # 2. Bundle PureScript (specified module)
+                spago bundle --offline --module ${module}
+                # 3. Concatenate: deps first, then app
+                cat dist/deps.js dist/index.js > dist/bundle.js
+                mv dist/bundle.js dist/index.js
+                rm dist/deps.js
+              '';
+              installPhase = ''
+                mkdir -p $out
+                cp dist/index.html $out/
+                cp dist/index.js $out/
+              '';
+            };
+        in
         {
-          default =
-            let
-              nodeModules = pkgs.importNpmLock.buildNodeModules {
-                npmRoot = ./.;
-                nodejs = pkgs.nodejs_20;
-              };
-            in
-              pkgs.mkSpagoDerivation {
-                pname = "graph-browser";
-                version = "1.0.0";
-                src = ./.;
-                spagoYaml = ./spago.yaml;
-                spagoLock = ./spago.lock;
-                nativeBuildInputs = [
-                  pkgs.purs
-                  pkgs.spago-unstable
-                  pkgs.esbuild
-                  pkgs.nodejs_20
-                ];
-                buildPhase = ''
-                  ln -s ${nodeModules}/node_modules node_modules
-                  # 1. Bundle npm deps (cytoscape → global)
-                  esbuild src/bootstrap.js \
-                    --bundle \
-                    --outfile=dist/deps.js \
-                    --format=iife \
-                    --platform=browser \
-                    --minify
-                  # 2. Bundle PureScript app (uses global)
-                  spago bundle --offline
-                  # 3. Concatenate: deps first, then app
-                  cat dist/deps.js dist/index.js > dist/bundle.js
-                  mv dist/bundle.js dist/index.js
-                  rm dist/deps.js
-                '';
-                installPhase = ''
-                  mkdir -p $out
-                  cp dist/index.html $out/
-                  cp dist/index.js $out/
-                '';
-              };
+          default = mkBundle { pname = "graph-browser"; module = "Main"; };
+          app = mkBundle { pname = "graph-browser"; module = "Main"; };
+          lib = mkBundle { pname = "graph-browser-lib"; module = "Lib"; };
         }
       );
 
