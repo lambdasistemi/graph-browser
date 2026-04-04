@@ -10,6 +10,7 @@ import Effect.Aff (Aff)
 import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
 import FFI.Resize as Resize
+import FFI.Url as Url
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
@@ -94,10 +95,16 @@ appHandleAction = case _ of
     H.modify_ _ { repos = repos }
     void $ H.tell _repoManager unit
       (RM.SetRepos repos)
-    -- Auto-select first repo if any
-    case Array.head repos of
-      Nothing -> pure unit
-      Just repo -> selectRepo repo
+    -- Check for ?repo= deep link
+    repoParam <- liftEffect Url.getRepoParam
+    if repoParam /= "" then do
+      -- Auto-add from URL param
+      appHandleAction (HandleRepo (RM.RepoAdded repoParam))
+    else
+      -- Auto-select first repo if any
+      case Array.head repos of
+        Nothing -> pure unit
+        Just repo -> selectRepo repo
 
   HandleRepo output -> case output of
     RM.RepoAdded input -> do
@@ -169,6 +176,7 @@ appHandleAction = case _ of
       when wasActive do
         void $ H.tell _repoManager unit
           (RM.SetActive Nothing)
+        liftEffect $ Url.setRepoParam ""
 
 selectRepo
   :: forall o
@@ -188,6 +196,7 @@ selectRepo entry = do
             }
           void $ H.tell _repoManager unit
             (RM.SetActive (Just entry.id))
+          liftEffect $ Url.setRepoParam entry.id
 
 -- Helpers
 
