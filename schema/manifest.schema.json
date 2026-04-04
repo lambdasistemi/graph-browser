@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "manifest.schema.json",
+  "title": "Graph Browser Manifest",
+  "description": "Declares the locations of graph-browser data files within a repository. Place as .graph-browser.json at the repo root.",
+  "type": "object",
+  "required": ["config", "graph"],
+  "properties": {
+    "config": {
+      "type": "string",
+      "description": "Relative path to config.json"
+    },
+    "graph": {
+      "type": "string",
+      "description": "Relative path to graph.json"
+    },
+    "tutorials": {
+      "type": "string",
+      "description": "Relative path to tutorials index.json"
+    }
+  },
+  "additionalProperties": false
+}
