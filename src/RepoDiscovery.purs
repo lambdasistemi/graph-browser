@@ -92,14 +92,15 @@ discoverDataUrlsAuth
   -> RepoSource
   -> Aff (Either String DataUrls)
 discoverDataUrlsAuth mToken src = do
-  let base = src.pagesBaseUrl
-  mainResult <- tryFetchManifest mToken base
-    (src.rawBaseUrl <> "/main/.graph-browser.json")
+  let rawMain = src.rawBaseUrl <> "/main/"
+  let rawMaster = src.rawBaseUrl <> "/master/"
+  mainResult <- tryFetchManifest mToken rawMain
+    (rawMain <> ".graph-browser.json")
   case mainResult of
     Right urls -> pure (Right urls)
     Left _ -> do
-      masterResult <- tryFetchManifest mToken base
-        (src.rawBaseUrl <> "/master/.graph-browser.json")
+      masterResult <- tryFetchManifest mToken rawMaster
+        (rawMaster <> ".graph-browser.json")
       case masterResult of
         Right urls -> pure (Right urls)
         Left _ -> do
@@ -107,7 +108,7 @@ discoverDataUrlsAuth mToken src = do
           reachable <- tryFetchUrl mToken urls.configUrl
           if reachable then pure (Right urls)
           else pure (Left
-            "No graph data found. Enable GitHub Pages or add .graph-browser.json")
+            "No graph data found. Add data/ directory or .graph-browser.json to your repo")
 
 tryFetchManifest
   :: Maybe String
@@ -153,14 +154,16 @@ parseManifest base body =
       }
 
 -- | Convention-based URLs when no manifest exists.
+-- | Uses raw GitHub URLs so data/ works without GitHub Pages.
 conventionUrls :: RepoSource -> DataUrls
 conventionUrls src =
-  { configUrl: src.pagesBaseUrl <> "data/config.json"
-  , graphUrl: src.pagesBaseUrl <> "data/graph.json"
-  , tutorialIndexUrl: src.pagesBaseUrl
-      <> "data/tutorials/index.json"
-  , baseUrl: src.pagesBaseUrl
-  }
+  let raw = src.rawBaseUrl <> "/main/"
+  in
+    { configUrl: raw <> "data/config.json"
+    , graphUrl: raw <> "data/graph.json"
+    , tutorialIndexUrl: raw <> "data/tutorials/index.json"
+    , baseUrl: raw
+    }
 
 -- | Check if a URL is reachable (returns 2xx).
 tryFetchUrl :: Maybe String -> String -> Aff Boolean
