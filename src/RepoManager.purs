@@ -23,6 +23,7 @@ data Output
   = RepoSelected RepoEntry
   | RepoAdded String
   | RepoDeleted RepoEntry
+  | ClearAll
 
 -- | Internal state.
 type State =
@@ -39,6 +40,7 @@ data Action
   | KeyPress KE.KeyboardEvent
   | Select RepoEntry
   | Delete RepoEntry
+  | Clear
 
 -- | Queries from parent.
 data Query a
@@ -90,6 +92,13 @@ render state =
             [ HH.text err ]
     , HH.div [ cls "repo-list" ]
         (map (renderRepoItem state.activeId) state.repos)
+    , if Array.null state.repos then HH.text ""
+      else
+        HH.button
+          [ cls "repo-clear-btn"
+          , HE.onClick \_ -> Clear
+          ]
+          [ HH.text "Clear all" ]
     , HH.div
         [ HP.id "repo-resize-handle"
         , cls "repo-resize-handle"
@@ -147,6 +156,8 @@ handleAction = case _ of
     H.raise (RepoSelected entry)
   Delete entry ->
     H.raise (RepoDeleted entry)
+  Clear ->
+    H.raise ClearAll
 
 handleQuery
   :: forall a m

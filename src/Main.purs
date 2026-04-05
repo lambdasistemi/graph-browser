@@ -4,6 +4,7 @@ import Prelude
 
 import Data.Array as Array
 import Data.Either (Either(..))
+import Data.Foldable (for_)
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
@@ -177,6 +178,22 @@ appHandleAction = case _ of
         void $ H.tell _repoManager unit
           (RM.SetActive Nothing)
         liftEffect $ Url.setRepoParam ""
+
+    RM.ClearAll -> do
+      state <- H.get
+      for_ state.repos \r ->
+        liftEffect $ Persist.deleteRepo r.id
+      liftEffect $ Persist.saveRepoList []
+      H.modify_ _
+        { repos = []
+        , activeRepo = Nothing
+        , dataUrls = Nothing
+        }
+      void $ H.tell _repoManager unit
+        (RM.SetRepos [])
+      void $ H.tell _repoManager unit
+        (RM.SetActive Nothing)
+      liftEffect $ Url.setRepoParam ""
 
 selectRepo
   :: forall o
