@@ -166,7 +166,10 @@ Update the action to handle both legacy JSON and new RDF formats based on manife
 
 ## Dependencies
 
-- **#33** (ontology) — defines the RDF vocabulary used in Turtle files
-- **#30** (RDF export) — produces the Turtle data from existing JSON
+- **#33** (ontology) — **critical path**. Defines the RDF vocabulary (classes, properties, required fields). Needed for:
+  - Phase 1: Turtle data loading (bootstrap SPARQL queries reference ontology terms)
+  - Phase 4: CI validation (semantic correctness checks — valid types, valid predicates, required properties)
+  - Without it, validation can only check Turtle syntax, not whether the data makes sense
+- **#30** (RDF export) — produces the Turtle data from existing JSON. Needed for Phase 1 testing with real data.
 
-These should be completed first, or at minimum the ontology vocabulary must be agreed before Phase 1 data loading can be tested with real data.
+**Order**: #33 (ontology) → #30 (export using ontology) → this feature.
