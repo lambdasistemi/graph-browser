@@ -1,0 +1,31 @@
+name: 'Build Graph Browser Site'
+description: 'Assemble a deployable graph-browser site from a data/ directory — no build tools required'
+
+inputs:
+  data-dir:
+    description: 'Path to the data directory'
+    required: false
+    default: 'data'
+  output-dir:
+    description: 'Path to write the assembled site'
+    required: false
+    default: 'site'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Download graph-browser app
+      shell: bash
+      run: |
+        OUT="${{ inputs.output-dir }}"
+        BASE="https://lambdasistemi.github.io/graph-browser"
+        mkdir -p "$OUT"
+        curl -sfL "$BASE/index.html" -o "$OUT/index.html"
+        curl -sfL "$BASE/index.js" -o "$OUT/index.js"
+
+    - name: Copy data
+      shell: bash
+      run: |
+        cp -r "${{ inputs.data-dir }}" "${{ inputs.output-dir }}/data"
+        echo "Site assembled in ${{ inputs.output-dir }}/"
+        ls -la "${{ inputs.output-dir }}/"

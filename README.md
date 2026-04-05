@@ -104,16 +104,42 @@ Your repository needs a `data/` directory with:
 
 ## Usage
 
-### Option 1: Deploy your own
+### Option 1: Data repo with GitHub Pages (recommended)
 
-1. Clone this repo
-2. Replace `example/data/` with your data
-3. `nix develop -c just serve` to preview
-4. Deploy `dist/` (with your data copied in) to GitHub Pages
+Create a repo with just a `data/` directory and this workflow:
 
-### Option 2: Use the hosted version
+```yaml
+# .github/workflows/pages.yml
+name: Deploy
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  pages: write
+  id-token: write
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: lambdasistemi/graph-browser/validate-action@main
+      - uses: lambdasistemi/graph-browser/build-action@main
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v5
+```
 
-Visit `https://lambdasistemi.github.io/graph-browser/?repo=owner/repo` to load data from any repo's GitHub Pages.
+No build tools needed — the actions download the app and assemble the site.
+
+### Option 2: Use the hosted universal viewer
+
+Visit `https://lambdasistemi.github.io/graph-browser/?repo=owner/repo` to browse any repo with a `data/` directory.
 
 ### Option 3: Use as a Nix flake input
 
