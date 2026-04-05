@@ -1,0 +1,15 @@
+{
+  "title": "Graph Browser Architecture",
+  "description": "The architecture of graph-browser itself — modules, data flow, build system, and design philosophy.",
+  "sourceUrl": "https://github.com/lambdasistemi/graph-browser",
+  "kinds": {
+    "component": { "label": "UI Component", "color": "#f778ba", "shape": "round-octagon" },
+    "module": { "label": "Module", "color": "#58a6ff", "shape": "round-rectangle" },
+    "ffi": { "label": "FFI Binding", "color": "#d2a8ff", "shape": "diamond" },
+    "schema": { "label": "JSON Schema", "color": "#e3b341", "shape": "round-pentagon" },
+    "build": { "label": "Build Tool", "color": "#3fb950", "shape": "barrel" },
+    "concept": { "label": "Concept", "color": "#56d364", "shape": "star" },
+    "type": { "label": "Data Type", "color": "#79c0ff", "shape": "ellipse" },
+    "output": { "label": "Build Output", "color": "#f0883e", "shape": "rectangle" }
+  }
+}

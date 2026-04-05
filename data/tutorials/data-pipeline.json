@@ -1,0 +1,43 @@
+{
+  "id": "data-pipeline",
+  "title": "The Data Pipeline",
+  "description": "Follow the data from JSON files through decoding, indexing, filtering, and rendering.",
+  "stops": [
+    {
+      "node": "graph-types",
+      "depth": 2,
+      "title": "The Type Foundation",
+      "narrative": "Everything starts with [Graph.Types](node:graph-types). These PureScript type aliases define the shape of all data: [Node](node:graph-types) (id, label, kind, group, description, links), Edge (source, target, label, description), Graph (nodes Map, edges Array, adjacency maps), and Config (title, kinds).\n\nEvery other module depends on these types. They're the contract between JSON data and PureScript logic."
+    },
+    {
+      "node": "graph-decode",
+      "depth": 2,
+      "title": "JSON to Types",
+      "narrative": "[Graph.Decode](node:graph-decode) bridges raw JSON and typed PureScript. It uses Argonaut decode combinators to parse config.json into a Config record and graph.json into arrays of Nodes and Edges.\n\nOptional fields (like links) default to empty arrays. Invalid JSON produces typed errors, not runtime crashes."
+    },
+    {
+      "node": "graph-build",
+      "depth": 2,
+      "title": "Indexing for Performance",
+      "narrative": "[Graph.Build](node:graph-build) takes the raw arrays and constructs an indexed Graph. Nodes are stored in a Map by ID for O(log n) lookup. Forward and backward adjacency maps (Map NodeId (Set NodeId)) enable O(1) neighbor access.\n\nThis indexing step is what makes [depth-based filtering](node:depth-filtering) fast — neighborhood BFS doesn't scan all edges, it follows adjacency links."
+    },
+    {
+      "node": "graph-operations",
+      "depth": 2,
+      "title": "Neighborhood and Subgraph",
+      "narrative": "[Graph.Operations](node:graph-operations) provides two core algorithms.\n\nneighborhood() does a BFS from a starting node, collecting all reachable nodes within N hops in both directions. subgraph() then extracts only the edges where both endpoints are in that neighborhood.\n\nThe result is a focused slice of the graph — small enough to render clearly, centered on what the user cares about."
+    },
+    {
+      "node": "graph-cytoscape",
+      "depth": 2,
+      "title": "Type Conversion",
+      "narrative": "[Graph.Cytoscape](node:graph-cytoscape) converts the PureScript Graph into [Cytoscape.js](node:cytoscape-js) element format. Nodes become {data: {id, label, kind}} objects, edges become {data: {source, target, label}} objects.\n\nThis is the last pure step before rendering. The Foreign arrays cross the FFI boundary into JavaScript."
+    },
+    {
+      "node": "ffi-cytoscape",
+      "depth": 1,
+      "title": "Rendering",
+      "narrative": "[FFI.Cytoscape](node:ffi-cytoscape) receives the Foreign elements and calls Cytoscape.js to render them. The fCoSE layout runs with adaptive parameters — edge length, repulsion, and node separation all scale with graph size.\n\nNode colors and shapes come from config.json kinds, applied as Cytoscape style selectors. Event callbacks (tap, hover) flow back through the FFI into Halogen actions."
+    }
+  ]
+}

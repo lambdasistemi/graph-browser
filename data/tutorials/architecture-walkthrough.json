@@ -1,0 +1,55 @@
+{
+  "id": "architecture-walkthrough",
+  "title": "Architecture Walkthrough",
+  "description": "How graph-browser works — from JSON data to interactive visualization.",
+  "stops": [
+    {
+      "node": "data-driven",
+      "depth": 2,
+      "title": "The Core Principle",
+      "narrative": "[Data-Driven Design](node:data-driven) is the foundation of everything. The PureScript code contains zero domain-specific knowledge — all visual elements come from JSON data files.\n\nThis means a knowledge graph about [Cardano governance](https://github.com/lambdasistemi/cardano-governance-graph), [local LLMs](https://github.com/lambdasistemi/local-llm-graph), or the graph-browser's own architecture all use the same code. You provide data, it provides visualization."
+    },
+    {
+      "node": "viewer",
+      "depth": 1,
+      "title": "The Central Component",
+      "narrative": "The [Viewer](node:viewer) is where everything happens. It's a [Halogen](node:halogen) component that manages the graph canvas, search box, sidebar, controls, and tutorial navigation.\n\nViewer holds the full application state: which node is selected, what's hovered, search results, tutorial progress, and the prompt builder input. All user interactions — clicking nodes, changing depth, searching — flow through Viewer's action handlers."
+    },
+    {
+      "node": "main",
+      "depth": 2,
+      "title": "Two Entry Points",
+      "narrative": "Graph-browser has two entry points that both use [Viewer](node:viewer).\n\n[Main](node:main) is the app variant — it adds a [RepoManager](node:repo-manager) panel on the left for browsing multiple repos. It handles deep linking via ?repo= URLs and persists the repo list.\n\n[Lib](node:lib) is the standalone variant — it mounts Viewer directly with hardcoded data paths. Downstream repos consume this via Nix flake input."
+    },
+    {
+      "node": "ffi-cytoscape",
+      "depth": 2,
+      "title": "The Rendering Layer",
+      "narrative": "[FFI.Cytoscape](node:ffi-cytoscape) is the bridge between PureScript and [Cytoscape.js](node:cytoscape-js). It's a thin JavaScript binding that initializes the graph canvas, sets elements, handles layout, and subscribes to interaction events.\n\nThe fCoSE layout algorithm adapts to graph size — smaller graphs get more spacing, larger graphs pack tighter. Node colors and shapes come from config.json kinds, mapped through the FFI layer."
+    },
+    {
+      "node": "depth-filtering",
+      "depth": 2,
+      "title": "Depth-Based Filtering",
+      "narrative": "[Depth-based filtering](node:depth-filtering) is the key UX innovation. Instead of overwhelming users with the entire graph, the viewer shows a neighborhood around the selected node.\n\nDepth 1 shows immediate neighbors. Depth 2 shows two hops. The BFS algorithm in [Graph.Operations](node:graph-operations) uses adjacency maps for efficient traversal. This is how a 70-node graph remains navigable."
+    },
+    {
+      "node": "nix-flake",
+      "depth": 2,
+      "title": "The Build System",
+      "narrative": "The [Nix Flake](node:nix-flake) orchestrates the entire build. It invokes [esbuild](node:esbuild) to bundle npm dependencies (Cytoscape.js + fCoSE), then [Spago](node:spago) to compile PureScript, then concatenates the outputs.\n\nTwo build outputs: [App](node:app-output) (hosted universal viewer) and [Lib](node:lib-output) (embeddable for downstream repos). Both produced in the Nix sandbox with zero network access."
+    },
+    {
+      "node": "validate-workflow",
+      "depth": 2,
+      "title": "Schema Validation",
+      "narrative": "The [reusable CI workflow](node:validate-workflow) lets data repos validate their JSON with one line of GitHub Actions config.\n\nIt fetches the [graph](node:schema-graph), [config](node:schema-config), and [tutorial](node:schema-tutorial) schemas, validates with ajv-cli, then checks edge integrity, kind references, and tutorial node references. This very graph is validated by this very workflow — dogfooding at its finest."
+    },
+    {
+      "node": "prompt-builder",
+      "depth": 2,
+      "title": "LLM Integration",
+      "narrative": "The [PromptBuilder](node:prompt-builder) closes the loop. Click any node, type what you want an LLM to do, and get a complete prompt with all the context: the node's JSON, connected edges, [schema](node:schema-graph) URLs, repo URL, and PR instructions.\n\nThe LLM gets everything it needs to propose valid changes. The user provides intent; the tool provides context and process."
+    }
+  ]
+}
