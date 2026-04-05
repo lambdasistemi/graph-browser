@@ -26,7 +26,11 @@ jobs:
           cachix-auth-token: ${{ secrets.CACHIX_AUTH_TOKEN }}
       - run: |
           nix develop --quiet -c just install
-          nix develop --quiet -c just bundle
+          nix develop --quiet -c just bundle-lib
+          mkdir -p dist/lib
+          cp dist/index.html dist/lib/index.html
+          cp dist/index.js dist/lib/index.js
+          nix develop --quiet -c just bundle-app
           cp -r schema dist/schema
       - uses: actions/upload-pages-artifact@v4
         with:

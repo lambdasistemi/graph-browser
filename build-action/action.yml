@@ -18,7 +18,7 @@ runs:
       shell: bash
       run: |
         OUT="${{ inputs.output-dir }}"
-        BASE="https://lambdasistemi.github.io/graph-browser"
+        BASE="https://lambdasistemi.github.io/graph-browser/lib"
         mkdir -p "$OUT"
         curl -sfL "$BASE/index.html" -o "$OUT/index.html"
         curl -sfL "$BASE/index.js" -o "$OUT/index.js"
