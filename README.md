@@ -158,6 +158,26 @@ Validate your data against the schemas in [`schema/`](schema/):
 - [`tutorial-index.schema.json`](schema/tutorial-index.schema.json) — tour list
 - [`manifest.schema.json`](schema/manifest.schema.json) — `.graph-browser.json` manifest
 
+### CI Validation for Data Repos
+
+Graph-browser publishes a reusable GitHub Actions workflow that validates your data against all schemas, checks edge integrity, kind references, duplicate IDs, and tutorial node references. Add this to your data repo:
+
+```yaml
+# .github/workflows/ci.yml
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    uses: lambdasistemi/graph-browser/.github/workflows/validate-data.yml@main
+```
+
+That's it — one line calls the full validation suite. No need to install tools or copy scripts.
+
 ## Generating Data with an LLM
 
 See [`GENERATE.md`](GENERATE.md) for prompt templates to generate graph data, tutorials, and configuration using Claude, ChatGPT, or any AI assistant with web access. The prompts are designed to produce valid JSON matching the schemas above.
@@ -173,3 +193,4 @@ See [`GENERATE.md`](GENERATE.md) for prompt templates to generate graph data, tu
 ## Projects Using Graph Browser
 
 - [Cardano Governance Graph](https://github.com/lambdasistemi/cardano-governance-graph) — interactive knowledge graph of Cardano's on-chain governance
+- [Local LLM Graph](https://github.com/lambdasistemi/local-llm-graph) — local LLM ecosystem: models, engines, quantization, hybrid cloud/local setups
