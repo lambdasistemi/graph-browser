@@ -111,27 +111,47 @@ This reuses `Graph.Operations.subgraph` — only the input set changes (from nei
 - Update `schema/tutorial.schema.json`
 - Migrate existing tutorial data files
 
-## Phase 4: Cleanup and Migration
+## Phase 4: CI and Validation
 
-### 4.1 Remove legacy modules
+### 4.1 Update validate-action
+
+The current `validate-action` validates `graph.json` + `config.json` against JSON schemas and checks referential integrity (edge sources/targets exist, kinds exist, tutorial nodes exist, view edges exist in graph).
+
+For Turtle + queries, the validation changes to:
+- **Turtle syntax validation**: Parse `.ttl` with a Turtle parser (or load into Oxigraph CLI) — syntax errors fail CI
+- **Query catalog schema validation**: New `schema/query-catalog.schema.json` validated with ajv
+- **SPARQL syntax validation**: Each query in the catalog is parsed/validated (dry-run against the loaded store)
+- **Tour referential integrity**: Tour stops reference query IDs that exist in the catalog
+- **Config/ontology consistency**: Kind IDs in `config.json` match class local names in the Turtle data
+- **Dual-format support**: Detect format from manifest and run the appropriate validation path
+
+Update the action to handle both legacy JSON and new RDF formats based on manifest.
+
+### 4.2 Update CI workflow
+
+- `ci.yml` validate step already uses `./validate-action` — the action itself changes, workflow stays the same
+- Add Oxigraph CLI or a Node-based Turtle parser to the nix devShell for CI validation
+- Ensure `just ci` still covers lint + build + bundle + validate
+
+### 4.3 Remove legacy modules
 
 - Remove `Graph/Search.purs` (replaced by catalog filter)
 - Remove `Graph/Views.purs` (replaced by named queries)
 - Remove `Graph/Decode.purs` graph decoder (Turtle replaces graph.json)
 - Keep `Graph/Decode.purs` config decoder (config.json remains)
 
-### 4.2 Data migration tooling
+### 4.4 Data migration tooling
 
 - Script to convert `graph.json` → `graph.ttl` (for existing data repos)
 - Script to convert view files → query catalog entries
 - Script to convert tutorial stops (node+depth) → query references
 - Update `GENERATE.md` prompt templates for Turtle + query catalog
 
-### 4.3 Backward compatibility
+### 4.5 Backward compatibility
 
-- Manifest `format` field determines loading path
-- Legacy repos (no `format` field) use current JSON pipeline
-- New repos use Turtle + queries pipeline
+- Manifest `format` field determines loading path and validation path
+- Legacy repos (no `format` field) use current JSON pipeline + JSON validation
+- New repos use Turtle + queries pipeline + RDF validation
 - Eventually deprecate JSON path
 
 ## Risks and Mitigations
