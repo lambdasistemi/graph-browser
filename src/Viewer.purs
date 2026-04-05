@@ -576,7 +576,7 @@ renderEdgeDetail state edge =
         ]
     , HH.p [ cls "description" ]
         [ HH.text edge.description ]
-    , renderPromptBuilder state "Ask an LLM about this edge"
+    , renderPromptBuilder state "Generate prompt to improve this edge"
     ]
 
 renderNodeDetail
@@ -594,7 +594,7 @@ renderNodeDetail state node =
     , renderLinks node.links
     , renderConnections "Connects to" outEdges
     , renderConnections "Connected from" inEdges
-    , renderPromptBuilder state "Ask an LLM about this node"
+    , renderPromptBuilder state "Generate prompt to improve this node"
     ]
   where
   cfg = state.config
@@ -664,7 +664,7 @@ renderPromptBuilder state title =
     , HH.textarea
         [ cls "prompt-textarea"
         , HP.value state.promptInput
-        , HP.placeholder "e.g. Update to reflect latest changes..."
+        , HP.placeholder "e.g. Add missing connections, update description..."
         , HP.rows 3
         , HE.onValueInput SetPromptInput
         ]
