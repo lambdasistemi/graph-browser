@@ -17,8 +17,8 @@
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^[a-z0-9-]+$",
-            "description": "Unique kebab-case identifier."
+            "pattern": "^[a-z0-9._-]+$",
+            "description": "Unique identifier (lowercase, digits, hyphens, dots, underscores)."
           },
           "label": {
             "type": "string",
