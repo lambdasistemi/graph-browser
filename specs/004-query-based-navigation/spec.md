@@ -103,17 +103,19 @@ A tour is a sequence of named queries. Each stop runs a query, highlights the re
 - **FR-006**: System MUST support parameterized queries with user-fillable inputs
 - **FR-007**: System MUST encode the active query (and parameters) in the URL for sharing
 - **FR-008**: System MUST support tours defined as sequences of query references
-- **FR-009**: Data repos MUST ship `.ttl` files as the graph data format (Turtle, not JSON-LD — validated by LLM format testing)
-- **FR-010**: Data repos MUST ship a query catalog file alongside the Turtle data
-- **FR-011**: System MUST validate Turtle data and query catalog at load time and surface errors to the user
+- **FR-009**: Views MUST be expressed as named queries — a view is a SPARQL query that selects a subgraph, replacing the current model of hardcoded node ID lists with depth settings
+- **FR-010**: Views, tours, and catalog entries MUST be the same artifact type (named queries) — there is no distinction between a "view", a "tour stop", and a "catalog entry"
+- **FR-011**: Data repos MUST ship `.ttl` files as the graph data format (Turtle, not JSON-LD — validated by LLM format testing)
+- **FR-012**: Data repos MUST ship a query catalog file alongside the Turtle data
+- **FR-013**: System MUST validate Turtle data and query catalog at load time and surface errors to the user
 
 ### Key Entities
 
 - **Triple Store**: In-browser Oxigraph WASM instance holding the graph as RDF triples
-- **Query Catalog**: A collection of named, described SPARQL queries shipped as a data asset
-- **Curated Query**: A named SPARQL query with a human-readable name, description, and optional parameters
+- **Query Catalog**: A collection of named queries shipped as a data asset. This is the single source of truth for all subgraph selections — views, tour stops, and browsable catalog entries are all the same thing
+- **Named Query**: A SPARQL query with a human-readable name, description, optional parameters, and optional tags (e.g. "view", "tour:setup-guide"). The only artifact type for subgraph selection
 - **Parameter**: A typed placeholder in a SPARQL query that the user fills in at runtime
-- **Query-Based Tour**: A tutorial defined as a sequence of query references with stop descriptions
+- **Tour**: An ordered sequence of named query references with stop descriptions. Not a separate entity — just metadata grouping existing queries
 
 ## Success Criteria
 
