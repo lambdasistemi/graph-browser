@@ -19,7 +19,7 @@ runs:
       run: |
         SCHEMA_DIR=$(mktemp -d)
         echo "SCHEMA_DIR=$SCHEMA_DIR" >> "$GITHUB_ENV"
-        for f in config.schema.json graph.schema.json tutorial-index.schema.json tutorial.schema.json; do
+        for f in config.schema.json graph.schema.json tutorial-index.schema.json tutorial.schema.json view.schema.json; do
           curl -sfL "https://raw.githubusercontent.com/lambdasistemi/graph-browser/${{ inputs.schema-ref }}/schema/$f" -o "$SCHEMA_DIR/$f"
         done
 
@@ -41,12 +41,19 @@ runs:
             npx ajv validate -s "$SCHEMA_DIR/tutorial.schema.json" -d "$f" -c ajv-formats --spec=draft2020
           done
         fi
+        if [ -d "$DATA/views" ]; then
+          for f in "$DATA"/views/*.json; do
+            echo "Validating view $f"
+            npx ajv validate -s "$SCHEMA_DIR/view.schema.json" -d "$f" -c ajv-formats --spec=draft2020
+          done
+        fi
 
     - name: Check referential integrity
       shell: bash
       run: |
         DATA="${{ inputs.data-dir }}"
         node -e "
+          const fs=require('fs');
           const d=require('./$DATA/graph.json');
           const c=require('./$DATA/config.json');
           const ids=new Set(d.nodes.map(n=>n.id));
@@ -59,7 +66,6 @@ runs:
             if(!ids.has(e.source)){console.error('Bad source e'+i+': '+e.source);ok=false}
             if(!ids.has(e.target)){console.error('Bad target e'+i+': '+e.target);ok=false}
           });
-          const fs=require('fs');
           const tutDir='./$DATA/tutorials';
           if(fs.existsSync(tutDir)){
             fs.readdirSync(tutDir).filter(f=>f.endsWith('.json')&&f!=='index.json').forEach(f=>{
@@ -69,6 +75,38 @@ runs:
               });
             });
           }
-          if(ok)console.log(d.nodes.length+' nodes, '+d.edges.length+' edges — validation passed');
+          // Build edge lookup for view validation
+          const edgeSet=new Set(d.edges.map(e=>e.source+'|'+e.target+'|'+e.label));
+          const viewDir='./$DATA/views';
+          if(fs.existsSync(viewDir)){
+            fs.readdirSync(viewDir).filter(f=>f.endsWith('.json')).forEach(f=>{
+              const view=JSON.parse(fs.readFileSync(viewDir+'/'+f,'utf8'));
+              const viewNodes=new Set();
+              (view.edges||[]).forEach((triple,i)=>{
+                const key=triple[0]+'|'+triple[1]+'|'+triple[2];
+                if(!edgeSet.has(key)){
+                  console.error('views/'+f+' edge '+i+': ['+triple.join(', ')+'] not found in graph.json');
+                  ok=false;
+                } else {
+                  viewNodes.add(triple[0]);
+                  viewNodes.add(triple[1]);
+                }
+              });
+              (view.tours||[]).forEach(tour=>{
+                (tour.stops||[]).forEach((s,i)=>{
+                  if(!viewNodes.has(s.node)){
+                    console.error('views/'+f+' tour \"'+tour.title+'\" stop '+i+': node \"'+s.node+'\" not reachable from view edges');
+                    ok=false;
+                  }
+                });
+              });
+            });
+          }
+          if(ok){
+            let msg=d.nodes.length+' nodes, '+d.edges.length+' edges';
+            const viewFiles=fs.existsSync(viewDir)?fs.readdirSync(viewDir).filter(f=>f.endsWith('.json')):[];
+            if(viewFiles.length>0) msg+=', '+viewFiles.length+' view(s)';
+            console.log(msg+' — validation passed');
+          }
           else process.exit(1);
         "

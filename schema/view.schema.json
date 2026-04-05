@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lambdasistemi.github.io/graph-browser/schema/view.schema.json",
+  "title": "Graph View",
+  "description": "A named subset of edges from the graph catalog, with optional guided tours.",
+  "type": "object",
+  "required": ["name", "description", "edges"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display name for this view."
+    },
+    "description": {
+      "type": "string",
+      "description": "Short description shown in the view picker."
+    },
+    "edges": {
+      "type": "array",
+      "description": "Edge references as [source, target, label] triples.",
+      "items": {
+        "type": "array",
+        "items": { "type": "string" },
+        "minItems": 3,
+        "maxItems": 3,
+        "description": "An edge triple: [source-node-id, target-node-id, edge-label]."
+      }
+    },
+    "tours": {
+      "type": "array",
+      "description": "Guided tours scoped to this view.",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "description", "stops"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9._-]+$",
+            "description": "Unique kebab-case identifier."
+          },
+          "title": {
+            "type": "string",
+            "description": "Display title for the tour."
+          },
+          "description": {
+            "type": "string",
+            "description": "Short description shown in tour menu."
+          },
+          "stops": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Ordered stops in the tour.",
+            "items": {
+              "type": "object",
+              "required": ["node", "depth", "title", "narrative"],
+              "additionalProperties": false,
+              "properties": {
+                "node": {
+                  "type": "string",
+                  "description": "Node ID to focus on. Must be reachable from this view's edges."
+                },
+                "depth": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "Neighborhood depth to show."
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Stop title shown in sidebar."
+                },
+                "narrative": {
+                  "type": "string",
+                  "description": "Narrative text with [text](node:id) and [text](url) links."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
