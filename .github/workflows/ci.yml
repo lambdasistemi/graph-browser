@@ -19,37 +19,5 @@ jobs:
         with:
           cachix-auth-token: ${{ secrets.CACHIX_AUTH_TOKEN }}
       - run: nix develop --quiet -c just ci
-      - name: Validate self-documenting graph data
-        run: |
-          npm install ajv-cli ajv-formats
-          npx ajv validate -s schema/config.schema.json -d data/config.json -c ajv-formats --spec=draft2020
-          npx ajv validate -s schema/graph.schema.json -d data/graph.json -c ajv-formats --spec=draft2020
-          npx ajv validate -s schema/tutorial-index.schema.json -d data/tutorials/index.json -c ajv-formats --spec=draft2020
-          for f in data/tutorials/*.json; do
-            [ "$(basename "$f")" = "index.json" ] && continue
-            echo "Validating $f"
-            npx ajv validate -s schema/tutorial.schema.json -d "$f" -c ajv-formats --spec=draft2020
-          done
-          node -e "
-            const d=require('./data/graph.json');
-            const c=require('./data/config.json');
-            const ids=new Set(d.nodes.map(n=>n.id));
-            const kinds=Object.keys(c.kinds);
-            let ok=true;
-            d.nodes.forEach(n=>{
-              if(!kinds.includes(n.kind)){console.error('Unknown kind: '+n.kind+' on '+n.id);ok=false}
-            });
-            d.edges.forEach((e,i)=>{
-              if(!ids.has(e.source)){console.error('Bad source e'+i+': '+e.source);ok=false}
-              if(!ids.has(e.target)){console.error('Bad target e'+i+': '+e.target);ok=false}
-            });
-            const fs=require('fs');
-            fs.readdirSync('data/tutorials').filter(f=>f.endsWith('.json')&&f!=='index.json').forEach(f=>{
-              const tut=JSON.parse(fs.readFileSync('data/tutorials/'+f,'utf8'));
-              (tut.stops||[]).forEach((s,i)=>{
-                if(!ids.has(s.node)){console.error(f+' stop '+i+': unknown node '+s.node);ok=false}
-              });
-            });
-            if(ok)console.log(d.nodes.length+' nodes, '+d.edges.length+' edges — self-check passed');
-            else process.exit(1);
-          "
+      - name: Validate graph data
+        uses: ./validate-action
