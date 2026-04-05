@@ -15,7 +15,7 @@ import Effect (Effect)
 import Web.HTML as Web.HTML
 import Web.HTML.Window as Web.HTML.Window
 import Web.HTML.HTMLDocument as Web.HTML.HTMLDocument
-import Effect.Aff (Aff)
+import Effect.Aff (Aff, try)
 import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
 import FFI.Cytoscape as Cy
@@ -42,6 +42,7 @@ import Graph.Types
   , emptyConfig
   , emptyGraph
   )
+import Graph.Views as Views
 import FFI.Clipboard as Clipboard
 import Halogen as H
 import Halogen.HTML as HH
@@ -80,6 +81,7 @@ type TutorialEntry =
 type State =
   { config :: Config
   , graph :: Graph
+  , fullGraph :: Graph
   , dataUrls :: DataUrls
   , selected :: Maybe Node
   , hoveredNode :: Maybe Node
@@ -95,6 +97,9 @@ type State =
   , error :: Maybe String
   , promptInput :: String
   , promptCopied :: Boolean
+  , viewIndex :: Array Views.ViewIndexEntry
+  , activeView :: Maybe Views.View
+  , showViewPicker :: Boolean
   }
 
 -- | Actions the component can handle.
@@ -116,6 +121,9 @@ data Action
   | ExitTutorial
   | SetPromptInput String
   | CopyPrompt
+  | SelectView String
+  | SelectAllView
+  | ToggleViewPicker
 
 -- | The viewer component, parameterized by data URLs.
 viewer
@@ -124,6 +132,7 @@ viewer = H.mkComponent
   { initialState: \urls ->
       { config: emptyConfig
       , graph: emptyGraph
+      , fullGraph: emptyGraph
       , dataUrls: urls
       , selected: Nothing
       , hoveredNode: Nothing
@@ -139,6 +148,9 @@ viewer = H.mkComponent
       , error: Nothing
       , promptInput: ""
       , promptCopied: false
+      , viewIndex: []
+      , activeView: Nothing
+      , showViewPicker: false
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -186,6 +198,23 @@ renderControls state =
             renderTutorialMenu state.tutorialIndex
           else HH.text ""
         ]
+    , if Array.null state.viewIndex then HH.text ""
+      else
+        HH.div [ cls "tour-menu-wrapper" ]
+          [ HH.button
+              [ cls "control-btn"
+              , HE.onClick \_ -> ToggleViewPicker
+              ]
+              [ HH.text
+                  ( case state.activeView of
+                      Just v -> v.name
+                      Nothing -> "Views"
+                  )
+              ]
+          , if state.showViewPicker then
+              renderViewPicker state
+            else HH.text ""
+          ]
     , HH.button
         [ cls "control-btn"
         , HE.onClick \_ -> FitAll
@@ -225,6 +254,34 @@ renderTutorialMenu entries =
       ]
       [ HH.div [ cls "tour-menu-title" ]
           [ HH.text entry.title ]
+      , HH.div [ cls "tour-menu-desc" ]
+          [ HH.text entry.description ]
+      ]
+
+renderViewPicker
+  :: forall m. State -> H.ComponentHTML Action () m
+renderViewPicker state =
+  HH.div [ cls "tour-menu" ]
+    ( [ HH.div
+          [ cls "tour-menu-item"
+          , HE.onClick \_ -> SelectAllView
+          ]
+          [ HH.div [ cls "tour-menu-title" ]
+              [ HH.text "All" ]
+          , HH.div [ cls "tour-menu-desc" ]
+              [ HH.text "Full graph" ]
+          ]
+      ]
+        <> map mkEntry state.viewIndex
+    )
+  where
+  mkEntry entry =
+    HH.div
+      [ cls "tour-menu-item"
+      , HE.onClick \_ -> SelectView entry.file
+      ]
+      [ HH.div [ cls "tour-menu-title" ]
+          [ HH.text entry.name ]
       , HH.div [ cls "tour-menu-desc" ]
           [ HH.text entry.description ]
       ]
@@ -744,8 +801,16 @@ handleAction = case _ of
         let start = mostConnectedNode graph
         H.modify_ _
           { graph = graph
+          , fullGraph = graph
           , selected = start
           }
+    -- Load view index
+    viewResult <- liftAff
+      (loadViewIndex (urls.baseUrl <> "data/views/index.json"))
+    case viewResult of
+      Left _ -> pure unit
+      Right vi ->
+        H.modify_ _ { viewIndex = vi }
     idxResult <- liftAff
       (loadTutorialIndex urls.tutorialIndexUrl)
     case idxResult of
@@ -910,18 +975,34 @@ handleAction = case _ of
 
   StartTutorial file -> do
     state <- H.get
-    let url = resolveUrl state.dataUrls.baseUrl file
-    result <- liftAff (loadTutorialFile url)
-    case result of
-      Left _ -> pure unit
-      Right tut -> do
-        H.modify_ _
-          { tutorial = Just tut
-          , tutorialStep = 0
-          , tutorialActive = true
-          , showTutorialMenu = false
-          }
-        applyTutorialStop
+    case state.activeView of
+      Just view -> do
+        -- View-local tour: file is the tour ID
+        let mTour = Array.find
+              (\t -> t.id == file) view.tours
+        case mTour of
+          Nothing -> pure unit
+          Just tut -> do
+            H.modify_ _
+              { tutorial = Just tut
+              , tutorialStep = 0
+              , tutorialActive = true
+              , showTutorialMenu = false
+              }
+            applyTutorialStop
+      Nothing -> do
+        let url = resolveUrl state.dataUrls.baseUrl file
+        result <- liftAff (loadTutorialFile url)
+        case result of
+          Left _ -> pure unit
+          Right tut -> do
+            H.modify_ _
+              { tutorial = Just tut
+              , tutorialStep = 0
+              , tutorialActive = true
+              , showTutorialMenu = false
+              }
+            applyTutorialStop
 
   TutorialNext -> do
     state <- H.get
@@ -1009,6 +1090,69 @@ handleAction = case _ of
       liftAff $ Clipboard.copyToClipboard prompt
       H.modify_ _ { promptCopied = true }
 
+  SelectView file -> do
+    state <- H.get
+    let vUrl = resolveUrl
+          state.dataUrls.baseUrl
+          ("data/views/" <> file)
+    viewResult <- liftAff (loadViewFile vUrl)
+    case viewResult of
+      Left _ -> pure unit
+      Right view -> do
+        let filtered = Views.filterByView view
+              state.fullGraph
+            start = mostConnectedNode filtered
+            tours = map
+              ( \t ->
+                  { id: t.id
+                  , title: t.title
+                  , description: t.description
+                  , file: t.id
+                  }
+              )
+              view.tours
+        H.modify_ _
+          { graph = filtered
+          , activeView = Just view
+          , selected = start
+          , tutorialIndex = tours
+          , tutorial = Nothing
+          , tutorialActive = false
+          , showTutorialMenu = false
+          , showViewPicker = false
+          , hoveredEdge = Nothing
+          , hoveredNode = Nothing
+          }
+        renderGraph
+
+  SelectAllView -> do
+    state <- H.get
+    let start = mostConnectedNode state.fullGraph
+    -- Reload global tutorials
+    idxResult <- liftAff
+      (loadTutorialIndex
+        state.dataUrls.tutorialIndexUrl)
+    let globalTours = case idxResult of
+          Left _ -> []
+          Right idx -> idx
+    H.modify_ _
+      { graph = state.fullGraph
+      , activeView = Nothing
+      , selected = start
+      , tutorialIndex = globalTours
+      , tutorial = Nothing
+      , tutorialActive = false
+      , showTutorialMenu = false
+      , showViewPicker = false
+      , hoveredEdge = Nothing
+      , hoveredNode = Nothing
+      }
+    renderGraph
+
+  ToggleViewPicker ->
+    H.modify_ \s -> s
+      { showViewPicker = not s.showViewPicker }
+
 renderGraph
   :: forall o
    . H.HalogenM State Action () o Aff Unit
@@ -1094,6 +1238,26 @@ loadTutorialFile file = do
   pure case AP.jsonParser body of
     Left err -> Left err
     Right json -> decodeTutorial json
+
+loadViewIndex
+  :: String -> Aff (Either String (Array Views.ViewIndexEntry))
+loadViewIndex url = do
+  result <- try $ fetch url { method: GET }
+  case result of
+    Left _ -> pure (Left "no views")
+    Right resp -> do
+      body <- resp.text
+      pure case AP.jsonParser body of
+        Left err -> Left err
+        Right json -> Views.decodeViewIndex json
+
+loadViewFile :: String -> Aff (Either String Views.View)
+loadViewFile url = do
+  resp <- fetch url { method: GET }
+  body <- resp.text
+  pure case AP.jsonParser body of
+    Left err -> Left err
+    Right json -> Views.decodeView json
 
 loadConfig :: String -> Aff (Either String Config)
 loadConfig url = do
