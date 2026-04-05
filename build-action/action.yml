@@ -32,7 +32,7 @@ runs:
       shell: bash
       run: |
         OUT="${{ inputs.output-dir }}"
-        if [ -d "$OUT/data/views" ]; then
+        if [ -d "$OUT/data/views" ] && [ ! -f "$OUT/data/views/index.json" ]; then
           node -e "
             const fs=require('fs');
             const dir='$OUT/data/views';

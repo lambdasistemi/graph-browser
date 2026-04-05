@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Build & Validation",
+    "description": "Nix build system, schemas, and CI validation pipeline.",
+    "file": "build-validation.json"
+  },
+  {
+    "name": "UI & Rendering",
+    "description": "The viewer component, graph operations, and Cytoscape rendering pipeline.",
+    "file": "ui-rendering.json"
+  }
+]
