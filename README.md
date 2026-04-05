@@ -18,6 +18,9 @@ An interactive knowledge graph browser with guided tours. Point it at any reposi
 - **Dual output**: `lib` (embeddable viewer) and `app` (hosted universal viewer)
 - **Deep-linking**: share `?repo=owner/repo` URLs that auto-load
 - **Token support**: encrypted storage for private repo access
+- **Prompt builder**: generate context-rich prompts to improve nodes and edges via PR
+- **Self-documenting**: graph-browser's own architecture is browsable as a graph
+- **CI validation action**: reusable GitHub Action to validate any data repo
 
 ## Data Format
 
@@ -134,7 +137,7 @@ Add `.graph-browser.json` to your repo root to customize data paths:
 }
 ```
 
-Without a manifest, the app uses the convention `data/` path on GitHub Pages.
+Without a manifest, the app looks for `data/` on the repo's main branch via raw GitHub URLs.
 
 ## Development
 
@@ -160,23 +163,14 @@ Validate your data against the schemas in [`schema/`](schema/):
 
 ### CI Validation for Data Repos
 
-Graph-browser publishes a reusable GitHub Actions workflow that validates your data against all schemas, checks edge integrity, kind references, duplicate IDs, and tutorial node references. Add this to your data repo:
+Graph-browser publishes a reusable GitHub Action that validates your data against all schemas, checks edge integrity, kind references, duplicate IDs, and tutorial node references. Add it as a step in your workflow:
 
 ```yaml
-# .github/workflows/ci.yml
-name: CI
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-jobs:
-  validate:
-    uses: lambdasistemi/graph-browser/.github/workflows/validate-data.yml@main
+- uses: lambdasistemi/graph-browser/validate-action@main
+  with:
+    data-dir: data          # optional, default: data
+    schema-ref: main        # optional, pin to tag/sha
 ```
-
-That's it — one line calls the full validation suite. No need to install tools or copy scripts.
 
 ## Generating Data with an LLM
 
