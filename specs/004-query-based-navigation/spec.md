@@ -54,7 +54,23 @@ Some queries have parameters — e.g. "All nodes of kind $kind" or "Neighbors of
 
 ---
 
-### User Story 4 - Share a query by URL (Priority: P2)
+### User Story 4 - Views are queries (Priority: P2)
+
+Views currently save a list of node IDs with a depth setting. In the new model, saving a view means saving a named query. The user activates a query from the catalog (or writes one), and saves it as a view. Views, catalog entries, and tour stops are the same thing — named queries with optional tags.
+
+**Why this priority**: Unifying views with queries eliminates a separate data model. But the catalog works without views.
+
+**Independent Test**: Run a query. Save it as a view. Reload. The view appears in the catalog and can be re-executed.
+
+**Acceptance Scenarios**:
+
+1. **Given** a query is active, **When** the user saves it as a view, **Then** it is stored as a named query in the catalog
+2. **Given** a saved view exists, **When** the user opens the catalog, **Then** the view appears alongside other named queries
+3. **Given** a view was saved from a parameterized query, **When** the user re-opens it, **Then** the parameter values are preserved
+
+---
+
+### User Story 5 - Share a query by URL (Priority: P2)
 
 The URL encodes the active query (and parameter values if any). Sharing the URL lets another user see the same subgraph selection.
 
@@ -69,17 +85,17 @@ The URL encodes the active query (and parameter values if any). Sharing the URL 
 
 ---
 
-### User Story 5 - Tours as query sequences (Priority: P3)
+### User Story 6 - Tours as query sequences (Priority: P3)
 
-A tour is a sequence of named queries. Each stop runs a query, highlights the result subgraph, and shows the stop description. This replaces the current node-pinned tour model.
+A tour is an ordered sequence of named queries with stop descriptions. Each stop runs its query, highlights the result subgraph, and shows the description. Tours don't introduce a new entity — they are metadata grouping existing named queries from the catalog.
 
-**Why this priority**: Tours are an existing feature. Migrating them to queries completes the model, but existing tours still work without this.
+**Why this priority**: Tours are an existing feature. Migrating them to query sequences completes the unification, but everything else works without this.
 
 **Independent Test**: Load a query-based tour. Step through it. Each stop shows a different subgraph selection.
 
 **Acceptance Scenarios**:
 
-1. **Given** a tour defined as a sequence of queries, **When** the user starts the tour, **Then** the first query runs and its result subgraph is highlighted
+1. **Given** a tour defined as a sequence of named queries, **When** the user starts the tour, **Then** the first query runs and its result subgraph is highlighted
 2. **Given** a tour is active, **When** the user advances to the next stop, **Then** the next query runs and the graph updates
 
 ---
