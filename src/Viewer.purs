@@ -299,7 +299,16 @@ renderSidebar state =
         ]
     , HH.div [ cls "sidebar-content" ]
         [ if state.tutorialActive then
-            renderTutorialContent state
+            HH.div_
+              ( [ renderTutorialContent state ]
+                  <> case state.hoveredEdge of
+                    Just edge ->
+                      [ renderEdgeDetail state edge ]
+                    Nothing -> case state.hoveredNode of
+                      Just node ->
+                        [ renderNodeDetail state node ]
+                      Nothing -> []
+              )
           else case state.hoveredEdge of
             Just edge -> renderEdgeDetail state edge
             Nothing -> case state.selected of
