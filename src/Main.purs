@@ -29,7 +29,7 @@ main = HA.runHalogenAff do
 
 type Slots =
   ( repoManager :: H.Slot RM.Query RM.Output Unit
-  , viewer :: forall q. H.Slot q Void Unit
+  , viewer :: forall q. H.Slot q Void String
   )
 
 _repoManager :: Proxy "repoManager"
@@ -73,14 +73,14 @@ appRender state =
     [ HH.slot _repoManager unit RM.repoManager unit
         HandleRepo
     , HH.div [ cls "main-area" ]
-        [ case state.dataUrls of
-            Nothing ->
+        [ case state.activeRepo, state.dataUrls of
+            Just repo, Just urls ->
+              HH.slot_ _viewer repo.id Viewer.viewer urls
+            _, _ ->
               HH.div [ cls "empty-main" ]
                 [ HH.text
                     "Add a repository to get started"
                 ]
-            Just urls ->
-              HH.slot_ _viewer unit Viewer.viewer urls
         ]
     ]
 
