@@ -10,6 +10,10 @@ inputs:
     description: 'Git ref to fetch schemas from (tag, branch, or SHA)'
     required: false
     default: 'main'
+  schema-dir:
+    description: 'Local path to schemas (skips fetching from GitHub)'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -17,11 +21,15 @@ runs:
     - name: Fetch schemas
       shell: bash
       run: |
-        SCHEMA_DIR=$(mktemp -d)
-        echo "SCHEMA_DIR=$SCHEMA_DIR" >> "$GITHUB_ENV"
-        for f in config.schema.json graph.schema.json tutorial-index.schema.json tutorial.schema.json view.schema.json; do
-          curl -sfL "https://raw.githubusercontent.com/lambdasistemi/graph-browser/${{ inputs.schema-ref }}/schema/$f" -o "$SCHEMA_DIR/$f"
-        done
+        if [ -n "${{ inputs.schema-dir }}" ]; then
+          echo "SCHEMA_DIR=${{ inputs.schema-dir }}" >> "$GITHUB_ENV"
+        else
+          SCHEMA_DIR=$(mktemp -d)
+          echo "SCHEMA_DIR=$SCHEMA_DIR" >> "$GITHUB_ENV"
+          for f in config.schema.json graph.schema.json tutorial-index.schema.json tutorial.schema.json view.schema.json; do
+            curl -sfL "https://raw.githubusercontent.com/lambdasistemi/graph-browser/${{ inputs.schema-ref }}/schema/$f" -o "$SCHEMA_DIR/$f"
+          done
+        fi
 
     - name: Install validator
       shell: bash
