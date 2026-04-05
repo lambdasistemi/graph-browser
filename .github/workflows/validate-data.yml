@@ -1,0 +1,83 @@
+name: Validate Graph Data
+
+on:
+  workflow_call:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install ajv-cli
+        run: npm install -g ajv-cli ajv-formats
+
+      - name: Fetch schemas
+        run: |
+          mkdir -p .schemas
+          BASE="https://raw.githubusercontent.com/lambdasistemi/graph-browser/main/schema"
+          curl -fsSL "$BASE/graph.schema.json" -o .schemas/graph.schema.json
+          curl -fsSL "$BASE/config.schema.json" -o .schemas/config.schema.json
+          curl -fsSL "$BASE/tutorial.schema.json" -o .schemas/tutorial.schema.json
+          curl -fsSL "$BASE/tutorial-index.schema.json" -o .schemas/tutorial-index.schema.json
+
+      - name: Validate config.json
+        run: ajv validate -s .schemas/config.schema.json -d data/config.json -c ajv-formats --spec=draft2020
+
+      - name: Validate graph.json
+        run: ajv validate -s .schemas/graph.schema.json -d data/graph.json -c ajv-formats --spec=draft2020
+
+      - name: Validate tutorial index
+        if: hashFiles('data/tutorials/index.json') != ''
+        run: ajv validate -s .schemas/tutorial-index.schema.json -d data/tutorials/index.json -c ajv-formats --spec=draft2020
+
+      - name: Validate tutorial files
+        if: hashFiles('data/tutorials/index.json') != ''
+        run: |
+          for f in data/tutorials/*.json; do
+            [ "$(basename "$f")" = "index.json" ] && continue
+            echo "Validating $f"
+            ajv validate -s .schemas/tutorial.schema.json -d "$f" -c ajv-formats --spec=draft2020
+          done
+
+      - name: Validate edge integrity and kind references
+        run: |
+          node -e "
+            const d = require('./data/graph.json');
+            const c = require('./data/config.json');
+            const ids = new Set(d.nodes.map(n => n.id));
+            const kinds = Object.keys(c.kinds);
+            let ok = true;
+            const seen = new Set();
+            d.nodes.forEach(n => {
+              if (seen.has(n.id)) { console.error('Duplicate node ID: ' + n.id); ok = false; }
+              seen.add(n.id);
+              if (!kinds.includes(n.kind)) {
+                console.error('Unknown kind: ' + n.kind + ' on node ' + n.id);
+                ok = false;
+              }
+            });
+            d.edges.forEach((e, i) => {
+              if (!ids.has(e.source)) { console.error('Bad source edge ' + i + ': ' + e.source); ok = false; }
+              if (!ids.has(e.target)) { console.error('Bad target edge ' + i + ': ' + e.target); ok = false; }
+            });
+            const fs = require('fs');
+            const tutDir = 'data/tutorials';
+            if (fs.existsSync(tutDir)) {
+              fs.readdirSync(tutDir).filter(f => f.endsWith('.json') && f !== 'index.json').forEach(f => {
+                const tut = JSON.parse(fs.readFileSync(tutDir + '/' + f, 'utf8'));
+                (tut.stops || []).forEach((s, i) => {
+                  if (!ids.has(s.node)) {
+                    console.error('Tutorial ' + f + ' stop ' + i + ' references unknown node: ' + s.node);
+                    ok = false;
+                  }
+                });
+              });
+            }
+            if (ok) console.log(d.nodes.length + ' nodes, ' + d.edges.length + ' edges — all checks passed');
+            else process.exit(1);
+          "
