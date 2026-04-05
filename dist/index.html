@@ -535,6 +535,60 @@
     color: #8b949e;
   }
 
+  /* Prompt builder */
+  .prompt-builder {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #30363d;
+  }
+
+  .prompt-builder h3 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #8b949e;
+    margin-bottom: 10px;
+  }
+
+  .prompt-textarea {
+    width: 100%;
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    resize: vertical;
+    min-height: 60px;
+  }
+
+  .prompt-textarea:focus { border-color: #58a6ff; background: #161b22; }
+
+  .prompt-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .prompt-copy-btn {
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }
+
+  .prompt-copy-btn:hover { background: #30363d; border-color: #8b949e; }
+  .prompt-copy-btn.copied { background: #1a3b2f; border-color: #3fb950; color: #3fb950; }
+
   /* App shell: repo panel + main area */
   .app-shell {
     display: flex;

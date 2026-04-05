@@ -42,11 +42,13 @@ import Graph.Types
   , emptyConfig
   , emptyGraph
   )
+import FFI.Clipboard as Clipboard
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
+import PromptBuilder as PB
 
 -- | Data URLs that the viewer fetches on init.
 type DataUrls =
@@ -58,7 +60,9 @@ type DataUrls =
 
 -- | Edge detail shown on hover.
 type EdgeInfo =
-  { sourceLabel :: String
+  { sourceId :: String
+  , targetId :: String
+  , sourceLabel :: String
   , targetLabel :: String
   , label :: String
   , description :: String
@@ -89,6 +93,8 @@ type State =
   , tutorialActive :: Boolean
   , showTutorialMenu :: Boolean
   , error :: Maybe String
+  , promptInput :: String
+  , promptCopied :: Boolean
   }
 
 -- | Actions the component can handle.
@@ -108,6 +114,8 @@ data Action
   | TutorialPrev
   | TutorialRecenter
   | ExitTutorial
+  | SetPromptInput String
+  | CopyPrompt
 
 -- | The viewer component, parameterized by data URLs.
 viewer
@@ -129,6 +137,8 @@ viewer = H.mkComponent
       , tutorialActive: false
       , showTutorialMenu: false
       , error: Nothing
+      , promptInput: ""
+      , promptCopied: false
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -291,13 +301,10 @@ renderSidebar state =
         [ if state.tutorialActive then
             renderTutorialContent state
           else case state.hoveredEdge of
-            Just edge -> renderEdgeDetail edge
+            Just edge -> renderEdgeDetail state edge
             Nothing -> case state.selected of
               Nothing -> renderEmptyState state.config
-              Just node -> renderNodeDetail
-                state.config
-                state.graph
-                node
+              Just node -> renderNodeDetail state node
         ]
     ]
   where
@@ -546,8 +553,8 @@ splitOn sep str = go str []
           go after (Array.cons before acc)
 
 renderEdgeDetail
-  :: forall m. EdgeInfo -> H.ComponentHTML Action () m
-renderEdgeDetail edge =
+  :: forall m. State -> EdgeInfo -> H.ComponentHTML Action () m
+renderEdgeDetail state edge =
   HH.div_
     [ HH.span [ cls "badge badge-mechanism" ]
         [ HH.text "relationship" ]
@@ -569,15 +576,15 @@ renderEdgeDetail edge =
         ]
     , HH.p [ cls "description" ]
         [ HH.text edge.description ]
+    , renderPromptBuilder state "Ask an LLM about this edge"
     ]
 
 renderNodeDetail
   :: forall m
-   . Config
-  -> Graph
+   . State
   -> Node
   -> H.ComponentHTML Action () m
-renderNodeDetail cfg graph node =
+renderNodeDetail state node =
   HH.div_
     [ HH.span
         [ cls ("badge badge-" <> node.kind) ]
@@ -587,8 +594,11 @@ renderNodeDetail cfg graph node =
     , renderLinks node.links
     , renderConnections "Connects to" outEdges
     , renderConnections "Connected from" inEdges
+    , renderPromptBuilder state "Ask an LLM about this node"
     ]
   where
+  cfg = state.config
+  graph = state.graph
   outEdges = Array.filter
     (\e -> e.source == node.id)
     graph.edges
@@ -645,6 +655,35 @@ renderNodeDetail cfg graph node =
         , HH.span [ cls "conn-node" ]
             [ HH.text targetLabel ]
         ]
+
+renderPromptBuilder
+  :: forall m. State -> String -> H.ComponentHTML Action () m
+renderPromptBuilder state title =
+  HH.div [ cls "prompt-builder" ]
+    [ HH.h3_ [ HH.text title ]
+    , HH.textarea
+        [ cls "prompt-textarea"
+        , HP.value state.promptInput
+        , HP.placeholder "e.g. Update to reflect latest changes..."
+        , HP.rows 3
+        , HE.onValueInput SetPromptInput
+        ]
+    , HH.div [ cls "prompt-actions" ]
+        [ HH.button
+            [ cls
+                ( "prompt-copy-btn"
+                    <> if state.promptCopied then " copied"
+                      else ""
+                )
+            , HE.onClick \_ -> CopyPrompt
+            ]
+            [ HH.text
+                ( if state.promptCopied then "Copied!"
+                  else "Copy prompt"
+                )
+            ]
+        ]
+    ]
 
 renderLegend
   :: forall m. Config -> H.ComponentHTML Action () m
@@ -769,10 +808,18 @@ handleAction = case _ of
     let node = Map.lookup nodeId state.graph.nodes
     if state.tutorialActive then
       H.modify_ _
-        { hoveredNode = node, hoveredEdge = Nothing }
+        { hoveredNode = node
+        , hoveredEdge = Nothing
+        , promptInput = ""
+        , promptCopied = false
+        }
     else
       H.modify_ _
-        { selected = node, hoveredEdge = Nothing }
+        { selected = node
+        , hoveredEdge = Nothing
+        , promptInput = ""
+        , promptCopied = false
+        }
     liftEffect $ Cy.markRoot nodeId
 
   EdgeHovered srcId tgtId lbl desc -> do
@@ -786,27 +833,29 @@ handleAction = case _ of
       tgtLabel = case tgtNode of
         Just n -> n.label
         Nothing -> tgtId
+      edgeInfo =
+        { sourceId: srcId
+        , targetId: tgtId
+        , sourceLabel: srcLabel
+        , targetLabel: tgtLabel
+        , label: lbl
+        , description: desc
+        }
     state' <- H.get
     if state'.tutorialActive then
       H.modify_ _
         { hoveredNode = Nothing
-        , hoveredEdge = Just
-            { sourceLabel: srcLabel
-            , targetLabel: tgtLabel
-            , label: lbl
-            , description: desc
-            }
+        , hoveredEdge = Just edgeInfo
+        , promptInput = ""
+        , promptCopied = false
         }
     else
       H.modify_ _
         { hoveredNode = Nothing
-        , hoveredEdge = Just
-            { sourceLabel: srcLabel
-            , targetLabel: tgtLabel
-            , label: lbl
-            , description: desc
-            }
+        , hoveredEdge = Just edgeInfo
         , selected = Nothing
+        , promptInput = ""
+        , promptCopied = false
         }
 
   SetDepth d -> do
@@ -840,7 +889,9 @@ handleAction = case _ of
           H.modify_ _
             { selected = node
             , hoveredEdge = Just
-                { sourceLabel
+                { sourceId: edge.source
+                , targetId: edge.target
+                , sourceLabel
                 , targetLabel
                 , label: edge.label
                 , description: edge.description
@@ -908,8 +959,55 @@ handleAction = case _ of
   NavigateTo nodeId -> do
     state <- H.get
     let node = Map.lookup nodeId state.graph.nodes
-    H.modify_ _ { selected = node }
+    H.modify_ _
+      { selected = node
+      , promptInput = ""
+      , promptCopied = false
+      }
     renderGraph
+
+  SetPromptInput text ->
+    H.modify_ _ { promptInput = text, promptCopied = false }
+
+  CopyPrompt -> do
+    state <- H.get
+    let
+      prompt = case state.hoveredEdge of
+        Just edge ->
+          let
+            srcNode = Map.lookup edge.sourceId state.graph.nodes
+            tgtNode = Map.lookup edge.targetId state.graph.nodes
+            rawEdge =
+              { source: edge.sourceId
+              , target: edge.targetId
+              , label: edge.label
+              , description: edge.description
+              }
+          in
+            case srcNode, tgtNode of
+              Just sn, Just tn ->
+                PB.buildEdgePrompt state.config state.graph
+                  rawEdge sn tn state.promptInput
+              _, _ ->
+                PB.buildEdgePrompt state.config state.graph
+                  rawEdge
+                  { id: edge.sourceId, label: edge.sourceLabel
+                  , kind: "", group: "", description: ""
+                  , links: []
+                  }
+                  { id: edge.targetId, label: edge.targetLabel
+                  , kind: "", group: "", description: ""
+                  , links: []
+                  }
+                  state.promptInput
+        Nothing -> case state.selected of
+          Just node ->
+            PB.buildNodePrompt state.config state.graph
+              node state.promptInput
+          Nothing -> ""
+    when (prompt /= "") do
+      liftAff $ Clipboard.copyToClipboard prompt
+      H.modify_ _ { promptCopied = true }
 
 renderGraph
   :: forall o
