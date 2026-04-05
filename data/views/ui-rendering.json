@@ -21,7 +21,11 @@
     ["graph-search", "graph-types", "searches over"],
     ["graph-cytoscape", "graph-types", "reads"],
     ["depth-filtering", "graph-operations", "implemented by"],
-    ["viewer", "depth-filtering", "exposes via controls"]
+    ["viewer", "depth-filtering", "exposes via controls"],
+    ["viewer", "graph-views", "filters by view"],
+    ["graph-views", "graph-build", "uses"],
+    ["graph-views", "graph-types", "operates on"],
+    ["graph-views", "tutorial", "decodes tours"]
   ],
   "tours": [
     {

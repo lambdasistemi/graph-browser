@@ -12,7 +12,14 @@
     ["schema-tutorial", "tutorial", "documents"],
     ["validate-workflow", "schema-graph", "validates against"],
     ["validate-workflow", "schema-config", "validates against"],
-    ["validate-workflow", "schema-tutorial", "validates against"]
+    ["validate-workflow", "schema-tutorial", "validates against"],
+    ["schema-view", "graph-views", "documents"],
+    ["validate-action", "schema-view", "validates against"],
+    ["validate-action", "schema-graph", "validates against"],
+    ["validate-action", "schema-config", "validates against"],
+    ["validate-action", "schema-tutorial", "validates against"],
+    ["build-action", "lib-output", "downloads"],
+    ["build-action", "data-driven", "leverages"]
   ],
   "tours": [
     {

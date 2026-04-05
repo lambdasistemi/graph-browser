@@ -19,8 +19,10 @@ An interactive knowledge graph browser with guided tours. Point it at any reposi
 - **Deep-linking**: share `?repo=owner/repo` URLs that auto-load
 - **Token support**: encrypted storage for private repo access
 - **Prompt builder**: generate context-rich prompts to improve nodes and edges via PR
-- **Self-documenting**: graph-browser's own architecture is browsable as a graph
+- **Views**: named subgraph lenses — filter a shared node/edge catalog by topic with per-view tours
+- **Self-documenting**: graph-browser's own architecture is browsable as a graph with views
 - **CI validation action**: reusable GitHub Action to validate any data repo
+- **Build action**: assemble a deployable site from JSON data with zero build tools
 
 ## Data Format
 
@@ -97,6 +99,41 @@ Your repository needs a `data/` directory with:
   ]
 }
 ```
+
+### `data/views/<name>.json` (optional)
+
+Views filter the graph into topic-specific subgraphs. Each view selects edges by triple and includes its own tours.
+
+```json
+{
+  "name": "My Topic",
+  "description": "A focused lens on this topic.",
+  "edges": [
+    ["node-a", "node-b", "relates to"],
+    ["node-c", "node-d", "depends on"]
+  ],
+  "tours": [
+    {
+      "id": "intro",
+      "title": "Introduction",
+      "description": "Walk through the basics.",
+      "stops": [
+        { "node": "node-a", "depth": 1, "title": "Start Here", "narrative": "..." }
+      ]
+    }
+  ]
+}
+```
+
+A `data/views/index.json` listing available views must also be committed:
+
+```json
+[
+  { "name": "My Topic", "description": "...", "file": "my-topic.json" }
+]
+```
+
+If no views are defined, the full graph is shown with tutorials from `data/tutorials/`.
 
 ### Available shapes
 
@@ -185,6 +222,7 @@ Validate your data against the schemas in [`schema/`](schema/):
 - [`graph.schema.json`](schema/graph.schema.json) — nodes and edges
 - [`tutorial.schema.json`](schema/tutorial.schema.json) — guided tour
 - [`tutorial-index.schema.json`](schema/tutorial-index.schema.json) — tour list
+- [`view.schema.json`](schema/view.schema.json) — view (subgraph lens with tours)
 - [`manifest.schema.json`](schema/manifest.schema.json) — `.graph-browser.json` manifest
 
 ### CI Validation for Data Repos
