@@ -27,5 +27,24 @@ runs:
       shell: bash
       run: |
         cp -r "${{ inputs.data-dir }}" "${{ inputs.output-dir }}/data"
-        echo "Site assembled in ${{ inputs.output-dir }}/"
-        ls -la "${{ inputs.output-dir }}/"
+
+    - name: Generate view index
+      shell: bash
+      run: |
+        OUT="${{ inputs.output-dir }}"
+        if [ -d "$OUT/data/views" ]; then
+          node -e "
+            const fs=require('fs');
+            const dir='$OUT/data/views';
+            const index=fs.readdirSync(dir)
+              .filter(f=>f.endsWith('.json'))
+              .map(f=>{
+                const v=JSON.parse(fs.readFileSync(dir+'/'+f,'utf8'));
+                return {name:v.name,description:v.description,file:f};
+              });
+            fs.writeFileSync(dir+'/index.json',JSON.stringify(index,null,2));
+            console.log('Generated view index: '+index.length+' view(s)');
+          "
+        fi
+        echo "Site assembled in $OUT/"
+        ls -la "$OUT/"
