@@ -51,6 +51,7 @@ runs:
         fi
         if [ -d "$DATA/views" ]; then
           for f in "$DATA"/views/*.json; do
+            [ "$(basename "$f")" = "index.json" ] && continue
             echo "Validating view $f"
             npx ajv validate -s "$SCHEMA_DIR/view.schema.json" -d "$f" -c ajv-formats --spec=draft2020
           done
