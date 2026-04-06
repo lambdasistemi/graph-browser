@@ -44,6 +44,23 @@
           }
         }
       }
+    },
+    "graphSource": {
+      "type": "object",
+      "description": "Optional alternate graph payload. Keeps config.json as the entry point while allowing the graph itself to come from RDF instead of graph.json.",
+      "additionalProperties": false,
+      "required": ["format", "path"],
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": ["application/n-quads", "nq", "text/turtle", "ttl", "application/ld+json", "jsonld", "application/n-triples", "nt", "application/trig", "trig", "text/n3", "n3", "application/rdf+xml", "rdf"],
+          "description": "RDF serialization format understood by the runtime importer."
+        },
+        "path": {
+          "type": "string",
+          "description": "Path to the RDF asset relative to the site or raw repository root (for example 'data/rdf/graph.nq')."
+        }
+      }
     }
   }
 }
