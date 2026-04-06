@@ -35,7 +35,23 @@ lint:
 install:
     npm ci
 
-ci: install lint build bundle
+ci: install lint build render-rdf-diagrams validate-rdf bundle
+
+export-rdf:
+    spago run --main Rdf.Export.Main -- --data-dir data --output-dir data/rdf
+
+render-rdf-diagrams: export-rdf
+    mmdc -i data/rdf/core-ontology.mmd -o data/rdf/core-ontology.svg -t dark -b transparent
+    mmdc -i data/rdf/application-ontology.mmd -o data/rdf/application-ontology.svg -t dark -b transparent
+
+build-docs: render-rdf-diagrams
+    mkdocs build --strict --site-dir dist/docs
+    rm -rf dist/rdf
+    cp -r data/rdf dist/rdf
+
+validate-rdf:
+    shacl validate --shapes data/rdf/shapes.ttl --data data/rdf/graph.ttl
+    shacl validate --shapes data/rdf/application-shapes.ttl --data data/rdf/application-ontology.ttl
 
 # Serve the example graph locally
 serve: bundle
