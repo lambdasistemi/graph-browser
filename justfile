@@ -41,8 +41,8 @@ export-rdf:
     spago run --main Rdf.Export.Main -- --data-dir data --output-dir data/rdf
 
 render-rdf-diagrams: export-rdf
-    mmdc -i data/rdf/core-ontology.mmd -o data/rdf/core-ontology.svg -t dark -b transparent
-    mmdc -i data/rdf/application-ontology.mmd -o data/rdf/application-ontology.svg -t dark -b transparent
+    mmdc -p mermaid-puppeteer-config.json -i data/rdf/core-ontology.mmd -o data/rdf/core-ontology.svg -t dark -b transparent
+    mmdc -p mermaid-puppeteer-config.json -i data/rdf/application-ontology.mmd -o data/rdf/application-ontology.svg -t dark -b transparent
 
 build-docs: render-rdf-diagrams
     mkdocs build --strict --site-dir dist/docs
