@@ -36,12 +36,18 @@ Your repository needs a `data/` directory with:
   "title": "My Knowledge Graph",
   "description": "What this graph is about.",
   "sourceUrl": "https://github.com/you/your-repo",
+  "graphSource": {
+    "format": "application/n-quads",
+    "path": "data/rdf/graph.nq"
+  },
   "kinds": {
     "concept": { "label": "Concept", "color": "#79c0ff", "shape": "round-octagon" },
     "entity": { "label": "Entity", "color": "#58a6ff", "shape": "ellipse" }
   }
 }
 ```
+
+`graphSource` is optional. If omitted, graph-browser loads `data/graph.json` as before. If present, graph-browser keeps `config.json` as the stable entry point and loads the graph payload from the configured RDF asset instead.
 
 ### `data/graph.json` (required)
 
@@ -69,6 +75,33 @@ Your repository needs a `data/` directory with:
   ]
 }
 ```
+
+`data/graph.json` is required for the legacy JSON flow. It may be omitted by RDF-backed repos when `data/config.json` declares `graphSource`.
+
+### RDF graph source via `graphSource` (optional)
+
+The current runtime importer supports RDF syntaxes understood by Oxigraph, including Turtle, JSON-LD, and N-Quads. The cleanest machine-oriented option is the exported `graph.nq`:
+
+```json
+{
+  "title": "My Knowledge Graph",
+  "description": "What this graph is about.",
+  "sourceUrl": "https://github.com/you/your-repo",
+  "graphSource": {
+    "format": "application/n-quads",
+    "path": "data/rdf/graph.nq"
+  },
+  "kinds": {
+    "concept": { "label": "Concept", "color": "#79c0ff", "shape": "round-octagon" }
+  }
+}
+```
+
+In this mode:
+
+- `config.json` still supplies viewer metadata and node kind styling
+- the graph itself is imported from RDF
+- existing JSON-backed repos continue to work unchanged
 
 ### `data/tutorials/index.json` (optional)
 
