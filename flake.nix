@@ -103,11 +103,15 @@
               pkgs.esbuild
               pkgs.nodejs_20
               pkgs.just
+              pkgs.jdk21_headless
               pkgs.apache-jena
               pkgs.mkdocs
               pkgs.python3Packages.mkdocs-material
               pkgs.mermaid-cli
             ];
+            shellHook = ''
+              export JAVA_HOME="${pkgs.jdk21_headless}"
+            '';
           };
         }
       );
