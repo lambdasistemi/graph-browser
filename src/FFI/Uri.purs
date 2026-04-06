@@ -1,5 +1,8 @@
 module FFI.Uri
-  ( encodeUriComponent
+  ( decodeUriComponent
+  , encodeUriComponent
   ) where
+
+foreign import decodeUriComponent :: String -> String
 
 foreign import encodeUriComponent :: String -> String

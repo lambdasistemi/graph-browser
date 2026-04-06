@@ -1,10 +1,26 @@
 module FFI.Oxigraph
-  ( RdfObject
+  ( ImportedRdfObject
+  , ImportedRdfQuad
+  , RdfObject
   , RdfQuad
+  , parseQuads
   , serializeQuads
   ) where
 
 import Effect (Effect)
+
+type ImportedRdfObject =
+  { termType :: String
+  , value :: String
+  , datatype :: String
+  , language :: String
+  }
+
+type ImportedRdfQuad =
+  { subject :: String
+  , predicate :: String
+  , object :: ImportedRdfObject
+  }
 
 type RdfObject =
   { termType :: String
@@ -17,6 +33,12 @@ type RdfQuad =
   , predicate :: String
   , object :: RdfObject
   }
+
+foreign import parseQuads
+  :: String
+  -> String
+  -> String
+  -> Effect (Array ImportedRdfQuad)
 
 foreign import serializeQuads
   :: Array RdfQuad
