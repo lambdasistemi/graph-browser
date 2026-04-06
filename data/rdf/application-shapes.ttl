@@ -1,0 +1,124 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#> .
+@prefix gbkind: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#> .
+@prefix gbgroup: <https://lambdasistemi.github.io/graph-browser/vocab/groups#> .
+@prefix gbedge: <https://lambdasistemi.github.io/graph-browser/vocab/edges#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://lambdasistemi.github.io/graph-browser/vocab/application-ontology>
+  a sh:NodeShape ;
+  sh:targetNode <https://lambdasistemi.github.io/graph-browser/vocab/application-ontology> ;
+  sh:property [
+    sh:path rdf:type ;
+    sh:hasValue owl:Ontology ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] ;
+  sh:property [
+    sh:path owl:imports ;
+    sh:hasValue <https://lambdasistemi.github.io/graph-browser/vocab/ontology> ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] .
+
+gb:ApplicationKindShape a sh:NodeShape ;
+  sh:targetSubjectsOf gb:kindId ;
+  sh:property [
+    sh:path rdf:type ;
+    sh:hasValue owl:Class ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] ;
+  sh:property [
+    sh:path rdfs:subClassOf ;
+    sh:hasValue gb:Node ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] ;
+  sh:property [
+    sh:path rdfs:label ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] ;
+  sh:property [
+    sh:path gb:kindId ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] ;
+  sh:property [
+    sh:path gb:color ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] ;
+  sh:property [
+    sh:path gb:shape ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] .
+
+gb:ApplicationGroupShape a sh:NodeShape ;
+  sh:targetSubjectsOf gb:groupId ;
+  sh:property [
+    sh:path rdf:type ;
+    sh:hasValue gb:Group ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] ;
+  sh:property [
+    sh:path rdfs:label ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] ;
+  sh:property [
+    sh:path gb:groupId ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] .
+
+gb:ApplicationEdgeShape a sh:NodeShape ;
+  sh:targetSubjectsOf gb:edgeLabel ;
+  sh:property [
+    sh:path rdf:type ;
+    sh:hasValue owl:ObjectProperty ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] ;
+  sh:property [
+    sh:path rdfs:subPropertyOf ;
+    sh:hasValue gb:EdgeRelation ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] ;
+  sh:property [
+    sh:path rdfs:label ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] ;
+  sh:property [
+    sh:path gb:edgeLabel ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] ;
+  sh:property [
+    sh:path rdfs:domain ;
+    sh:hasValue gb:Node ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] ;
+  sh:property [
+    sh:path rdfs:range ;
+    sh:hasValue gb:Node ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] .

@@ -6,6 +6,10 @@ inputs:
     description: 'Path to the data directory'
     required: false
     default: 'data'
+  rdf-dir:
+    description: 'Path to the RDF directory for optional SHACL validation'
+    required: false
+    default: 'data/rdf'
   schema-ref:
     description: 'Git ref to fetch schemas from (tag, branch, or SHA)'
     required: false
@@ -34,6 +38,14 @@ runs:
     - name: Install validator
       shell: bash
       run: npm install ajv-cli ajv-formats
+
+    - name: Install SHACL validator
+      shell: bash
+      run: |
+        JENA_VERSION=6.0.0
+        JENA_DIR=$(mktemp -d)
+        curl -sfL "https://archive.apache.org/dist/jena/binaries/apache-jena-${JENA_VERSION}.tar.gz" | tar -xz -C "$JENA_DIR"
+        echo "$JENA_DIR/apache-jena-${JENA_VERSION}/bin" >> "$GITHUB_PATH"
 
     - name: Validate schemas
       shell: bash
@@ -119,3 +131,25 @@ runs:
           }
           else process.exit(1);
         "
+
+    - name: Validate RDF contracts
+      shell: bash
+      run: |
+        RDF="${{ inputs.rdf-dir }}"
+        ran=false
+
+        if [ -f "$RDF/graph.ttl" ] && [ -f "$RDF/shapes.ttl" ]; then
+          echo "Validating RDF instance data"
+          shacl validate --shapes "$RDF/shapes.ttl" --data "$RDF/graph.ttl"
+          ran=true
+        fi
+
+        if [ -f "$RDF/application-ontology.ttl" ] && [ -f "$RDF/application-shapes.ttl" ]; then
+          echo "Validating application ontology"
+          shacl validate --shapes "$RDF/application-shapes.ttl" --data "$RDF/application-ontology.ttl"
+          ran=true
+        fi
+
+        if [ "$ran" = false ]; then
+          echo "No RDF validation artifacts found in $RDF; skipping SHACL validation"
+        fi

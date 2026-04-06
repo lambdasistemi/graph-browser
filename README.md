@@ -23,6 +23,7 @@ An interactive knowledge graph browser with guided tours. Point it at any reposi
 - **Self-documenting**: graph-browser's own architecture is browsable as a graph with views
 - **CI validation action**: reusable GitHub Action to validate any data repo
 - **Build action**: assemble a deployable site from JSON data with zero build tools
+- **RDF export**: derive Turtle and N-Quads from the authored JSON graph through the Oxigraph FFI path
 
 ## Data Format
 
@@ -206,6 +207,8 @@ Without a manifest, the app looks for `data/` on the repo's main branch via raw 
 
 ```bash
 nix develop -c just ci          # lint + build + bundle
+nix develop -c just export-rdf  # regenerate data/rdf from data/config.json + data/graph.json
+nix develop -c just validate-rdf # validate RDF artifacts with SHACL
 nix develop -c just serve       # serve example on port 10002
 nix develop -c just dev         # watch mode
 nix develop -c just bundle-app  # bundle app (with repo panel)
@@ -213,6 +216,30 @@ nix develop -c just bundle-lib  # bundle lib (viewer only)
 nix build .#app                 # nix build app output
 nix build .#lib                 # nix build lib output
 ```
+
+## RDF Export
+
+`just export-rdf` runs the PureScript export entrypoint `Rdf.Export.Main`, which owns the JSON-to-RDF mapping logic. The low-level triple storage and serialization is delegated through the thin Oxigraph FFI layer in `src/FFI/Oxigraph.js`.
+
+The command writes:
+
+- `data/rdf/graph.ttl`
+- `data/rdf/graph.nq`
+- `data/rdf/core-ontology.ttl`
+- `data/rdf/application-ontology.ttl`
+- `data/rdf/core-ontology.mmd`
+- `data/rdf/application-ontology.mmd`
+- `data/rdf/shapes.ttl`
+- `data/rdf/application-shapes.ttl`
+
+`core-ontology.ttl` is the shared graph-browser ontology. `application-ontology.ttl` is the repo-specific extension generated from local kinds, groups, and edge labels. `core-ontology.mmd` and `application-ontology.mmd` are generated Mermaid views of the same structures for lightweight visualization and Pages publishing.
+
+`just validate-rdf` runs two SHACL checks:
+
+- `graph.ttl` against `shapes.ttl` for shared graph-browser instance structure
+- `application-ontology.ttl` against `application-shapes.ttl` for application vocabulary compatibility with the core ontology
+
+That gives downstream applications an explicit contract: they are free to define their own ontology terms, but kinds must still extend `gb:Node`, groups must still use `gb:Group`, and application predicates must still refine `gb:EdgeRelation`.
 
 ## JSON Schemas
 

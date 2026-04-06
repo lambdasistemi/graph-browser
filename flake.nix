@@ -103,6 +103,10 @@
               pkgs.esbuild
               pkgs.nodejs_20
               pkgs.just
+              pkgs.apache-jena
+              pkgs.mkdocs
+              pkgs.python3Packages.mkdocs-material
+              pkgs.mermaid-cli
             ];
           };
         }

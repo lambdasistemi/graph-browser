@@ -1,0 +1,1012 @@
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/51> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The build action works because the viewer is fully data-driven — just copy JSON data alongside the pre-built app." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "leverages" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#leverages> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/data-driven> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/build-action> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 51 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/build-action> <https://lambdasistemi.github.io/graph-browser/vocab/edges#leverages> <https://github.com/lambdasistemi/graph-browser/rdf/node/data-driven> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/50> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The build action fetches the pre-built lib variant (index.html + index.js) from GitHub Pages to assemble the site." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "downloads" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#downloads> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/lib-output> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/build-action> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 50 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/build-action> <https://lambdasistemi.github.io/graph-browser/vocab/edges#downloads> <https://github.com/lambdasistemi/graph-browser/rdf/node/lib-output> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/49> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The validate action checks tutorial files against the tutorial schema." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "validates against" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#validates%20against> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-tutorial> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/validate-action> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 49 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/validate-action> <https://lambdasistemi.github.io/graph-browser/vocab/edges#validates%20against> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-tutorial> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/48> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The validate action checks config.json against the config schema." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "validates against" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#validates%20against> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-config> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/validate-action> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 48 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/validate-action> <https://lambdasistemi.github.io/graph-browser/vocab/edges#validates%20against> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-config> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/47> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The validate action checks graph.json against the graph schema." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "validates against" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#validates%20against> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-graph> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/validate-action> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 47 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/validate-action> <https://lambdasistemi.github.io/graph-browser/vocab/edges#validates%20against> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-graph> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/46> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The validate action uses ajv-cli to check each view file in data/views/ against the view schema." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "validates against" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#validates%20against> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-view> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/validate-action> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 46 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/validate-action> <https://lambdasistemi.github.io/graph-browser/vocab/edges#validates%20against> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-view> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/45> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The view schema formally specifies the JSON format that Graph.Views decodes: name, description, edge triples, and optional tours." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "documents" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#documents> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-views> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-view> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 45 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/schema-view> <https://lambdasistemi.github.io/graph-browser/vocab/edges#documents> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-views> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/44> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "View files contain inline tour definitions. Graph.Views uses the Tutorial decoder to parse them." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "decodes tours" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#decodes%20tours> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/tutorial> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-views> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 44 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-views> <https://lambdasistemi.github.io/graph-browser/vocab/edges#decodes%20tours> <https://github.com/lambdasistemi/graph-browser/rdf/node/tutorial> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/43> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Graph.Views operates on Graph and Edge types, filtering edges by triple matching and computing node sets." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "operates on" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#operates%20on> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-views> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 43 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-views> <https://lambdasistemi.github.io/graph-browser/vocab/edges#operates%20on> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/42> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "filterByView uses Graph.Build.buildGraph to construct a new Graph from the filtered nodes and edges with fresh adjacency maps." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "uses" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#uses> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-build> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-views> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 42 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-views> <https://lambdasistemi.github.io/graph-browser/vocab/edges#uses> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-build> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/41> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "When a view is selected, Viewer calls filterByView to compute the visible subgraph from the full graph, keeping only matching edges and their referenced nodes." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "filters by view" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#filters%20by%20view> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-views> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 41 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> <https://lambdasistemi.github.io/graph-browser/vocab/edges#filters%20by%20view> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-views> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/40> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The depth slider (1/2/3/All buttons) lets users control how much of the graph they see around the selected node." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "exposes via controls" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#exposes%20via%20controls> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/depth-filtering> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 40 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> <https://lambdasistemi.github.io/graph-browser/vocab/edges#exposes%20via%20controls> <https://github.com/lambdasistemi/graph-browser/rdf/node/depth-filtering> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/39> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Depth-based filtering is the combination of neighborhood BFS and subgraph extraction in Graph.Operations." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "implemented by" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#implemented%20by> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-operations> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/depth-filtering> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 39 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/depth-filtering> <https://lambdasistemi.github.io/graph-browser/vocab/edges#implemented%20by> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-operations> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/38> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "PromptBuilder works for any graph-browser dataset because it reads config.sourceUrl and schema URLs — no hardcoded domain knowledge." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "leverages" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#leverages> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/data-driven> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/prompt-builder> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 38 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/prompt-builder> <https://lambdasistemi.github.io/graph-browser/vocab/edges#leverages> <https://github.com/lambdasistemi/graph-browser/rdf/node/data-driven> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/37> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The assembled LLM prompt includes URLs to the graph and config schemas so the LLM knows the exact data format when proposing changes." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "links to" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#links%20to> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-graph> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/prompt-builder> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 37 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/prompt-builder> <https://lambdasistemi.github.io/graph-browser/vocab/edges#links%20to> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-graph> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/36> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The reusable CI workflow uses ajv-cli to validate each tutorial file against the tutorial schema." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "validates against" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#validates%20against> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-tutorial> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/validate-workflow> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 36 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/validate-workflow> <https://lambdasistemi.github.io/graph-browser/vocab/edges#validates%20against> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-tutorial> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/35> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The reusable CI workflow uses ajv-cli to validate config.json against the config schema." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "validates against" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#validates%20against> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-config> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/validate-workflow> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 35 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/validate-workflow> <https://lambdasistemi.github.io/graph-browser/vocab/edges#validates%20against> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-config> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/34> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The reusable CI workflow uses ajv-cli to validate graph.json against the graph schema." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "validates against" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#validates%20against> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-graph> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/validate-workflow> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 34 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/validate-workflow> <https://lambdasistemi.github.io/graph-browser/vocab/edges#validates%20against> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-graph> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/33> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The tutorial schema formally specifies the JSON format that the Tutorial module decodes." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "documents" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#documents> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/tutorial> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-tutorial> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 33 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/schema-tutorial> <https://lambdasistemi.github.io/graph-browser/vocab/edges#documents> <https://github.com/lambdasistemi/graph-browser/rdf/node/tutorial> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/32> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The config schema formally specifies the JSON format that Graph.Decode parses into the Config type." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "documents" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#documents> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-config> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 32 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/schema-config> <https://lambdasistemi.github.io/graph-browser/vocab/edges#documents> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/31> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The graph schema formally specifies the JSON format that Graph.Decode parses into Graph.Types records." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "documents" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#documents> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-graph> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 31 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/schema-graph> <https://lambdasistemi.github.io/graph-browser/vocab/edges#documents> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/30> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Because the viewer is fully data-driven, the lib output works for any topic — just provide config.json and graph.json. No code changes needed." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "enables" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#enables> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/data-driven> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/lib-output> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 30 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/lib-output> <https://lambdasistemi.github.io/graph-browser/vocab/edges#enables> <https://github.com/lambdasistemi/graph-browser/rdf/node/data-driven> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/29> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "nix build .#lib produces the embeddable viewer that downstream repos consume via flake input." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "produces" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#produces> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/lib-output> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/nix-flake> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 29 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/nix-flake> <https://lambdasistemi.github.io/graph-browser/vocab/edges#produces> <https://github.com/lambdasistemi/graph-browser/rdf/node/lib-output> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/28> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "nix build .#app produces the full hosted application with repo manager, deployed to GitHub Pages." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "produces" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#produces> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/app-output> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/nix-flake> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 28 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/nix-flake> <https://lambdasistemi.github.io/graph-browser/vocab/edges#produces> <https://github.com/lambdasistemi/graph-browser/rdf/node/app-output> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/27> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The Nix build calls esbuild to bundle npm dependencies (cytoscape + fcose) into a single minified IIFE file before concatenating with the spago output." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "invokes" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#invokes> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/esbuild> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/nix-flake> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 27 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/nix-flake> <https://lambdasistemi.github.io/graph-browser/vocab/edges#invokes> <https://github.com/lambdasistemi/graph-browser/rdf/node/esbuild> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/26> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The Nix build calls spago bundle --offline to compile PureScript and produce the bundled JavaScript output." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "invokes" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#invokes> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/spago> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/nix-flake> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 26 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/nix-flake> <https://lambdasistemi.github.io/graph-browser/vocab/edges#invokes> <https://github.com/lambdasistemi/graph-browser/rdf/node/spago> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/25> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Main is the root Halogen component with child slots for RepoManager and Viewer." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "built with" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#built%20with> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/halogen> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/main> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 25 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/main> <https://lambdasistemi.github.io/graph-browser/vocab/edges#built%20with> <https://github.com/lambdasistemi/graph-browser/rdf/node/halogen> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/24> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Viewer is a Halogen component: pure render function, typed actions, state monad, Aff for async. The entire UI is Halogen HTML combinators." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "built with" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#built%20with> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/halogen> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 24 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> <https://lambdasistemi.github.io/graph-browser/vocab/edges#built%20with> <https://github.com/lambdasistemi/graph-browser/rdf/node/halogen> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/23> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "RepoDiscovery decrypts stored tokens to include in fetch headers when accessing private repo data." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "decrypts tokens" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#decrypts%20tokens> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-crypto> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/repo-discovery> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 23 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/repo-discovery> <https://lambdasistemi.github.io/graph-browser/vocab/edges#decrypts%20tokens> <https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-crypto> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/22> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "When a user provides a GitHub token for private repos, RepoManager encrypts it via FFI.Crypto before storing in localStorage." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "encrypts tokens" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#encrypts%20tokens> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-crypto> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/repo-manager> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 22 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/repo-manager> <https://lambdasistemi.github.io/graph-browser/vocab/edges#encrypts%20tokens> <https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-crypto> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/21> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "RepoManager saves the list of added repos to localStorage so they survive page reloads." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "persists repo list" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#persists%20repo%20list> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/persist> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/repo-manager> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 21 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/repo-manager> <https://lambdasistemi.github.io/graph-browser/vocab/edges#persists%20repo%20list> <https://github.com/lambdasistemi/graph-browser/rdf/node/persist> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/20> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "FFI.Cytoscape is a thin PureScript/JS bridge to the Cytoscape.js library. All rendering, layout, and interaction events pass through this binding." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "wraps" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#wraps> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/cytoscape-js> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-cytoscape> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 20 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-cytoscape> <https://lambdasistemi.github.io/graph-browser/vocab/edges#wraps> <https://github.com/lambdasistemi/graph-browser/rdf/node/cytoscape-js> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/19> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Graph.Cytoscape maps Node and Edge records to Cytoscape.js element format for rendering." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "reads" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#reads> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-cytoscape> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 19 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-cytoscape> <https://lambdasistemi.github.io/graph-browser/vocab/edges#reads> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/18> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Graph.Search traverses the Graph's nodes map and edges array to find text matches." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "searches over" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#searches%20over> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-search> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 18 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-search> <https://lambdasistemi.github.io/graph-browser/vocab/edges#searches%20over> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/17> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Graph.Operations functions take a Graph and return subsets of it — neighborhood node sets and subgraph slices." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "operates on" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#operates%20on> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-operations> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 17 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-operations> <https://lambdasistemi.github.io/graph-browser/vocab/edges#operates%20on> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/16> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Graph.Build takes arrays of Node and Edge and produces a Graph record with indexed maps and adjacency sets." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "consumes and produces" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#consumes%20and%20produces> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-build> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 16 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-build> <https://lambdasistemi.github.io/graph-browser/vocab/edges#consumes%20and%20produces> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/15> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Graph.Decode parses JSON into the types defined in Graph.Types: Node, Edge, Config, Link, KindDef records." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "produces" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#produces> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-decode> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 15 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-decode> <https://lambdasistemi.github.io/graph-browser/vocab/edges#produces> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/14> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "After PromptBuilder assembles the prompt, Viewer calls FFI.Clipboard.copyToClipboard to write it to the system clipboard." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "copies to clipboard" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#copies%20to%20clipboard> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-clipboard> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 14 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> <https://lambdasistemi.github.io/graph-browser/vocab/edges#copies%20to%20clipboard> <https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-clipboard> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/13> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "When the user clicks Copy Prompt, Viewer calls PromptBuilder with the current element and config to produce a complete LLM-ready prompt." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "assembles prompts" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#assembles%20prompts> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/prompt-builder> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 13 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> <https://lambdasistemi.github.io/graph-browser/vocab/edges#assembles%20prompts> <https://github.com/lambdasistemi/graph-browser/rdf/node/prompt-builder> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/12> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "When the user starts a guided tour, Viewer fetches the tutorial JSON file and uses the Tutorial decoder to parse stops with narrative text and node references." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "loads tours" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#loads%20tours> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/tutorial> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 12 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> <https://lambdasistemi.github.io/graph-browser/vocab/edges#loads%20tours> <https://github.com/lambdasistemi/graph-browser/rdf/node/tutorial> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/11> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Viewer persists selected node, depth, and tutorial progress to localStorage on every render, and restores them on init for seamless session recovery." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "saves/restores state" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#saves%2Frestores%20state> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/persist> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 11 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> <https://lambdasistemi.github.io/graph-browser/vocab/edges#saves%2Frestores%20state> <https://github.com/lambdasistemi/graph-browser/rdf/node/persist> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/10> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Viewer calls FFI.Cytoscape to initialize the graph instance, set elements, mark the selected node, fit the viewport, and subscribe to interaction events." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "renders via" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#renders%20via> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-cytoscape> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 10 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> <https://lambdasistemi.github.io/graph-browser/vocab/edges#renders%20via> <https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-cytoscape> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/9> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "On every keystroke in the search box, Viewer calls Graph.Search to find matching nodes and edges, displaying results in a dropdown." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "searches" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#searches> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-search> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 9 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> <https://lambdasistemi.github.io/graph-browser/vocab/edges#searches> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-search> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/8> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Viewer converts the visible subgraph to Cytoscape.js Foreign elements via Graph.Cytoscape.toElements, then passes them to FFI.Cytoscape." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "converts for rendering" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#converts%20for%20rendering> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-cytoscape> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 8 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> <https://lambdasistemi.github.io/graph-browser/vocab/edges#converts%20for%20rendering> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-cytoscape> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/7> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "On every render, Viewer calls neighborhood() and subgraph() to compute the visible portion of the graph based on the selected node and depth." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "filters by depth" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#filters%20by%20depth> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-operations> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 7 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> <https://lambdasistemi.github.io/graph-browser/vocab/edges#filters%20by%20depth> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-operations> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/6> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "After decoding, Viewer calls Graph.Build to construct the indexed Graph with adjacency maps from raw node and edge arrays." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "constructs graph" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#constructs%20graph> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-build> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 6 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> <https://lambdasistemi.github.io/graph-browser/vocab/edges#constructs%20graph> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-build> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/5> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "On Initialize, Viewer fetches JSON files and uses Graph.Decode to parse them into typed Config and Graph records." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "fetches and decodes" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#fetches%20and%20decodes> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-decode> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 5 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> <https://lambdasistemi.github.io/graph-browser/vocab/edges#fetches%20and%20decodes> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-decode> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/4> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Lib mounts Viewer with hardcoded data URLs (data/config.json, data/graph.json, data/tutorials/index.json). No repo management." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "mounts" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#mounts> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/lib> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 4 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/lib> <https://lambdasistemi.github.io/graph-browser/vocab/edges#mounts> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/3> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Main reads ?repo= on startup for deep linking and writes it when the user switches repos, enabling shareable URLs." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "uses" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#uses> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-url> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/main> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 3 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/main> <https://lambdasistemi.github.io/graph-browser/vocab/edges#uses> <https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-url> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/2> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "When a repo is added or selected, Main calls RepoDiscovery to resolve the input string into DataUrls that Viewer can fetch." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "uses" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#uses> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/repo-discovery> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/main> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 2 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/main> <https://lambdasistemi.github.io/graph-browser/vocab/edges#uses> <https://github.com/lambdasistemi/graph-browser/rdf/node/repo-discovery> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/1> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Main creates a RepoManager slot on the left. RepoManager emits events (add/select/delete) that Main handles to update which repo Viewer displays." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "mounts" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#mounts> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/repo-manager> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/main> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 1 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/main> <https://lambdasistemi.github.io/graph-browser/vocab/edges#mounts> <https://github.com/lambdasistemi/graph-browser/rdf/node/repo-manager> .
+<https://github.com/lambdasistemi/graph-browser/rdf/edge/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Main creates a Viewer slot and passes DataUrls as input. Viewer handles all graph interaction independently." ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "mounts" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#predicate> <https://lambdasistemi.github.io/graph-browser/vocab/edges#mounts> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#to> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#from> <https://github.com/lambdasistemi/graph-browser/rdf/node/main> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeIndex> 0 ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#EdgeAssertion> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/main> <https://lambdasistemi.github.io/graph-browser/vocab/edges#mounts> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/viewer/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/Viewer.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The central Halogen component. Manages the graph canvas, controls (depth/fit/tours), search box, and detail sidebar. Holds the full application state: selected node, hovered elements, search results, tutorial progress, and prompt input. All user interaction flows through Viewer's action handlers." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#ui> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Viewer" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "viewer" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#component> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/validate-workflow> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/validate-workflow/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/validate-workflow/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/.github/workflows/validate-data.yml"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Workflow" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/validate-workflow> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Graph-browser's own CI validation step. Uses the local validate-action with schema-dir pointing at the repo's own schema/ directory. Validates the self-documenting architecture graph data, views, and tutorials on every PR." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#schemas> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "CI Validation" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "validate-workflow" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#schema> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/validate-action> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/validate-action/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/validate-action/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/tree/main/validate-action"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/validate-action> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "A reusable GitHub Actions composite action that validates any data/ directory. Fetches schemas from graph-browser, runs ajv validation on config, graph, tutorials, and view files. Checks referential integrity: edge endpoints exist, kind references valid, tutorial stops reference real nodes, view edge triples match the catalog, and view tour stops are reachable from view edges." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#schemas> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Validate Action" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "validate-action" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#schema> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/tutorial> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/tutorial/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/tutorial/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/Tutorial.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/tutorial> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Decoder and types for tutorial JSON files. A Tutorial has stops, each referencing a node ID with a depth and narrative text. Narratives support inline links: [text](node:id) navigates to a graph node, [text](https://url) opens external. Tutorials are loaded on-demand when the user starts a guided tour." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#data-loading> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Tutorial" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "tutorial" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#module> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/spago> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/spago/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/spago/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/purescript/spago"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Spago" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/spago> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "PureScript package manager and build tool. Resolves dependencies from the PureScript registry, compiles all modules, and bundles the output into a single JavaScript file. graph-browser depends on ~20 packages including halogen, argonaut, fetch, web-html, and ordered-collections." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#build> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Spago" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "spago" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#build> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/schema-view> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-view/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/schema-view/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://lambdasistemi.github.io/graph-browser/schema/view.schema.json"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Schema" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/schema-view> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "JSON Schema for view files (draft 2020-12). Defines name, description, edges array of [source, target, label] triples, and optional tours array. Tours use the same structure as tutorial.schema.json. Used by the validate-action to check view files and by the viewer to load per-view subgraphs." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#schemas> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "view.schema.json" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "schema-view" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#schema> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/schema-tutorial> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-tutorial/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/schema-tutorial/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://lambdasistemi.github.io/graph-browser/schema/tutorial.schema.json"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Schema" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/schema-tutorial> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "JSON Schema for guided tours. Defines id, title, description, and a stops array. Each stop references a node ID, depth (integer >= 1), title, and narrative text. Narratives support inline links: [text](node:id) for graph navigation, [text](https://url) for external." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#schemas> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "tutorial.schema.json" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "schema-tutorial" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#schema> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/schema-graph> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-graph/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/schema-graph/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://lambdasistemi.github.io/graph-browser/schema/graph.schema.json"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Schema" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/schema-graph> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "JSON Schema for graph data (draft 2020-12). Defines the nodes array (id, label, kind, group, description, links) and edges array (source, target, label, description). Node IDs must be kebab-case. Descriptions must be non-empty. Links require label and URI-format url. Used by downstream repos to validate their data and by the LLM prompt builder as context." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#schemas> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "graph.schema.json" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "schema-graph" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#schema> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/schema-config> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/schema-config/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/schema-config/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://lambdasistemi.github.io/graph-browser/schema/config.schema.json"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Schema" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/schema-config> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "JSON Schema for configuration. Defines title, description, sourceUrl (URI format), and kinds map. Each kind has a label, hex color (#rrggbb), and Cytoscape shape (enum of 10 shapes). The kinds map drives all visual differentiation — node colors, shapes, badges, and filter buttons come from here." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#schemas> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "config.schema.json" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "schema-config" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#schema> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/repo-manager> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/repo-manager/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/repo-manager/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/RepoManager.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/repo-manager> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Left sidebar component for the app variant. Provides a text input for adding repos (owner/repo, GitHub URLs, or Pages URLs), displays the saved repo list with active selection highlighting, and delete buttons. Emits RepoAdded, RepoSelected, and RepoDeleted outputs to Main." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#ui> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "RepoManager" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "repo-manager" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#component> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/repo-discovery> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/repo-discovery/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/repo-discovery/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/RepoDiscovery.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/repo-discovery> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Resolves user input into data URLs. Parses multiple input formats (owner/repo, GitHub URLs, Pages URLs), looks for a .graph-browser.json manifest on main then master branch, falls back to convention-based paths. Supports auth tokens for private repos. Returns a DataUrls record with config, graph, tutorial index, and base URL." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#data-loading> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "RepoDiscovery" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "repo-discovery" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#module> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/purescript> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/purescript/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/purescript/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://www.purescript.org/"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "PureScript" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/purescript> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Strongly-typed functional language that compiles to JavaScript. All application logic is PureScript — types catch errors at compile time, Effects track side effects, and algebraic data types model the domain precisely. JavaScript is only used in FFI wrappers for browser APIs that PureScript cannot access directly." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#external> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "PureScript" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "purescript" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#concept> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/prompt-builder> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/prompt-builder/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/prompt-builder/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/PromptBuilder.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/prompt-builder> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Pure functions for assembling LLM prompts. Given a Config, Graph, and selected Node or Edge, produces a markdown-formatted prompt with: element JSON, connected elements, JSON schema URLs, source repo URL, file paths, and PR instructions. The user types their intent; the tool provides all the context. No effects — clipboard is handled by FFI.Clipboard." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#features> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "PromptBuilder" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "prompt-builder" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#module> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/persist> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/persist/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/persist/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/Persist.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/persist> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "localStorage persistence layer. Saves and restores viewer state (selected node ID, depth, tutorial ID, tutorial step) keyed by graph title. Also persists the repo list globally. Uses Argonaut for JSON serialization. State is saved on every graph render, enabling seamless session recovery." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#data-loading> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Persist" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "persist" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#module> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/nix-flake> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/nix-flake/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/nix-flake/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/flake.nix"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/nix-flake> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The build orchestrator. Produces two outputs: app (Main module with repo manager) and lib (Lib module, standalone viewer). Build process: esbuild bundles npm deps (cytoscape + fcose) into deps.js, spago bundles PureScript into index.js, then they're concatenated. mkSpagoDerivation handles PureScript in the Nix sandbox, importNpmLock handles npm deps." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#build> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Nix Flake" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "nix-flake" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#build> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/main> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/main/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/main/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/Main.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/main> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The root component for the app variant. Manages the dual-pane layout: RepoManager slot on the left, Viewer slot on the right. Handles repo add/select/delete events, deep linking via ?repo= URL parameter, and auto-loading the first saved repo on startup." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#ui> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Main (App Entry)" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "main" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#component> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/lib-output> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/lib-output/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/lib-output/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser#projects-using-graph-browser"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Consumers" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/lib-output> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The embeddable viewer built from the Lib module. No repo management — reads data/ relative to the serving URL. Downstream repos consume it via Nix flake input, copy their data alongside the HTML, and deploy. Used by local-llm-graph, cardano-governance-graph, and any project that wants a self-hosted graph browser." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#outputs> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Lib Output" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "lib-output" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#output> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/lib> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/lib/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/lib/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/Lib.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/lib> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The entry point for the lib variant. A thin wrapper that mounts Viewer with hardcoded data URLs pointing to data/config.json, data/graph.json, and data/tutorials/index.json. No repo management — consumers provide their own data alongside the HTML. Used by downstream repos via Nix flake input." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#ui> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Lib (Standalone Entry)" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "lib" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#component> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/halogen> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/halogen/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/halogen/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/purescript-halogen/purescript-halogen"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Halogen" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/halogen> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "PureScript UI framework used for all components. Functional reactive architecture: components are pure render functions plus action handlers. State updates via H.modify_, async via Aff monad, parent-child communication via slots and outputs. Every UI element in graph-browser is a Halogen component or HTML helper." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#external> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Halogen" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "halogen" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#concept> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-views> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-views/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-views/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/Graph/Views.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-views> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "View types, decoding, and graph filtering. A View selects a subset of edges by (source, target, label) triples and includes per-view tours. filterByView computes the visible nodes from matched edges and builds a filtered Graph. Enables multiple topic-specific lenses over a shared node/edge catalog." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#graph-core> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Graph.Views" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "graph-views" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#module> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/Graph/Types.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Core type definitions for the entire application. Defines Node (id, label, kind, group, description, links), Edge (source, target, label, description), Graph (nodes Map, edges Array, forward/backward adjacency), Config (title, description, sourceUrl, kinds), and helper types. All other modules depend on these types." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#types> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Graph.Types" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "graph-types" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#type> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-search> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-search/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-search/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/Graph/Search.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-search> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Full-text search across all graph content. Matches against node labels, descriptions, kinds, and edge labels using case-insensitive substring matching. Returns SearchResult (NodeResult or EdgeResult) with up to 12 results shown in a dropdown. Live search on every keystroke." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#graph-core> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Graph.Search" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "graph-search" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#module> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-operations> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-operations/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-operations/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/Graph/Operations.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-operations> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Core graph algorithms. neighborhood() collects all nodes within N hops using BFS in both directions via the adjacency maps. subgraph() extracts the visible portion — only edges where both endpoints are in the neighborhood. These power the depth slider: depth 1 shows immediate neighbors, depth 99 shows everything." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#graph-core> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Graph.Operations" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "graph-operations" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#module> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-decode> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-decode/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-decode/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/Graph/Decode.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-decode> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "JSON decoders for graph.json and config.json. Uses Argonaut decode combinators to parse node arrays, edge arrays, kind definitions, and links. Handles optional fields (links array defaults to empty). The bridge between raw JSON responses and typed PureScript records." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#data-loading> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Graph.Decode" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "graph-decode" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#module> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-cytoscape> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-cytoscape/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-cytoscape/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/Graph/Cytoscape.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-cytoscape> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Converts the internal Graph representation to Cytoscape.js Foreign elements. Maps nodes to {data: {id, label, kind}} and edges to {data: {source, target, label}} arrays. The output format is what FFI.Cytoscape expects for rendering. Also identifies the most-connected node for initial selection." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#graph-core> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Graph.Cytoscape" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "graph-cytoscape" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#module> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-build> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-build/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-build/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/Graph/Build.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/graph-build> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Constructs the indexed Graph from raw decoded data. Takes arrays of nodes and edges, builds a Map of nodes by ID and forward/backward adjacency maps (Map NodeId (Set NodeId)) for efficient neighborhood traversal. The adjacency maps enable O(1) lookup of all connections from any node." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#graph-core> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Graph.Build" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "graph-build" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#module> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-url> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-url/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-url/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/FFI/Url.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-url> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "URL query parameter management. Gets and sets ?repo= and ?view= parameters using URLSearchParams and history.replaceState (no page reload). Enables deep linking: share a URL that auto-loads a specific repo's graph, optionally filtered to a specific view." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#ffi> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "FFI.Url" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "ffi-url" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#ffi> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-resize> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-resize/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-resize/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/FFI/Resize.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-resize> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Makes the repo manager panel resizable by dragging its right edge. Clamps width between 200px and 600px. Uses pointer events (pointerdown/pointermove/pointerup) for cross-device compatibility." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#ffi> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "FFI.Resize" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "ffi-resize" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#ffi> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-cytoscape> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-cytoscape/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-cytoscape/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/FFI/Cytoscape.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-cytoscape> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "JavaScript FFI wrapper for Cytoscape.js. Initializes the graph instance with kind-based styling (colors, shapes from config), registers the fCoSE layout plugin, handles element updates with adaptive layout parameters (edge length, repulsion, node separation scale with graph size). Provides event callbacks for node tap, node hover, and edge hover." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#ffi> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "FFI.Cytoscape" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "ffi-cytoscape" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#ffi> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-crypto> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-crypto/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-crypto/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/FFI/Crypto.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-crypto> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "AES-256-GCM encryption via the Web Crypto API. Generates a random key on first use, stores it in localStorage. Encrypts GitHub tokens before storage and decrypts on load. IV is prepended to ciphertext, both base64-encoded. Used by the repo manager for private repo access tokens." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#ffi> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "FFI.Crypto" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "ffi-crypto" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#ffi> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-clipboard> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-clipboard/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-clipboard/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/blob/main/src/FFI/Clipboard.purs"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/ffi-clipboard> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Thin wrapper around navigator.clipboard.writeText. Follows the Effect → Promise → Aff pattern used across all FFI modules. Requires a secure context (HTTPS or localhost). Used by the prompt builder's Copy button." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#ffi> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "FFI.Clipboard" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "ffi-clipboard" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#ffi> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/esbuild> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/esbuild/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/esbuild/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://esbuild.github.io/"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "esbuild" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/esbuild> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "JavaScript bundler used for npm dependencies only. Bundles bootstrap.js (which imports cytoscape and cytoscape-fcose) into a single minified IIFE file (~555KB). Runs before spago bundle; the two outputs are concatenated into the final index.js. Chosen for speed — sub-100ms bundling." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#build> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "esbuild" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "esbuild" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#build> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/depth-filtering> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The key UX innovation. Instead of showing the entire graph (overwhelming), the viewer shows a neighborhood of configurable depth around the selected node. Depth 1 shows immediate neighbors (~5-10 nodes), depth 2 shows two hops (~15-30), depth 99 shows everything. The BFS algorithm uses forward and backward adjacency maps for O(hop-count) traversal." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#philosophy> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Depth-Based Filtering" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "depth-filtering" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#concept> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/data-driven> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Core principle: the PureScript/JS code contains zero domain-specific knowledge. Every visual element — node kinds, colors, shapes, titles, descriptions — comes from JSON data files. A new knowledge graph on any topic works by providing config.json + graph.json without touching code. This enables the universal viewer and the reusable CI workflow." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#philosophy> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Data-Driven Design" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "data-driven" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#concept> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/cytoscape-js> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/cytoscape-js/link/1> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/cytoscape-js/link/1> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/iVis-at-Bilkent/cytoscape.js-fcose"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "fCoSE Layout" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/cytoscape-js> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/cytoscape-js/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/cytoscape-js/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://js.cytoscape.org/"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Cytoscape.js" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/cytoscape-js> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "Graph visualization library that powers all rendering. Handles node/edge drawing, layout, pan/zoom, selection, and events. Graph-browser uses the fCoSE (compound spring embedder) layout algorithm with adaptive parameters that scale with graph size. Styles are programmatically set from config.json kind definitions." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#external> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Cytoscape.js" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "cytoscape-js" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#concept> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/build-action> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/build-action/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/build-action/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://github.com/lambdasistemi/graph-browser/tree/main/build-action"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Source" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/build-action> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "A reusable GitHub Actions composite action that assembles a deployable graph-browser site from a data/ directory with zero build tools. Downloads the pre-built lib variant from GitHub Pages, copies data alongside it, and generates a view index if views are present. Data repos need only JSON files and this action." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#schemas> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Build Action" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "build-action" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#schema> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/app-output> <https://lambdasistemi.github.io/graph-browser/vocab/terms#externalLink> <https://github.com/lambdasistemi/graph-browser/rdf/node/app-output/link/0> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/app-output/link/0> <https://lambdasistemi.github.io/graph-browser/vocab/terms#url> "https://lambdasistemi.github.io/graph-browser/"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Live Demo" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#ExternalLink> .
+<https://github.com/lambdasistemi/graph-browser/rdf/node/app-output> <https://lambdasistemi.github.io/graph-browser/vocab/terms#description> "The full hosted application built from the Main module. Includes repo manager panel, URL deep linking (?repo=owner/repo), multi-repo state persistence, and token encryption. Deployed to lambdasistemi.github.io/graph-browser/. Users browse any public or private repo's graph data without cloning." ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#group> <https://lambdasistemi.github.io/graph-browser/vocab/groups#outputs> ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "App Output" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeId> "app-output" ;
+	<http://purl.org/dc/terms/isPartOf> <https://github.com/lambdasistemi/graph-browser/rdf> ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/kinds#output> , <https://lambdasistemi.github.io/graph-browser/vocab/terms#Node> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#wraps> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "wraps" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "wraps" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#validates%20against> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "validates against" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "validates against" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#uses> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "uses" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "uses" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#searches%20over> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "searches over" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "searches over" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#searches> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "searches" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "searches" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#saves%2Frestores%20state> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "saves/restores state" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "saves/restores state" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#renders%20via> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "renders via" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "renders via" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#reads> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "reads" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "reads" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#produces> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "produces" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "produces" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#persists%20repo%20list> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "persists repo list" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "persists repo list" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#operates%20on> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "operates on" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "operates on" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#mounts> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "mounts" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "mounts" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#loads%20tours> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "loads tours" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "loads tours" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#links%20to> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "links to" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "links to" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#leverages> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "leverages" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "leverages" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#invokes> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "invokes" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "invokes" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#implemented%20by> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "implemented by" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "implemented by" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#filters%20by%20view> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "filters by view" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "filters by view" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#filters%20by%20depth> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "filters by depth" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "filters by depth" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#fetches%20and%20decodes> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "fetches and decodes" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "fetches and decodes" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#exposes%20via%20controls> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "exposes via controls" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "exposes via controls" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#encrypts%20tokens> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "encrypts tokens" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "encrypts tokens" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#enables> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "enables" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "enables" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#downloads> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "downloads" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "downloads" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#documents> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "documents" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "documents" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#decrypts%20tokens> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "decrypts tokens" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "decrypts tokens" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#decodes%20tours> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "decodes tours" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "decodes tours" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#copies%20to%20clipboard> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "copies to clipboard" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "copies to clipboard" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#converts%20for%20rendering> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "converts for rendering" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "converts for rendering" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#consumes%20and%20produces> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "consumes and produces" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "consumes and produces" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#constructs%20graph> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "constructs graph" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "constructs graph" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#built%20with> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "built with" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "built with" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/edges#assembles%20prompts> <https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeLabel> "assembles prompts" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "assembles prompts" ;
+	a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+<https://lambdasistemi.github.io/graph-browser/vocab/groups#ui> <https://lambdasistemi.github.io/graph-browser/vocab/terms#groupId> "ui" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "ui" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#Group> .
+<https://lambdasistemi.github.io/graph-browser/vocab/groups#types> <https://lambdasistemi.github.io/graph-browser/vocab/terms#groupId> "types" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "types" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#Group> .
+<https://lambdasistemi.github.io/graph-browser/vocab/groups#schemas> <https://lambdasistemi.github.io/graph-browser/vocab/terms#groupId> "schemas" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "schemas" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#Group> .
+<https://lambdasistemi.github.io/graph-browser/vocab/groups#philosophy> <https://lambdasistemi.github.io/graph-browser/vocab/terms#groupId> "philosophy" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "philosophy" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#Group> .
+<https://lambdasistemi.github.io/graph-browser/vocab/groups#outputs> <https://lambdasistemi.github.io/graph-browser/vocab/terms#groupId> "outputs" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "outputs" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#Group> .
+<https://lambdasistemi.github.io/graph-browser/vocab/groups#graph-core> <https://lambdasistemi.github.io/graph-browser/vocab/terms#groupId> "graph-core" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "graph-core" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#Group> .
+<https://lambdasistemi.github.io/graph-browser/vocab/groups#ffi> <https://lambdasistemi.github.io/graph-browser/vocab/terms#groupId> "ffi" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "ffi" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#Group> .
+<https://lambdasistemi.github.io/graph-browser/vocab/groups#features> <https://lambdasistemi.github.io/graph-browser/vocab/terms#groupId> "features" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "features" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#Group> .
+<https://lambdasistemi.github.io/graph-browser/vocab/groups#external> <https://lambdasistemi.github.io/graph-browser/vocab/terms#groupId> "external" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "external" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#Group> .
+<https://lambdasistemi.github.io/graph-browser/vocab/groups#data-loading> <https://lambdasistemi.github.io/graph-browser/vocab/terms#groupId> "data-loading" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "data-loading" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#Group> .
+<https://lambdasistemi.github.io/graph-browser/vocab/groups#build> <https://lambdasistemi.github.io/graph-browser/vocab/terms#groupId> "build" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "build" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#Group> .
+<https://lambdasistemi.github.io/graph-browser/vocab/kinds#type> <https://lambdasistemi.github.io/graph-browser/vocab/terms#shape> "ellipse" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#color> "#79c0ff" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#kindId> "type" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Data Type" ;
+	a <http://www.w3.org/2000/01/rdf-schema#Class> .
+<https://lambdasistemi.github.io/graph-browser/vocab/kinds#schema> <https://lambdasistemi.github.io/graph-browser/vocab/terms#shape> "round-pentagon" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#color> "#e3b341" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#kindId> "schema" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "JSON Schema" ;
+	a <http://www.w3.org/2000/01/rdf-schema#Class> .
+<https://lambdasistemi.github.io/graph-browser/vocab/kinds#output> <https://lambdasistemi.github.io/graph-browser/vocab/terms#shape> "rectangle" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#color> "#f0883e" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#kindId> "output" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Build Output" ;
+	a <http://www.w3.org/2000/01/rdf-schema#Class> .
+<https://lambdasistemi.github.io/graph-browser/vocab/kinds#module> <https://lambdasistemi.github.io/graph-browser/vocab/terms#shape> "round-rectangle" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#color> "#58a6ff" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#kindId> "module" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Module" ;
+	a <http://www.w3.org/2000/01/rdf-schema#Class> .
+<https://lambdasistemi.github.io/graph-browser/vocab/kinds#ffi> <https://lambdasistemi.github.io/graph-browser/vocab/terms#shape> "diamond" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#color> "#d2a8ff" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#kindId> "ffi" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "FFI Binding" ;
+	a <http://www.w3.org/2000/01/rdf-schema#Class> .
+<https://lambdasistemi.github.io/graph-browser/vocab/kinds#concept> <https://lambdasistemi.github.io/graph-browser/vocab/terms#shape> "star" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#color> "#56d364" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#kindId> "concept" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Concept" ;
+	a <http://www.w3.org/2000/01/rdf-schema#Class> .
+<https://lambdasistemi.github.io/graph-browser/vocab/kinds#component> <https://lambdasistemi.github.io/graph-browser/vocab/terms#shape> "round-octagon" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#color> "#f778ba" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#kindId> "component" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "UI Component" ;
+	a <http://www.w3.org/2000/01/rdf-schema#Class> .
+<https://lambdasistemi.github.io/graph-browser/vocab/kinds#build> <https://lambdasistemi.github.io/graph-browser/vocab/terms#shape> "barrel" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#color> "#3fb950" ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#kindId> "build" ;
+	<http://www.w3.org/2000/01/rdf-schema#label> "Build Tool" ;
+	a <http://www.w3.org/2000/01/rdf-schema#Class> .
+<https://github.com/lambdasistemi/graph-browser/rdf> <https://lambdasistemi.github.io/graph-browser/vocab/terms#sourceRepository> "https://github.com/lambdasistemi/graph-browser"^^<http://www.w3.org/2001/XMLSchema#anyURI> ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#edgeCount> 52 ;
+	<https://lambdasistemi.github.io/graph-browser/vocab/terms#nodeCount> 37 ;
+	<http://purl.org/dc/terms/description> "The architecture of graph-browser itself — modules, data flow, build system, and design philosophy." ;
+	<http://purl.org/dc/terms/title> "Graph Browser Architecture" ;
+	a <https://lambdasistemi.github.io/graph-browser/vocab/terms#Dataset> .
