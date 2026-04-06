@@ -43,7 +43,7 @@ runs:
 
     - name: Install validator
       shell: bash
-      run: npm install ajv-cli ajv-formats
+      run: npm install ajv-cli ajv-formats oxigraph
 
     - name: Install SHACL validator
       shell: bash
@@ -58,7 +58,9 @@ runs:
       run: |
         DATA="${{ inputs.data-dir }}"
         npx ajv validate -s "$SCHEMA_DIR/config.schema.json" -d "$DATA/config.json" -c ajv-formats --spec=draft2020
-        npx ajv validate -s "$SCHEMA_DIR/graph.schema.json" -d "$DATA/graph.json" -c ajv-formats --spec=draft2020
+        if [ -f "$DATA/graph.json" ]; then
+          npx ajv validate -s "$SCHEMA_DIR/graph.schema.json" -d "$DATA/graph.json" -c ajv-formats --spec=draft2020
+        fi
         if [ -f "$DATA/tutorials/index.json" ]; then
           npx ajv validate -s "$SCHEMA_DIR/tutorial-index.schema.json" -d "$DATA/tutorials/index.json" -c ajv-formats --spec=draft2020
           for f in "$DATA"/tutorials/*.json; do
@@ -81,61 +83,85 @@ runs:
         DATA="${{ inputs.data-dir }}"
         node -e "
           const fs=require('fs');
-          const d=require('./$DATA/graph.json');
           const c=require('./$DATA/config.json');
-          const ids=new Set(d.nodes.map(n=>n.id));
-          const kinds=Object.keys(c.kinds);
           let ok=true;
-          d.nodes.forEach(n=>{
-            if(!kinds.includes(n.kind)){console.error('Unknown kind: '+n.kind+' on '+n.id);ok=false}
-          });
-          d.edges.forEach((e,i)=>{
-            if(!ids.has(e.source)){console.error('Bad source e'+i+': '+e.source);ok=false}
-            if(!ids.has(e.target)){console.error('Bad target e'+i+': '+e.target);ok=false}
-          });
-          const tutDir='./$DATA/tutorials';
-          if(fs.existsSync(tutDir)){
-            fs.readdirSync(tutDir).filter(f=>f.endsWith('.json')&&f!=='index.json').forEach(f=>{
-              const tut=JSON.parse(fs.readFileSync(tutDir+'/'+f,'utf8'));
-              (tut.stops||[]).forEach((s,i)=>{
-                if(!ids.has(s.node)){console.error(f+' stop '+i+': unknown node '+s.node);ok=false}
-              });
-            });
-          }
-          // Build edge lookup for view validation
-          const edgeSet=new Set(d.edges.map(e=>e.source+'|'+e.target+'|'+e.label));
+          const graphPath='./$DATA/graph.json';
           const viewDir='./$DATA/views';
-          if(fs.existsSync(viewDir)){
-            fs.readdirSync(viewDir).filter(f=>f.endsWith('.json')).forEach(f=>{
-              const view=JSON.parse(fs.readFileSync(viewDir+'/'+f,'utf8'));
-              const viewNodes=new Set();
-              (view.edges||[]).forEach((triple,i)=>{
-                const key=triple[0]+'|'+triple[1]+'|'+triple[2];
-                if(!edgeSet.has(key)){
-                  console.error('views/'+f+' edge '+i+': ['+triple.join(', ')+'] not found in graph.json');
-                  ok=false;
-                } else {
-                  viewNodes.add(triple[0]);
-                  viewNodes.add(triple[1]);
-                }
-              });
-              (view.tours||[]).forEach(tour=>{
-                (tour.stops||[]).forEach((s,i)=>{
-                  if(!viewNodes.has(s.node)){
-                    console.error('views/'+f+' tour \"'+tour.title+'\" stop '+i+': node \"'+s.node+'\" not reachable from view edges');
-                    ok=false;
-                  }
+          if(fs.existsSync(graphPath)){
+            const d=require(graphPath);
+            const ids=new Set(d.nodes.map(n=>n.id));
+            const kinds=Object.keys(c.kinds);
+            d.nodes.forEach(n=>{
+              if(!kinds.includes(n.kind)){console.error('Unknown kind: '+n.kind+' on '+n.id);ok=false}
+            });
+            d.edges.forEach((e,i)=>{
+              if(!ids.has(e.source)){console.error('Bad source e'+i+': '+e.source);ok=false}
+              if(!ids.has(e.target)){console.error('Bad target e'+i+': '+e.target);ok=false}
+            });
+            const tutDir='./$DATA/tutorials';
+            if(fs.existsSync(tutDir)){
+              fs.readdirSync(tutDir).filter(f=>f.endsWith('.json')&&f!=='index.json').forEach(f=>{
+                const tut=JSON.parse(fs.readFileSync(tutDir+'/'+f,'utf8'));
+                (tut.stops||[]).forEach((s,i)=>{
+                  if(!ids.has(s.node)){console.error(f+' stop '+i+': unknown node '+s.node);ok=false}
                 });
               });
-            });
+            }
+            const edgeSet=new Set(d.edges.map(e=>e.source+'|'+e.target+'|'+e.label));
+            if(fs.existsSync(viewDir)){
+              fs.readdirSync(viewDir).filter(f=>f.endsWith('.json')).forEach(f=>{
+                const view=JSON.parse(fs.readFileSync(viewDir+'/'+f,'utf8'));
+                const viewNodes=new Set();
+                (view.edges||[]).forEach((triple,i)=>{
+                  const key=triple[0]+'|'+triple[1]+'|'+triple[2];
+                  if(!edgeSet.has(key)){
+                    console.error('views/'+f+' edge '+i+': ['+triple.join(', ')+'] not found in graph.json');
+                    ok=false;
+                  } else {
+                    viewNodes.add(triple[0]);
+                    viewNodes.add(triple[1]);
+                  }
+                });
+                (view.tours||[]).forEach(tour=>{
+                  (tour.stops||[]).forEach((s,i)=>{
+                    if(!viewNodes.has(s.node)){
+                      console.error('views/'+f+' tour \"'+tour.title+'\" stop '+i+': node \"'+s.node+'\" not reachable from view edges');
+                      ok=false;
+                    }
+                  });
+                });
+              });
+            }
+            if(ok){
+              let msg=d.nodes.length+' nodes, '+d.edges.length+' edges';
+              const viewFiles=fs.existsSync(viewDir)?fs.readdirSync(viewDir).filter(f=>f.endsWith('.json')):[];
+              if(viewFiles.length>0) msg+=', '+viewFiles.length+' view(s)';
+              console.log(msg+' — validation passed');
+            }
+          } else if (c.graphSource) {
+            const oxigraph=require('oxigraph');
+            const sourcePath='./'+c.graphSource.path;
+            if(!fs.existsSync(sourcePath)){
+              console.error('Configured RDF graph source not found: '+sourcePath);
+              ok=false;
+            } else {
+              try {
+                const store=new oxigraph.Store();
+                store.load(fs.readFileSync(sourcePath,'utf8'), {
+                  format: c.graphSource.format,
+                  base_iri: 'https://graph-browser.invalid/'
+                });
+                console.log('RDF graph source parsed: '+c.graphSource.path);
+              } catch (err) {
+                console.error('Failed to parse RDF graph source '+c.graphSource.path+': '+err);
+                ok=false;
+              }
+            }
+          } else {
+            console.error('Missing data/graph.json and no config.graphSource configured');
+            ok=false;
           }
-          if(ok){
-            let msg=d.nodes.length+' nodes, '+d.edges.length+' edges';
-            const viewFiles=fs.existsSync(viewDir)?fs.readdirSync(viewDir).filter(f=>f.endsWith('.json')):[];
-            if(viewFiles.length>0) msg+=', '+viewFiles.length+' view(s)';
-            console.log(msg+' — validation passed');
-          }
-          else process.exit(1);
+          if(!ok) process.exit(1);
         "
 
     - name: Validate RDF contracts
