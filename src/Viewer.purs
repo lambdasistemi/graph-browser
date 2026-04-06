@@ -8,7 +8,6 @@ import Data.Either (Either(..))
 import Data.Foldable (foldl, for_)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
-import Data.Set as Set
 import Data.String as String
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
@@ -29,6 +28,7 @@ import Foreign (Foreign, unsafeToForeign)
 import Foreign.Object as FO
 import Graph.Search (SearchResult(..), search)
 import Persist as Persist
+import Rdf.Import as Rdf.Import
 import Tutorial (Tutorial, TutorialStop, decodeTutorial)
 import Graph.Decode (decodeConfig, decodeGraph)
 import Graph.Types
@@ -50,6 +50,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
 import PromptBuilder as PB
+import FFI.Oxigraph as Oxigraph
 
 -- | Data URLs that the viewer fetches on init.
 type DataUrls =
@@ -802,7 +803,10 @@ handleAction = case _ of
         HS.notify edgeSub.listener
           (EdgeHovered src tgt lbl desc)
     void $ H.subscribe edgeSub.emitter
-    result <- liftAff (loadGraphData urls.graphUrl)
+    let
+      graphLocation = graphSourceLocation urls state.config
+    result <- liftAff
+      (loadGraphData graphLocation.format graphLocation.url)
     case result of
       Left err ->
         H.modify_ _ { error = Just err }
@@ -1276,13 +1280,22 @@ loadConfig url = do
     Left err -> Left err
     Right json -> decodeConfig json
 
-loadGraphData :: String -> Aff (Either String Graph)
-loadGraphData url = do
+loadGraphData :: String -> String -> Aff (Either String Graph)
+loadGraphData format url = do
   resp <- fetch url { method: GET }
   body <- resp.text
-  pure case jsonParser body of
-    Left err -> Left err
-    Right json -> decodeGraph json
+  if isJsonGraphFormat format url then
+    pure case jsonParser body of
+      Left err -> Left err
+      Right json -> decodeGraph json
+  else do
+    parsed <- try do
+      quads <- liftEffect
+        (Oxigraph.parseQuads format url body)
+      pure (Rdf.Import.importGraph quads)
+    pure case parsed of
+      Left err -> Left (show err)
+      Right result -> result
 
 persistState
   :: forall o
@@ -1335,6 +1348,27 @@ resolveUrl :: String -> String -> String
 resolveUrl base path =
   if String.take 4 path == "http" then path
   else base <> path
+
+graphSourceLocation
+  :: forall r
+   . { baseUrl :: String, graphUrl :: String | r }
+  -> Config
+  -> { format :: String, url :: String }
+graphSourceLocation urls cfg = case cfg.graphSource of
+  Just source ->
+    { format: source.format
+    , url: resolveUrl urls.baseUrl source.path
+    }
+  Nothing ->
+    { format: "application/json"
+    , url: urls.graphUrl
+    }
+
+isJsonGraphFormat :: String -> String -> Boolean
+isJsonGraphFormat format url =
+  format == "application/json"
+    || format == "json"
+    || String.drop (String.length url - 5) url == ".json"
 
 cls
   :: forall r i
