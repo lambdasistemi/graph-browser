@@ -1,13 +1,20 @@
 module FFI.Oxigraph
   ( ImportedRdfObject
   , ImportedRdfQuad
+  , OxigraphStore
   , RdfObject
   , RdfQuad
+  , SparqlBinding
+  , createStore
+  , loadTurtle
   , parseQuads
+  , querySparql
   , serializeQuads
   ) where
 
+import Prelude (Unit)
 import Effect (Effect)
+import Foreign (Foreign)
 
 type ImportedRdfObject =
   { termType :: String
@@ -46,3 +53,17 @@ foreign import serializeQuads
        { turtle :: String
        , nquads :: String
        }
+
+-- | Opaque handle to an in-memory Oxigraph triple store.
+foreign import data OxigraphStore :: Type
+
+-- | A row from a SPARQL SELECT result: variable name → string value.
+type SparqlBinding = Foreign
+
+foreign import createStore :: Effect OxigraphStore
+
+foreign import loadTurtle
+  :: OxigraphStore -> String -> String -> Effect Unit
+
+foreign import querySparql
+  :: OxigraphStore -> String -> Effect (Array SparqlBinding)
