@@ -1,4 +1,9 @@
-const oxigraph = window.oxigraph;
+// Browser: oxigraph is initialized by bootstrap.js and set on window.
+// Node.js: import directly from the npm package.
+const oxigraph =
+  typeof window !== "undefined" && window.oxigraph
+    ? window.oxigraph
+    : await import("oxigraph");
 
 const namedNode = (value) => oxigraph.namedNode(value);
 
@@ -33,11 +38,8 @@ export const serializeQuads = (quads) => () => {
   };
 };
 
-export const parseQuads = (format) => (baseIri) => (input) => () => {
-  console.log("[Oxigraph FFI] parseQuads called, format:", format, "input length:", input.length);
-  const quads = oxigraph.parse(input, { format, base_iri: baseIri });
-  console.log("[Oxigraph FFI] parsed", quads.length, "quads");
-  return quads.map((quad) => ({
+export const parseQuads = (format) => (baseIri) => (input) => () =>
+  oxigraph.parse(input, { format, base_iri: baseIri }).map((quad) => ({
     subject: quad.subject.value,
     predicate: quad.predicate.value,
     object: {
@@ -53,4 +55,3 @@ export const parseQuads = (format) => (baseIri) => (input) => () => {
           : "",
     },
   }));
-};
