@@ -51,6 +51,7 @@ import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
 import PromptBuilder as PB
 import FFI.Oxigraph as Oxigraph
+import FFI.Uri (absoluteUrl)
 
 -- | Data URLs that the viewer fetches on init.
 type DataUrls =
@@ -1289,9 +1290,12 @@ loadGraphData format url = do
       Left err -> Left err
       Right json -> decodeGraph json
   else do
+    -- Oxigraph requires an absolute base IRI. The fetch URL may be
+    -- relative, so resolve it against the page origin.
+    absUrl <- liftEffect (absoluteUrl url)
     parsed <- try do
       quads <- liftEffect
-        (Oxigraph.parseQuads format url body)
+        (Oxigraph.parseQuads format absUrl body)
       pure (Rdf.Import.importGraph quads)
     pure case parsed of
       Left err -> Left (show err)

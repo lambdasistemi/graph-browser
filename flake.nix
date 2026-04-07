@@ -57,12 +57,13 @@
               ];
               buildPhase = ''
                 ln -s ${nodeModules}/node_modules node_modules
-                # 1. Bundle npm deps (cytoscape → global)
+                # 1. Bundle npm deps (cytoscape + oxigraph → global)
                 esbuild src/bootstrap.js \
                   --bundle \
                   --outfile=dist/deps.js \
                   --format=iife \
                   --platform=browser \
+                  --loader:.wasm=binary \
                   --minify
                 # 2. Bundle PureScript (specified module)
                 spago bundle --offline --module ${module}

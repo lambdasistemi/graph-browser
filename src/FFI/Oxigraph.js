@@ -1,4 +1,4 @@
-import * as oxigraph from "oxigraph";
+const oxigraph = window.oxigraph;
 
 const namedNode = (value) => oxigraph.namedNode(value);
 
@@ -33,8 +33,11 @@ export const serializeQuads = (quads) => () => {
   };
 };
 
-export const parseQuads = (format) => (baseIri) => (input) => () =>
-  oxigraph.parse(input, { format, base_iri: baseIri }).map((quad) => ({
+export const parseQuads = (format) => (baseIri) => (input) => () => {
+  console.log("[Oxigraph FFI] parseQuads called, format:", format, "input length:", input.length);
+  const quads = oxigraph.parse(input, { format, base_iri: baseIri });
+  console.log("[Oxigraph FFI] parsed", quads.length, "quads");
+  return quads.map((quad) => ({
     subject: quad.subject.value,
     predicate: quad.predicate.value,
     object: {
@@ -50,3 +53,4 @@ export const parseQuads = (format) => (baseIri) => (input) => () =>
           : "",
     },
   }));
+};
