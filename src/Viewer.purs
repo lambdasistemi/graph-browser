@@ -8,6 +8,7 @@ import Data.Either (Either(..))
 import Data.Foldable (foldl, for_)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
+import Data.Set as Set
 import Data.String as String
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
@@ -43,6 +44,7 @@ import Graph.Types
   , emptyGraph
   )
 import Graph.Views as Views
+import Graph.Query as Query
 import FFI.Clipboard as Clipboard
 import Halogen as H
 import Halogen.HTML as HH
@@ -102,6 +104,11 @@ type State =
   , viewIndex :: Array Views.ViewIndexEntry
   , activeView :: Maybe Views.View
   , showViewPicker :: Boolean
+  , oxigraphStore :: Maybe Oxigraph.OxigraphStore
+  , queryCatalog :: Array Query.NamedQuery
+  , activeQuery :: Maybe Query.NamedQuery
+  , catalogFilter :: String
+  , showQueryCatalog :: Boolean
   }
 
 -- | Actions the component can handle.
@@ -126,6 +133,10 @@ data Action
   | SelectView String
   | SelectAllView
   | ToggleViewPicker
+  | SetCatalogFilter String
+  | ExecuteQuery Query.NamedQuery
+  | ClearQuery
+  | ToggleQueryCatalog
 
 -- | The viewer component, parameterized by data URLs.
 viewer
@@ -153,6 +164,11 @@ viewer = H.mkComponent
       , viewIndex: []
       , activeView: Nothing
       , showViewPicker: false
+      , oxigraphStore: Nothing
+      , queryCatalog: []
+      , activeQuery: Nothing
+      , catalogFilter: ""
+      , showQueryCatalog: false
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -818,6 +834,22 @@ handleAction = case _ of
           , fullGraph = graph
           , selected = start
           }
+    -- If RDF format, create SPARQL store and load turtle
+    when (not $ isJsonGraphFormat graphLocation.format graphLocation.url) do
+      storeResult <- liftAff
+        (loadSparqlStore graphLocation.format graphLocation.url)
+      case storeResult of
+        Left _ -> pure unit
+        Right store ->
+          H.modify_ _ { oxigraphStore = Just store }
+    -- Load query catalog
+    catalogResult <- liftAff
+      (loadQueryCatalog
+        (urls.baseUrl <> "data/queries.json"))
+    case catalogResult of
+      Left _ -> pure unit
+      Right catalog ->
+        H.modify_ _ { queryCatalog = catalog }
     -- Load view index
     viewResult <- liftAff
       (loadViewIndex (urls.baseUrl <> "data/views/index.json"))
@@ -1167,6 +1199,51 @@ handleAction = case _ of
     H.modify_ \s -> s
       { showViewPicker = not s.showViewPicker }
 
+  ToggleQueryCatalog ->
+    H.modify_ \s -> s
+      { showQueryCatalog = not s.showQueryCatalog }
+
+  SetCatalogFilter q ->
+    H.modify_ _ { catalogFilter = q }
+
+  ExecuteQuery query -> do
+    state <- H.get
+    case state.oxigraphStore of
+      Nothing -> pure unit
+      Just store -> do
+        result <- liftAff $ try $ liftEffect do
+          ids <- Oxigraph.querySparqlNodeIds store
+            query.sparql
+          pure $ Set.fromFoldable ids
+        case result of
+          Left err ->
+            H.modify_ _ { error = Just (show err) }
+          Right nodeIds -> do
+            let filtered = subgraph nodeIds state.fullGraph
+                start = mostConnectedNode filtered
+            H.modify_ _
+              { graph = filtered
+              , activeQuery = Just query
+              , selected = start
+              , showQueryCatalog = false
+              , hoveredEdge = Nothing
+              , hoveredNode = Nothing
+              }
+            renderGraph
+
+  ClearQuery -> do
+    state <- H.get
+    let start = mostConnectedNode state.fullGraph
+    H.modify_ _
+      { graph = state.fullGraph
+      , activeQuery = Nothing
+      , selected = start
+      , catalogFilter = ""
+      , hoveredEdge = Nothing
+      , hoveredNode = Nothing
+      }
+    renderGraph
+
 renderGraph
   :: forall o
    . H.HalogenM State Action () o Aff Unit
@@ -1300,6 +1377,32 @@ loadGraphData format url = do
     pure case parsed of
       Left err -> Left (show err)
       Right result -> result
+
+loadSparqlStore
+  :: String -> String -> Aff (Either String Oxigraph.OxigraphStore)
+loadSparqlStore _format url = do
+  resp <- fetch url { method: GET }
+  body <- resp.text
+  parsed <- try do
+    absUrl <- liftEffect (absoluteUrl url)
+    store <- liftEffect Oxigraph.createStore
+    liftEffect $ Oxigraph.loadTurtle store absUrl body
+    pure store
+  pure case parsed of
+    Left err -> Left (show err)
+    Right store -> Right store
+
+loadQueryCatalog
+  :: String -> Aff (Either String Query.QueryCatalog)
+loadQueryCatalog url = do
+  result <- try $ fetch url { method: GET }
+  case result of
+    Left _ -> pure (Left "no query catalog")
+    Right resp -> do
+      body <- resp.text
+      pure case AP.jsonParser body of
+        Left err -> Left err
+        Right json -> Query.decodeQueryCatalog json
 
 persistState
   :: forall o

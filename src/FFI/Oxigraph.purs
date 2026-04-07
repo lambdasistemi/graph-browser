@@ -9,6 +9,7 @@ module FFI.Oxigraph
   , loadTurtle
   , parseQuads
   , querySparql
+  , querySparqlNodeIds
   , serializeQuads
   ) where
 
@@ -67,3 +68,6 @@ foreign import loadTurtle
 
 foreign import querySparql
   :: OxigraphStore -> String -> Effect (Array SparqlBinding)
+
+foreign import querySparqlNodeIds
+  :: OxigraphStore -> String -> Effect (Array String)
