@@ -50,3 +50,34 @@ export const parseQuads = (format) => (baseIri) => (input) => () =>
           : "",
     },
   }));
+
+// --- SPARQL Store API ---
+
+export const createStore = () => new oxigraph.Store();
+
+export const loadTurtle = (store) => (baseIri) => (turtleContent) => () => {
+  store.load(turtleContent, {
+    format: "text/turtle",
+    base_iri: baseIri,
+  });
+};
+
+const bindingToRecord = (bindings) => {
+  const result = {};
+  for (const [key, term] of bindings) {
+    result[key.value] = term.value;
+  }
+  return result;
+};
+
+export const querySparql = (store) => (sparql) => () => {
+  const results = store.query(sparql);
+  if (typeof results === "boolean") {
+    return [];
+  }
+  const rows = [];
+  for (const binding of results) {
+    rows.push(bindingToRecord(binding));
+  }
+  return rows;
+};
