@@ -1,0 +1,51 @@
+[
+  {
+    "id": "all-ui-components",
+    "name": "UI Components",
+    "description": "All Halogen UI components",
+    "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT ?node WHERE { ?node a gbk:component }",
+    "tags": ["view"]
+  },
+  {
+    "id": "all-modules",
+    "name": "PureScript Modules",
+    "description": "All PureScript logic modules",
+    "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT ?node WHERE { ?node a gbk:module }",
+    "tags": ["view"]
+  },
+  {
+    "id": "all-ffi",
+    "name": "FFI Bindings",
+    "description": "All JavaScript FFI wrappers",
+    "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT ?node WHERE { ?node a gbk:ffi }",
+    "tags": ["view"]
+  },
+  {
+    "id": "all-schemas",
+    "name": "JSON Schemas",
+    "description": "All validation schemas",
+    "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT ?node WHERE { ?node a gbk:schema }",
+    "tags": ["view"]
+  },
+  {
+    "id": "build-pipeline",
+    "name": "Build Pipeline",
+    "description": "Build tools and their outputs",
+    "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT ?node WHERE { { ?node a gbk:build } UNION { ?node a gbk:output } }",
+    "tags": ["view"]
+  },
+  {
+    "id": "data-types",
+    "name": "Data Types",
+    "description": "Core data type definitions",
+    "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT ?node WHERE { ?node a gbk:type }",
+    "tags": ["view"]
+  },
+  {
+    "id": "concepts",
+    "name": "Design Concepts",
+    "description": "Architectural concepts and principles",
+    "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT ?node WHERE { ?node a gbk:concept }",
+    "tags": ["view"]
+  }
+]

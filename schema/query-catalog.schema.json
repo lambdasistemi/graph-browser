@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Query Catalog",
+  "description": "A catalog of named SPARQL queries for graph-browser navigation.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "name", "description", "sparql"],
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9._-]*$",
+        "description": "Unique kebab-case identifier."
+      },
+      "name": {
+        "type": "string",
+        "description": "Human-readable display name."
+      },
+      "description": {
+        "type": "string",
+        "description": "What this query shows."
+      },
+      "sparql": {
+        "type": "string",
+        "description": "SPARQL SELECT query. Must return a ?node variable."
+      },
+      "parameters": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["name", "label", "type"],
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Variable name in SPARQL template."
+            },
+            "label": {
+              "type": "string",
+              "description": "Display label for input field."
+            },
+            "type": {
+              "type": "string",
+              "enum": ["string", "node", "kind"],
+              "description": "Input widget type."
+            },
+            "default": {
+              "type": "string",
+              "description": "Optional default value."
+            }
+          },
+          "additionalProperties": false
+        },
+        "default": []
+      },
+      "tags": {
+        "type": "array",
+        "items": { "type": "string" },
+        "default": [],
+        "description": "Tags for categorization (e.g. 'view', 'tour:guide-name')."
+      }
+    },
+    "additionalProperties": false
+  }
+}
