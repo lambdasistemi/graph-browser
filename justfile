@@ -3,7 +3,7 @@ build:
 
 bundle-app:
     # 1. Bundle npm deps into a single file
-    esbuild src/bootstrap.js --bundle --outfile=dist/deps.js --format=iife --platform=browser --minify
+    esbuild src/bootstrap.js --bundle --outfile=dist/deps.js --format=iife --platform=browser --loader:.wasm=binary --minify
     # 2. Bundle PureScript app (Main module)
     spago bundle --module Main --outfile dist/index.js
     # 3. Concatenate: deps first, then app
@@ -13,7 +13,7 @@ bundle-app:
 
 bundle-lib:
     # 1. Bundle npm deps into a single file
-    esbuild src/bootstrap.js --bundle --outfile=dist/deps.js --format=iife --platform=browser --minify
+    esbuild src/bootstrap.js --bundle --outfile=dist/deps.js --format=iife --platform=browser --loader:.wasm=binary --minify
     # 2. Bundle PureScript lib (Lib module)
     spago bundle --module Lib --outfile dist/index.js
     # 3. Concatenate: deps first, then app
