@@ -147,7 +147,7 @@ subjectsWithType typeIri quads =
 
 findKindIri :: Array ImportedRdfQuad -> String -> Maybe String
 findKindIri quads iri =
-  Array.find (\value -> value /= gbNode)
+  Array.find (\value -> String.take (String.length gbKinds) value == gbKinds)
     (namedObjectValues quads iri rdfType)
 
 literalValue
