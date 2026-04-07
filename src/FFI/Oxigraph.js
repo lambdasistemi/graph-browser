@@ -81,3 +81,22 @@ export const querySparql = (store) => (sparql) => () => {
   }
   return rows;
 };
+
+export const querySparqlNodeIds = (store) => (sparql) => () => {
+  const results = store.query(sparql);
+  if (typeof results === "boolean") {
+    return [];
+  }
+  const ids = [];
+  for (const binding of results) {
+    for (const [, term] of binding) {
+      const v = term.value;
+      const hash = v.lastIndexOf("#");
+      const slash = v.lastIndexOf("/");
+      const sep = Math.max(hash, slash);
+      ids.push(sep >= 0 ? v.substring(sep + 1) : v);
+      break; // take first variable only
+    }
+  }
+  return ids;
+};
