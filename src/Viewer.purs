@@ -183,7 +183,10 @@ render state =
     [ HH.div [ cls "graph-container" ]
         [ HH.div [ HP.id "cy" ] []
         , renderControls state
-        , renderSearchBox state
+        , if Array.null state.queryCatalog then
+            renderSearchBox state
+          else
+            renderQueryCatalogPanel state
         , renderLegend state.config
         ]
     , renderSidebar state
@@ -363,6 +366,65 @@ renderSearchResult cfg result = case result of
           ]
       , HH.span [ cls "search-result-kind" ]
           [ HH.text edge.label ]
+      ]
+
+renderQueryCatalogPanel
+  :: forall m. State -> H.ComponentHTML Action () m
+renderQueryCatalogPanel state =
+  HH.div [ cls "search-container" ]
+    [ HH.div [ cls "query-catalog-header" ]
+        [ HH.input
+            [ cls "search-input"
+            , HP.type_ HP.InputText
+            , HP.placeholder "Filter queries..."
+            , HP.value state.catalogFilter
+            , HE.onValueInput SetCatalogFilter
+            , HE.onFocus \_ -> ToggleQueryCatalog
+            ]
+        , case state.activeQuery of
+            Just q ->
+              HH.button
+                [ cls "query-clear-btn"
+                , HE.onClick \_ -> ClearQuery
+                ]
+                [ HH.text ("Clear: " <> q.name) ]
+            Nothing -> HH.text ""
+        ]
+    , if state.showQueryCatalog then
+        HH.div [ cls "search-results" ]
+          ( map renderQueryEntry filteredCatalog )
+      else HH.text ""
+    ]
+  where
+  lowerFilter = String.toLower state.catalogFilter
+
+  filteredCatalog =
+    if state.catalogFilter == "" then state.queryCatalog
+    else Array.filter matchesFilter state.queryCatalog
+
+  matchesFilter q =
+    String.contains
+      (String.Pattern lowerFilter)
+      (String.toLower q.name)
+      || String.contains
+        (String.Pattern lowerFilter)
+        (String.toLower q.description)
+
+  renderQueryEntry q =
+    HH.div
+      [ cls "search-result-item"
+      , HE.onClick \_ -> ExecuteQuery q
+      ]
+      [ HH.span
+          [ cls "search-dot"
+          , HP.attr (HH.AttrName "style")
+              "background:#58a6ff"
+          ]
+          []
+      , HH.span [ cls "search-result-label" ]
+          [ HH.text q.name ]
+      , HH.span [ cls "search-result-kind" ]
+          [ HH.text q.description ]
       ]
 
 renderSidebar
