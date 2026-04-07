@@ -3,7 +3,7 @@ build:
 
 bundle-app:
     # 1. Bundle npm deps into a single file
-    esbuild src/bootstrap.js --bundle --outfile=dist/deps.js --format=iife --platform=browser --minify
+    esbuild src/bootstrap.js --bundle --outfile=dist/deps.js --format=iife --platform=browser --loader:.wasm=binary --minify
     # 2. Bundle PureScript app (Main module)
     spago bundle --module Main --outfile dist/index.js
     # 3. Concatenate: deps first, then app
@@ -13,7 +13,7 @@ bundle-app:
 
 bundle-lib:
     # 1. Bundle npm deps into a single file
-    esbuild src/bootstrap.js --bundle --outfile=dist/deps.js --format=iife --platform=browser --minify
+    esbuild src/bootstrap.js --bundle --outfile=dist/deps.js --format=iife --platform=browser --loader:.wasm=binary --minify
     # 2. Bundle PureScript lib (Lib module)
     spago bundle --module Lib --outfile dist/index.js
     # 3. Concatenate: deps first, then app
@@ -38,7 +38,7 @@ install:
 ci: install lint build render-rdf-diagrams validate-rdf bundle
 
 export-rdf:
-    spago run --main Rdf.Export.Main -- --data-dir data --output-dir data/rdf
+    NODE_OPTIONS="--require ./src/oxigraph-shim.cjs" spago run --main Rdf.Export.Main -- --data-dir data --output-dir data/rdf
 
 render-rdf-diagrams: export-rdf
     mmdc -p mermaid-puppeteer-config.json -i data/rdf/core-ontology.mmd -o data/rdf/core-ontology.svg -t dark -b transparent

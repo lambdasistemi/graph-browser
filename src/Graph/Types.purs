@@ -7,6 +7,7 @@ module Graph.Types
   , Node
   , Edge
   , Graph
+  , GraphSource
   , Config
   , emptyGraph
   , emptyConfig
@@ -16,6 +17,7 @@ import Prelude
 
 import Data.Map (Map)
 import Data.Map as Map
+import Data.Maybe (Maybe(..))
 import Data.Set (Set)
 
 -- | Unique identifier for a node.
@@ -63,12 +65,19 @@ type Graph =
   , backward :: Map NodeId (Set NodeId)
   }
 
+-- | Optional alternate graph payload source declared in config.json.
+type GraphSource =
+  { format :: String
+  , path :: String
+  }
+
 -- | Application configuration loaded from config.json.
 type Config =
   { title :: String
   , description :: String
   , sourceUrl :: String
   , kinds :: Map KindId KindDef
+  , graphSource :: Maybe GraphSource
   }
 
 -- | An empty graph.
@@ -87,4 +96,5 @@ emptyConfig =
   , description: ""
   , sourceUrl: ""
   , kinds: Map.empty
+  , graphSource: Nothing
   }

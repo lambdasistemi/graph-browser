@@ -20,7 +20,7 @@ import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Foreign.Object as FO
 import Graph.Build (buildGraph)
-import Graph.Types (Config, Edge, Graph, KindDef, Link, Node)
+import Graph.Types (Config, Edge, Graph, GraphSource, KindDef, Link, Node)
 
 -- | Decode a JSON value into a Graph.
 decodeGraph :: Json -> Either String Graph
@@ -41,17 +41,20 @@ decodeConfig json = do
   sourceUrl <- lmap' $ obj .: "sourceUrl"
   kindsObj <- lmap' $
     (obj .: "kinds" :: Either JsonDecodeError (FO.Object Json))
+  rawGraphSource <- lmap' $ obj .:? "graphSource"
   kindPairs <- traverse
     ( \(Tuple k v) -> do
         def <- decodeKindDef v
         pure (Tuple k def)
     )
     (FO.toUnfoldable kindsObj :: Array _)
+  graphSource <- traverse decodeGraphSource rawGraphSource
   pure
     { title
     , description
     , sourceUrl
     , kinds: Map.fromFoldable kindPairs
+    , graphSource
     }
 
 decodeKindDef :: Json -> Either String KindDef
@@ -90,6 +93,13 @@ decodeEdge json = do
   description <- lmap' $
     fromMaybe "" <$> obj .:? "description"
   pure { source, target, label, description }
+
+decodeGraphSource :: Json -> Either String GraphSource
+decodeGraphSource json = do
+  obj <- lmap' $ decodeJson json
+  format <- lmap' $ obj .: "format"
+  path <- lmap' $ obj .: "path"
+  pure { format, path }
 
 lmap'
   :: forall a
