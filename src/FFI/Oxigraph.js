@@ -1,9 +1,4 @@
-// Browser: oxigraph is initialized by bootstrap.js and set on window.
-// Node.js: import directly from the npm package.
-const oxigraph =
-  typeof window !== "undefined" && window.oxigraph
-    ? window.oxigraph
-    : await import("oxigraph");
+const oxigraph = globalThis.oxigraph;
 
 const namedNode = (value) => oxigraph.namedNode(value);
 

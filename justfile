@@ -38,7 +38,7 @@ install:
 ci: install lint build render-rdf-diagrams validate-rdf bundle
 
 export-rdf:
-    spago run --main Rdf.Export.Main -- --data-dir data --output-dir data/rdf
+    NODE_OPTIONS="--require ./src/oxigraph-shim.cjs" spago run --main Rdf.Export.Main -- --data-dir data --output-dir data/rdf
 
 render-rdf-diagrams: export-rdf
     mmdc -p mermaid-puppeteer-config.json -i data/rdf/core-ontology.mmd -o data/rdf/core-ontology.svg -t dark -b transparent

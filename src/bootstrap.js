@@ -7,6 +7,6 @@ cytoscape.use(fcose);
 window.cytoscape = cytoscape;
 
 // Initialize Oxigraph WASM synchronously from the inlined binary,
-// then expose the initialized module on window for the PureScript FFI.
+// then expose the initialized module on globalThis for the PureScript FFI.
 oxigraph.initSync({ module: new WebAssembly.Module(wasmBytes) });
-window.oxigraph = oxigraph;
+globalThis.oxigraph = oxigraph;
