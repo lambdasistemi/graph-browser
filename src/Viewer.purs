@@ -310,10 +310,8 @@ renderQueryPanel state =
                   [ HH.text "All" ]
               ]
           ]
-            <> map mkEntry state.queryCatalog
+            <> Array.concatMap mkEntry state.queryCatalog
         )
-    , HH.div [ cls "query-panel-params" ]
-        (renderParamForm state)
     ]
   where
   isActive q = case state.activeQuery of
@@ -321,18 +319,20 @@ renderQueryPanel state =
     Nothing -> false
 
   mkEntry q =
-    HH.div
-      [ cls
-          ( "query-item"
-              <> if isActive q then " active" else ""
-          )
-      , HE.onClick \_ -> SelectQuery q
-      ]
-      [ HH.div [ cls "query-item-name" ]
-          [ HH.text q.name ]
-      , HH.div [ cls "query-item-desc" ]
-          [ HH.text q.description ]
-      ]
+    [ HH.div
+        [ cls
+            ( "query-item"
+                <> if isActive q then " active" else ""
+            )
+        , HE.onClick \_ -> SelectQuery q
+        ]
+        [ HH.div [ cls "query-item-name" ]
+            [ HH.text q.name ]
+        , HH.div [ cls "query-item-desc" ]
+            [ HH.text q.description ]
+        ]
+    ] <> if isActive q then renderParamForm state
+         else []
 
 renderParamForm
   :: forall m. State -> Array (H.ComponentHTML Action () m)
@@ -1365,9 +1365,15 @@ handleAction = case _ of
           Right nodeIds -> do
             let filtered = subgraph nodeIds state.fullGraph
                 start = mostConnectedNode filtered
-            H.modify_ _
+            -- Keep the original template in activeQuery
+            -- (SelectQuery sets it); only set it for
+            -- non-parameterized direct executions.
+            let setActive = case state.activeQuery of
+                  Just aq | not (Array.null aq.parameters) ->
+                    identity
+                  _ -> \s -> s { activeQuery = Just query }
+            H.modify_ \s -> setActive s
               { graph = filtered
-              , activeQuery = Just query
               , selected = start
               , showQueryCatalog = false
               , showViewPicker = false
