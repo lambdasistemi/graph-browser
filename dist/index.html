@@ -691,6 +691,29 @@
   .prompt-copy-btn:hover { background: #30363d; border-color: #8b949e; }
   .prompt-copy-btn.copied { background: #1a3b2f; border-color: #3fb950; color: #3fb950; }
 
+  .panel-tabs {
+    display: flex;
+    border-bottom: 1px solid #30363d;
+    margin-bottom: 0;
+  }
+
+  .panel-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #8b949e;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 600;
+    transition: all 0.15s ease;
+  }
+
+  .panel-tab:hover { color: #c9d1d9; }
+  .panel-tab.active { color: #58a6ff; border-bottom-color: #58a6ff; }
+
   /* App shell: repo panel + main area */
   .app-shell {
     display: flex;
