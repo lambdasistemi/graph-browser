@@ -42,6 +42,62 @@
     "tags": []
   },
   {
+    "id": "ffi-boundary",
+    "name": "FFI Boundary",
+    "description": "Everything that crosses the PureScript / JavaScript border.",
+    "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nPREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT DISTINCT ?node WHERE {\n  { ?node a gbk:ffi }\n  UNION { ?e a gb:EdgeAssertion . ?e gb:from ?ffi . ?ffi a gbk:ffi . ?e gb:to ?node }\n  UNION { ?e a gb:EdgeAssertion . ?e gb:to ?ffi . ?ffi a gbk:ffi . ?e gb:from ?node }\n}",
+    "tags": ["view"]
+  },
+  {
+    "id": "external-deps",
+    "name": "External Dependencies",
+    "description": "Third-party libraries and frameworks the project depends on.",
+    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nPREFIX gbg: <https://lambdasistemi.github.io/graph-browser/vocab/groups#>\nSELECT ?node WHERE { ?node gb:group gbg:external }",
+    "tags": []
+  },
+  {
+    "id": "validation-chain",
+    "name": "Validation Chain",
+    "description": "What validates what — CI validators and their schema targets.",
+    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nPREFIX gbe: <https://lambdasistemi.github.io/graph-browser/vocab/edges#>\nSELECT DISTINCT ?node WHERE {\n  { ?node gbe:validates%20against ?target }\n  UNION { ?source gbe:validates%20against ?node }\n}",
+    "tags": []
+  },
+  {
+    "id": "data-pipeline",
+    "name": "Data Pipeline",
+    "description": "The full path from data loading through indexing, filtering, and rendering.",
+    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nPREFIX gbg: <https://lambdasistemi.github.io/graph-browser/vocab/groups#>\nSELECT DISTINCT ?node WHERE {\n  { ?node gb:group gbg:data-loading }\n  UNION { ?node gb:group gbg:graph-core }\n  UNION { ?node gb:nodeId \"graph-cytoscape\" }\n  UNION { ?node gb:nodeId \"ffi-cytoscape\" }\n}",
+    "tags": ["view"]
+  },
+  {
+    "id": "leaf-nodes",
+    "name": "Leaf Nodes",
+    "description": "Entry points and terminal dependencies — nodes with only one connection.",
+    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT ?node WHERE {\n  { SELECT ?node (COUNT(*) AS ?c) WHERE {\n    { ?e a gb:EdgeAssertion . ?e gb:from ?node }\n    UNION { ?e a gb:EdgeAssertion . ?e gb:to ?node }\n  } GROUP BY ?node HAVING (COUNT(*) = 1) }\n}",
+    "tags": []
+  },
+  {
+    "id": "hub-nodes",
+    "name": "Hub Nodes",
+    "description": "The most connected nodes — architectural load-bearing components.",
+    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT ?node WHERE {\n  { SELECT ?node (COUNT(*) AS ?c) WHERE {\n    { ?e a gb:EdgeAssertion . ?e gb:from ?node }\n    UNION { ?e a gb:EdgeAssertion . ?e gb:to ?node }\n  } GROUP BY ?node HAVING (COUNT(*) > 4) }\n}",
+    "tags": []
+  },
+  {
+    "id": "viewer-deps",
+    "name": "Viewer Dependencies",
+    "description": "Everything the Viewer component depends on (transitive).",
+    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nPREFIX gbe: <https://lambdasistemi.github.io/graph-browser/vocab/edges#>\nSELECT DISTINCT ?node WHERE {\n  <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ?p ?node .\n  ?node a ?type .\n  FILTER(?p != <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>)\n}",
+    "tags": []
+  },
+  {
+    "id": "graph-core",
+    "name": "Graph Core",
+    "description": "Pure graph operations: types, build, operations, search — no UI, no FFI.",
+    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nPREFIX gbg: <https://lambdasistemi.github.io/graph-browser/vocab/groups#>\nSELECT ?node WHERE { ?node gb:group gbg:graph-core }",
+    "tags": []
+  },
+  {
     "id": "by-kind",
     "name": "Nodes by Kind",
     "description": "All nodes of a selected kind.",
