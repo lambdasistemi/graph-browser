@@ -83,6 +83,13 @@ type TutorialEntry =
   }
 
 -- | Application state.
+-- | What kind of prompt the builder is assembling.
+data PromptMode
+  = PromptNode
+  | PromptEdge
+  | PromptQuery
+  | PromptTour
+
 type State =
   { config :: Config
   , graph :: Graph
@@ -102,6 +109,7 @@ type State =
   , error :: Maybe String
   , promptInput :: String
   , promptCopied :: Boolean
+  , promptMode :: PromptMode
   , viewIndex :: Array Views.ViewIndexEntry
   , activeView :: Maybe Views.View
   , showViewPicker :: Boolean
@@ -112,6 +120,8 @@ type State =
   , showQueryCatalog :: Boolean
   , paramValues :: Map.Map String String
   , paramOptions :: Map.Map String (Array String)
+  , loadedTutorials :: Array Tutorial
+  , panelTab :: PanelTab
   }
 
 -- | Actions the component can handle.
@@ -142,6 +152,9 @@ data Action
   | ClearQuery
   | ToggleQueryCatalog
   | SetParamValue String String
+  | SetPanelTab PanelTab
+
+data PanelTab = QueriesTab | ToursTab
 
 -- | The viewer component, parameterized by data URLs.
 viewer
@@ -166,6 +179,7 @@ viewer = H.mkComponent
       , error: Nothing
       , promptInput: ""
       , promptCopied: false
+      , promptMode: PromptNode
       , viewIndex: []
       , activeView: Nothing
       , showViewPicker: false
@@ -176,6 +190,8 @@ viewer = H.mkComponent
       , showQueryCatalog: false
       , paramValues: Map.empty
       , paramOptions: Map.empty
+      , loadedTutorials: []
+      , panelTab: QueriesTab
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -207,29 +223,32 @@ renderControls
   :: forall m. State -> H.ComponentHTML Action () m
 renderControls state =
   HH.div [ cls "controls" ]
-    [ HH.div [ cls "tour-menu-wrapper" ]
-        [ HH.button
-            [ cls
-                ( "control-btn"
-                    <> if state.tutorialActive
-                      then " active"
-                      else ""
-                )
-            , HE.onClick \_ ->
-                if state.tutorialActive then
-                  ExitTutorial
-                else ToggleTutorialMenu
-            ]
-            [ HH.text
-                ( if state.tutorialActive then
-                    "Exit Tour"
-                  else "Guided Tours"
-                )
-            ]
-        , if state.showTutorialMenu then
-            renderTutorialMenu state.tutorialIndex
-          else HH.text ""
-        ]
+    [ if not (Array.null state.queryCatalog) then
+        HH.text ""
+      else
+        HH.div [ cls "tour-menu-wrapper" ]
+          [ HH.button
+              [ cls
+                  ( "control-btn"
+                      <> if state.tutorialActive
+                        then " active"
+                        else ""
+                  )
+              , HE.onClick \_ ->
+                  if state.tutorialActive then
+                    ExitTutorial
+                  else ToggleTutorialMenu
+              ]
+              [ HH.text
+                  ( if state.tutorialActive then
+                      "Exit Tour"
+                    else "Guided Tours"
+                  )
+              ]
+          , if state.showTutorialMenu then
+              renderTutorialMenu state.tutorialIndex
+            else HH.text ""
+          ]
     , if not (Array.null state.viewIndex) then
         HH.div [ cls "tour-menu-wrapper" ]
           [ HH.button
@@ -294,9 +313,73 @@ renderQueryPanel
   :: forall m. State -> H.ComponentHTML Action () m
 renderQueryPanel state =
   HH.div [ cls "query-panel" ]
-    [ HH.div [ cls "query-panel-header" ]
-        [ HH.h3_ [ HH.text "Queries" ] ]
-    , HH.div [ cls "query-panel-list" ]
+    [ HH.div [ cls "panel-tabs" ]
+        [ HH.button
+            [ cls
+                ( "panel-tab"
+                    <> if isQueriesTab state.panelTab
+                      then " active" else ""
+                )
+            , HE.onClick \_ -> SetPanelTab QueriesTab
+            ]
+            [ HH.text "Queries" ]
+        , HH.button
+            [ cls
+                ( "panel-tab"
+                    <> if isToursTab state.panelTab
+                      then " active" else ""
+                )
+            , HE.onClick \_ -> SetPanelTab ToursTab
+            ]
+            [ HH.text "Tours" ]
+        ]
+    , HH.div [ cls "panel-search" ]
+        [ HH.input
+            [ cls "panel-search-input"
+            , HP.type_ HP.InputText
+            , HP.placeholder "Filter..."
+            , HP.value state.catalogFilter
+            , HE.onValueInput SetCatalogFilter
+            ]
+        ]
+    , case state.panelTab of
+        QueriesTab -> renderQueriesList state
+        ToursTab -> renderToursList state
+    ]
+
+isQueriesTab :: PanelTab -> Boolean
+isQueriesTab QueriesTab = true
+isQueriesTab _ = false
+
+isToursTab :: PanelTab -> Boolean
+isToursTab ToursTab = true
+isToursTab _ = false
+
+filterByText
+  :: String -> Array Query.NamedQuery -> Array Query.NamedQuery
+filterByText "" qs = qs
+filterByText filter qs =
+  let f = String.toLower filter
+  in Array.filter
+    (\q -> String.contains (String.Pattern f) (String.toLower q.name)
+        || String.contains (String.Pattern f) (String.toLower q.description))
+    qs
+
+filterToursByText
+  :: String -> Array TutorialEntry -> Array TutorialEntry
+filterToursByText "" ts = ts
+filterToursByText filter ts =
+  let f = String.toLower filter
+  in Array.filter
+    (\t -> String.contains (String.Pattern f) (String.toLower t.title)
+        || String.contains (String.Pattern f) (String.toLower t.description))
+    ts
+
+renderQueriesList
+  :: forall m. State -> H.ComponentHTML Action () m
+renderQueriesList state =
+  HH.div_
+    [ HH.div [ cls "query-panel-list" ]
         ( [ HH.div
               [ cls
                   ( "query-item"
@@ -310,15 +393,17 @@ renderQueryPanel state =
                   [ HH.text "All" ]
               ]
           ]
-            <> Array.concatMap mkEntry state.queryCatalog
+            <> Array.concatMap mkQueryEntry
+                (filterByText state.catalogFilter state.queryCatalog)
         )
+    , renderPromptBuilder state PromptQuery "New query"
     ]
   where
   isActive q = case state.activeQuery of
     Just aq -> aq.id == q.id
     Nothing -> false
 
-  mkEntry q =
+  mkQueryEntry q =
     [ HH.div
         [ cls
             ( "query-item"
@@ -333,6 +418,29 @@ renderQueryPanel state =
         ]
     ] <> if isActive q then renderParamForm state
          else []
+
+renderToursList
+  :: forall m. State -> H.ComponentHTML Action () m
+renderToursList state =
+  HH.div_
+    [ HH.div [ cls "query-panel-list" ]
+        ( map mkTourEntry
+            (filterToursByText state.catalogFilter
+              state.tutorialIndex)
+        )
+    , renderPromptBuilder state PromptTour "New tour"
+    ]
+  where
+  mkTourEntry entry =
+    HH.div
+      [ cls "query-item"
+      , HE.onClick \_ -> StartTutorial entry.file
+      ]
+      [ HH.div [ cls "query-item-name" ]
+          [ HH.text entry.title ]
+      , HH.div [ cls "query-item-desc" ]
+          [ HH.text entry.description ]
+      ]
 
 renderParamForm
   :: forall m. State -> Array (H.ComponentHTML Action () m)
@@ -762,7 +870,7 @@ renderEdgeDetail state edge =
         ]
     , HH.p [ cls "description" ]
         [ HH.text edge.description ]
-    , renderPromptBuilder state "Generate prompt to improve this edge"
+    , renderPromptBuilder state PromptEdge "Generate prompt"
     ]
 
 renderNodeDetail
@@ -780,7 +888,7 @@ renderNodeDetail state node =
     , renderLinks node.links
     , renderConnections "Connects to" outEdges
     , renderConnections "Connected from" inEdges
-    , renderPromptBuilder state "Generate prompt to improve this node"
+    , renderPromptBuilder state PromptNode "Generate prompt"
     ]
   where
   cfg = state.config
@@ -843,14 +951,18 @@ renderNodeDetail state node =
         ]
 
 renderPromptBuilder
-  :: forall m. State -> String -> H.ComponentHTML Action () m
-renderPromptBuilder state title =
+  :: forall m
+   . State
+  -> PromptMode
+  -> String
+  -> H.ComponentHTML Action () m
+renderPromptBuilder state mode title =
   HH.div [ cls "prompt-builder" ]
     [ HH.h3_ [ HH.text title ]
     , HH.textarea
         [ cls "prompt-textarea"
         , HP.value state.promptInput
-        , HP.placeholder "e.g. Add missing connections, update description..."
+        , HP.placeholder (promptPlaceholder mode)
         , HP.rows 3
         , HE.onValueInput SetPromptInput
         ]
@@ -870,6 +982,16 @@ renderPromptBuilder state title =
             ]
         ]
     ]
+
+promptPlaceholder :: PromptMode -> String
+promptPlaceholder PromptNode =
+  "e.g. Add missing connections, update description..."
+promptPlaceholder PromptEdge =
+  "e.g. Refine this relationship, add details..."
+promptPlaceholder PromptQuery =
+  "e.g. Find all actors that can vote on treasury actions..."
+promptPlaceholder PromptTour =
+  "e.g. A tour explaining how DRep delegation works..."
 
 renderLegend
   :: forall m. Config -> H.ComponentHTML Action () m
@@ -1033,6 +1155,7 @@ handleAction = case _ of
         , hoveredEdge = Nothing
         , promptInput = ""
         , promptCopied = false
+        , promptMode = PromptNode
         }
     else
       H.modify_ _
@@ -1040,6 +1163,7 @@ handleAction = case _ of
         , hoveredEdge = Nothing
         , promptInput = ""
         , promptCopied = false
+        , promptMode = PromptNode
         }
     liftEffect $ Cy.markRoot nodeId
 
@@ -1069,6 +1193,7 @@ handleAction = case _ of
         , hoveredEdge = Just edgeInfo
         , promptInput = ""
         , promptCopied = false
+        , promptMode = PromptEdge
         }
     else
       H.modify_ _
@@ -1077,6 +1202,7 @@ handleAction = case _ of
         , selected = Nothing
         , promptInput = ""
         , promptCopied = false
+        , promptMode = PromptEdge
         }
 
   SetDepth d -> do
@@ -1131,6 +1257,11 @@ handleAction = case _ of
 
   StartTutorial file -> do
     state <- H.get
+    -- Restore full graph when exiting a query to start a tour
+    H.modify_ _
+      { graph = state.fullGraph
+      , activeQuery = Nothing
+      }
     case state.activeView of
       Just view -> do
         -- View-local tour: file is the tour ID
@@ -1152,11 +1283,20 @@ handleAction = case _ of
         case result of
           Left _ -> pure unit
           Right tut -> do
+            state' <- H.get
+            let alreadyLoaded = Array.any
+                  (\t -> t.id == tut.id)
+                  state'.loadedTutorials
             H.modify_ _
               { tutorial = Just tut
               , tutorialStep = 0
               , tutorialActive = true
               , showTutorialMenu = false
+              , loadedTutorials =
+                  if alreadyLoaded then
+                    state'.loadedTutorials
+                  else
+                    Array.snoc state'.loadedTutorials tut
               }
             applyTutorialStop
 
@@ -1200,6 +1340,7 @@ handleAction = case _ of
       { selected = node
       , promptInput = ""
       , promptCopied = false
+      , promptMode = PromptNode
       }
     renderGraph
 
@@ -1209,35 +1350,49 @@ handleAction = case _ of
   CopyPrompt -> do
     state <- H.get
     let
-      prompt = case state.hoveredEdge of
-        Just edge ->
-          let
-            srcNode = Map.lookup edge.sourceId state.graph.nodes
-            tgtNode = Map.lookup edge.targetId state.graph.nodes
-            rawEdge =
-              { source: edge.sourceId
-              , target: edge.targetId
-              , label: edge.label
-              , description: edge.description
-              }
-          in
-            case srcNode, tgtNode of
-              Just sn, Just tn ->
-                PB.buildEdgePrompt state.config state.graph
-                  rawEdge sn tn state.promptInput
-              _, _ ->
-                PB.buildEdgePrompt state.config state.graph
-                  rawEdge
-                  { id: edge.sourceId, label: edge.sourceLabel
-                  , kind: "", group: "", description: ""
-                  , links: []
-                  }
-                  { id: edge.targetId, label: edge.targetLabel
-                  , kind: "", group: "", description: ""
-                  , links: []
-                  }
-                  state.promptInput
-        Nothing -> case state.selected of
+      prompt = case state.promptMode of
+        PromptQuery ->
+          PB.buildQueryPrompt state.config state.graph
+            state.queryCatalog state.promptInput
+        PromptTour ->
+          PB.buildTourPrompt state.config state.graph
+            state.loadedTutorials state.queryCatalog
+            state.promptInput
+        PromptEdge -> case state.hoveredEdge of
+          Just edge ->
+            let
+              srcNode = Map.lookup edge.sourceId
+                state.graph.nodes
+              tgtNode = Map.lookup edge.targetId
+                state.graph.nodes
+              rawEdge =
+                { source: edge.sourceId
+                , target: edge.targetId
+                , label: edge.label
+                , description: edge.description
+                }
+            in
+              case srcNode, tgtNode of
+                Just sn, Just tn ->
+                  PB.buildEdgePrompt state.config
+                    state.graph rawEdge sn tn
+                    state.promptInput
+                _, _ ->
+                  PB.buildEdgePrompt state.config
+                    state.graph rawEdge
+                    { id: edge.sourceId
+                    , label: edge.sourceLabel
+                    , kind: "", group: ""
+                    , description: "", links: []
+                    }
+                    { id: edge.targetId
+                    , label: edge.targetLabel
+                    , kind: "", group: ""
+                    , description: "", links: []
+                    }
+                    state.promptInput
+          Nothing -> ""
+        PromptNode -> case state.selected of
           Just node ->
             PB.buildNodePrompt state.config state.graph
               node state.promptInput
@@ -1317,6 +1472,11 @@ handleAction = case _ of
     H.modify_ _ { catalogFilter = q }
 
   SelectQuery query -> do
+    H.modify_ _
+      { tutorialActive = false
+      , tutorial = Nothing
+      , hoveredNode = Nothing
+      }
     if Array.null query.parameters then
       handleAction (ExecuteQuery query)
     else do
@@ -1333,6 +1493,16 @@ handleAction = case _ of
             , paramOptions = options
             , showQueryCatalog = false
             }
+
+  SetPanelTab tab ->
+    H.modify_ _
+      { panelTab = tab
+      , promptMode = case tab of
+          QueriesTab -> PromptQuery
+          ToursTab -> PromptTour
+      , promptInput = ""
+      , promptCopied = false
+      }
 
   SetParamValue name value -> do
     state <- H.get
@@ -1393,6 +1563,8 @@ handleAction = case _ of
       , showViewPicker = false
       , hoveredEdge = Nothing
       , hoveredNode = Nothing
+      , tutorialActive = false
+      , tutorial = Nothing
       }
     renderGraph
 

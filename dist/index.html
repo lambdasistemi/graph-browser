@@ -129,14 +129,20 @@
   .param-select:focus { border-color: #58a6ff; }
 
   .query-panel {
-    width: 240px;
-    min-width: 180px;
+    width: 300px;
+    min-width: 240px;
     background: #0d1117;
     border-right: 1px solid #30363d;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    overflow: hidden;
+    overflow-y: auto;
+    direction: rtl;
+    scrollbar-width: thin;
+    scrollbar-color: #30363d transparent;
+  }
+  .query-panel > * {
+    direction: ltr;
   }
   .query-panel-header {
     padding: 12px 16px;
@@ -151,8 +157,7 @@
     margin: 0;
   }
   .query-panel-list {
-    flex: 1;
-    overflow-y: auto;
+    flex: none;
   }
   .query-panel-params {
     border-top: 1px solid #30363d;
@@ -640,7 +645,7 @@
   /* Prompt builder */
   .prompt-builder {
     margin-top: 20px;
-    padding-top: 16px;
+    padding: 16px 12px 0;
     border-top: 1px solid #30363d;
   }
 
@@ -655,6 +660,7 @@
 
   .prompt-textarea {
     width: 100%;
+    box-sizing: border-box;
     background: #21262d;
     border: 1px solid #30363d;
     color: #c9d1d9;
@@ -690,6 +696,45 @@
 
   .prompt-copy-btn:hover { background: #30363d; border-color: #8b949e; }
   .prompt-copy-btn.copied { background: #1a3b2f; border-color: #3fb950; color: #3fb950; }
+
+  .panel-tabs {
+    display: flex;
+    border-bottom: 1px solid #30363d;
+    margin-bottom: 0;
+  }
+
+  .panel-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #8b949e;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 600;
+    transition: all 0.15s ease;
+  }
+
+  .panel-tab:hover { color: #c9d1d9; }
+  .panel-tab.active { color: #58a6ff; border-bottom-color: #58a6ff; }
+
+  .panel-search { padding: 8px 12px; border-bottom: 1px solid #30363d; }
+  .panel-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: inherit;
+    outline: none;
+  }
+  .panel-search-input:focus { border-color: #58a6ff; background: #161b22; }
+  .panel-search-input::placeholder { color: #484f58; }
 
   /* App shell: repo panel + main area */
   .app-shell {
