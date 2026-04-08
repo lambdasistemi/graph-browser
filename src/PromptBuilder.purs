@@ -30,6 +30,7 @@ vocabBase = "https://lambdasistemi.github.io/graph-browser/vocab"
 isRdf :: Config -> Boolean
 isRdf config = isJust config.graphSource
 
+
 -- | Build a prompt for a node with its connected edges.
 buildNodePrompt :: Config -> Graph -> Node -> String -> String
 buildNodePrompt config graph node userText =
@@ -370,14 +371,12 @@ filePathsBlock config =
   if isRdf config then
     case config.graphSource of
       Just gs ->
-        "- Graph (RDF): `" <> gs.path <> "`\n"
-          <> "- Graph (JSON source): `data/graph.json`\n"
+        "- Graph (RDF, edit this): `" <> gs.path <> "`\n"
           <> "- Config: `data/config.json`\n"
           <> "- Query catalog: `data/queries.json`\n"
           <> "- Tutorials: `data/tutorials/`"
       Nothing ->
-        "- Graph: `data/graph.json`\n"
-          <> "- Config: `data/config.json`\n"
+        "- Config: `data/config.json`\n"
           <> "- Query catalog: `data/queries.json`\n"
           <> "- Tutorials: `data/tutorials/`"
   else
@@ -395,8 +394,8 @@ prSection config
   | S.null config.sourceUrl = ""
   | isRdf config = section "How to Submit Changes"
       ( "Fork " <> config.sourceUrl
-          <> ". For graph data, edit `data/graph.json`"
-          <> " and re-export RDF. "
+          <> ". For graph data, edit the RDF file listed above"
+          <> " (Turtle). "
           <> "For queries, edit `data/queries.json`. "
           <> "For tours, add/edit in `data/tutorials/`. "
           <> "Validate against schemas and open a PR."
@@ -408,9 +407,12 @@ prSection config
           <> " pull request."
       )
 
--- | Escape and quote a string for JSON output.
+-- | Quote a string for Turtle/JSON output.
 quote :: String -> String
-quote s = "\"" <> escapeJson s <> "\""
+quote s = "\"" <> escapeTurtle s <> "\""
 
--- | Minimal JSON string escaping.
+-- | Minimal Turtle string escaping (same chars as JSON).
 foreign import escapeJson :: String -> String
+
+escapeTurtle :: String -> String
+escapeTurtle = escapeJson
