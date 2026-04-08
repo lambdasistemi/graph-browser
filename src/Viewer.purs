@@ -1389,14 +1389,43 @@ applyTutorialStop = do
   state <- H.get
   case currentStop state of
     Nothing -> pure unit
-    Just stop -> do
-      let node = Map.lookup stop.node state.graph.nodes
-      H.modify_ _
-        { selected = node
-        , depth = stop.depth
-        , hoveredEdge = Nothing
-        }
-      renderGraph
+    Just stop -> case stop.queryId of
+      Just qid -> do
+        -- Query-based stop: find and execute the query
+        let mQuery = Array.find (\q -> q.id == qid)
+              state.queryCatalog
+        case mQuery of
+          Nothing -> pure unit
+          Just query ->
+            case state.oxigraphStore of
+              Nothing -> pure unit
+              Just store -> do
+                result <- liftAff $ try $ liftEffect do
+                  ids <- Oxigraph.querySparqlNodeIds store
+                    query.sparql
+                  pure $ Set.fromFoldable ids
+                case result of
+                  Left _ -> pure unit
+                  Right nodeIds -> do
+                    let filtered = subgraph nodeIds
+                          state.fullGraph
+                        start = mostConnectedNode filtered
+                    H.modify_ _
+                      { graph = filtered
+                      , activeQuery = Just query
+                      , selected = start
+                      , hoveredEdge = Nothing
+                      }
+                    renderGraph
+      Nothing -> do
+        -- Legacy stop: center on node with depth
+        let node = Map.lookup stop.node state.graph.nodes
+        H.modify_ _
+          { selected = node
+          , depth = stop.depth
+          , hoveredEdge = Nothing
+          }
+        renderGraph
 
 loadTutorialIndex
   :: String -> Aff (Either String (Array TutorialEntry))
