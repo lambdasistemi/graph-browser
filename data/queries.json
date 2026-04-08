@@ -4,48 +4,118 @@
     "name": "UI Components",
     "description": "All Halogen UI components",
     "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT ?node WHERE { ?node a gbk:component }",
-    "tags": ["view"]
+    "tags": []
   },
   {
     "id": "all-modules",
     "name": "PureScript Modules",
     "description": "All PureScript logic modules",
     "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT ?node WHERE { ?node a gbk:module }",
-    "tags": ["view"]
+    "tags": []
   },
   {
     "id": "all-ffi",
     "name": "FFI Bindings",
     "description": "All JavaScript FFI wrappers",
     "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT ?node WHERE { ?node a gbk:ffi }",
-    "tags": ["view"]
+    "tags": []
   },
   {
     "id": "all-schemas",
     "name": "JSON Schemas",
     "description": "All validation schemas",
     "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT ?node WHERE { ?node a gbk:schema }",
-    "tags": ["view"]
-  },
-  {
-    "id": "build-pipeline",
-    "name": "Build Pipeline",
-    "description": "Build tools and their outputs",
-    "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT ?node WHERE { { ?node a gbk:build } UNION { ?node a gbk:output } }",
-    "tags": ["view"]
+    "tags": []
   },
   {
     "id": "data-types",
     "name": "Data Types",
     "description": "Core data type definitions",
     "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT ?node WHERE { ?node a gbk:type }",
-    "tags": ["view"]
+    "tags": []
   },
   {
     "id": "concepts",
     "name": "Design Concepts",
     "description": "Architectural concepts and principles",
     "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT ?node WHERE { ?node a gbk:concept }",
+    "tags": []
+  },
+  {
+    "id": "build-validation",
+    "name": "Build & Validation",
+    "description": "Nix build system, schemas, and CI validation pipeline.",
+    "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nPREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT DISTINCT ?node WHERE {\n  { ?node a gbk:build }\n  UNION { ?node a gbk:output }\n  UNION { ?node a gbk:schema }\n  UNION { ?node gb:nodeId \"validate-workflow\" }\n  UNION { ?node gb:nodeId \"validate-action\" }\n  UNION { ?node gb:nodeId \"build-action\" }\n  UNION { ?node gb:nodeId \"data-driven\" }\n}",
     "tags": ["view"]
+  },
+  {
+    "id": "ui-rendering",
+    "name": "UI & Rendering",
+    "description": "The viewer component, graph operations, and Cytoscape rendering pipeline.",
+    "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nPREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT DISTINCT ?node WHERE {\n  { ?node a gbk:component }\n  UNION { ?node a gbk:module }\n  UNION { ?node a gbk:ffi }\n  UNION { ?node gb:nodeId \"halogen\" }\n  UNION { ?node gb:nodeId \"cytoscape-js\" }\n  UNION { ?node gb:nodeId \"depth-filtering\" }\n}",
+    "tags": ["view"]
+  },
+  {
+    "id": "nix-build",
+    "name": "Nix Build Nodes",
+    "description": "The flake, bundlers, and build outputs.",
+    "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT ?node WHERE { { ?node a gbk:build } UNION { ?node a gbk:output } }",
+    "tags": ["tour:build-pipeline"]
+  },
+  {
+    "id": "validation-nodes",
+    "name": "Validation Pipeline",
+    "description": "CI validation workflow and schema nodes.",
+    "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nPREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT DISTINCT ?node WHERE {\n  { ?node a gbk:schema }\n  UNION { ?node gb:nodeId \"validate-workflow\" }\n  UNION { ?node gb:nodeId \"validate-action\" }\n}",
+    "tags": ["tour:build-pipeline"]
+  },
+  {
+    "id": "viewer-neighborhood",
+    "name": "Viewer Component",
+    "description": "The central Halogen component and its direct connections.",
+    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT DISTINCT ?node WHERE {\n  { ?node gb:nodeId \"viewer\" }\n  UNION { <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> ?p ?node . ?node a ?type }\n  UNION { ?node ?p <https://github.com/lambdasistemi/graph-browser/rdf/node/viewer> . ?node a ?type }\n}",
+    "tags": ["tour:rendering-pipeline"]
+  },
+  {
+    "id": "decode-nodes",
+    "name": "Decoding Layer",
+    "description": "Graph decoding and type foundation.",
+    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT DISTINCT ?node WHERE {\n  { ?node gb:nodeId \"graph-decode\" }\n  UNION { ?node gb:nodeId \"graph-types\" }\n}",
+    "tags": ["tour:rendering-pipeline", "tour:data-pipeline"]
+  },
+  {
+    "id": "ffi-rendering",
+    "name": "FFI Rendering",
+    "description": "Cytoscape FFI wrapper and the JS library.",
+    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT DISTINCT ?node WHERE {\n  { ?node gb:nodeId \"ffi-cytoscape\" }\n  UNION { ?node gb:nodeId \"cytoscape-js\" }\n}",
+    "tags": ["tour:rendering-pipeline"]
+  },
+  {
+    "id": "type-foundation",
+    "name": "Type Foundation",
+    "description": "Graph.Types and its dependents.",
+    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT DISTINCT ?node WHERE {\n  { ?node gb:nodeId \"graph-types\" }\n  UNION { <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> ?p ?node . ?node a ?type }\n  UNION { ?node ?p <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-types> . ?node a ?type }\n}",
+    "tags": ["tour:data-pipeline"]
+  },
+  {
+    "id": "graph-build-node",
+    "name": "Graph Build",
+    "description": "Graph.Build indexing module.",
+    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT DISTINCT ?node WHERE {\n  { ?node gb:nodeId \"graph-build\" }\n  UNION { <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-build> ?p ?node . ?node a ?type }\n  UNION { ?node ?p <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-build> . ?node a ?type }\n}",
+    "tags": ["tour:data-pipeline"]
+  },
+  {
+    "id": "graph-operations-node",
+    "name": "Graph Operations",
+    "description": "Neighborhood and subgraph algorithms.",
+    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT DISTINCT ?node WHERE {\n  { ?node gb:nodeId \"graph-operations\" }\n  UNION { <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-operations> ?p ?node . ?node a ?type }\n  UNION { ?node ?p <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-operations> . ?node a ?type }\n}",
+    "tags": ["tour:data-pipeline"]
+  },
+  {
+    "id": "cytoscape-conversion",
+    "name": "Cytoscape Conversion",
+    "description": "PureScript to Cytoscape.js element conversion.",
+    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT DISTINCT ?node WHERE {\n  { ?node gb:nodeId \"graph-cytoscape\" }\n  UNION { <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-cytoscape> ?p ?node . ?node a ?type }\n  UNION { ?node ?p <https://github.com/lambdasistemi/graph-browser/rdf/node/graph-cytoscape> . ?node a ?type }\n}",
+    "tags": ["tour:data-pipeline"]
   }
 ]
