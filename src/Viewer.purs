@@ -7,9 +7,10 @@ import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (foldl, for_)
 import Data.Map as Map
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), isNothing)
 import Data.Set as Set
 import Data.String as String
+import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Web.HTML as Web.HTML
@@ -109,6 +110,8 @@ type State =
   , activeQuery :: Maybe Query.NamedQuery
   , catalogFilter :: String
   , showQueryCatalog :: Boolean
+  , paramValues :: Map.Map String String
+  , paramOptions :: Map.Map String (Array String)
   }
 
 -- | Actions the component can handle.
@@ -134,9 +137,11 @@ data Action
   | SelectAllView
   | ToggleViewPicker
   | SetCatalogFilter String
+  | SelectQuery Query.NamedQuery
   | ExecuteQuery Query.NamedQuery
   | ClearQuery
   | ToggleQueryCatalog
+  | SetParamValue String String
 
 -- | The viewer component, parameterized by data URLs.
 viewer
@@ -169,6 +174,8 @@ viewer = H.mkComponent
       , activeQuery: Nothing
       , catalogFilter: ""
       , showQueryCatalog: false
+      , paramValues: Map.empty
+      , paramOptions: Map.empty
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -180,17 +187,21 @@ viewer = H.mkComponent
 render :: forall m. State -> H.ComponentHTML Action () m
 render state =
   HH.div [ cls "app" ]
-    [ HH.div [ cls "graph-container" ]
-        [ HH.div [ HP.id "cy" ] []
-        , renderControls state
-        , if Array.null state.queryCatalog then
-            renderSearchBox state
-          else
-            renderQueryCatalogPanel state
-        , renderLegend state.config
-        ]
-    , renderSidebar state
-    ]
+    ( ( if Array.null state.queryCatalog then []
+        else [ renderQueryPanel state ]
+      )
+        <>
+          [ HH.div [ cls "graph-container" ]
+              [ HH.div [ HP.id "cy" ] []
+              , renderControls state
+              , if Array.null state.queryCatalog then
+                  renderSearchBox state
+                else HH.text ""
+              , renderLegend state.config
+              ]
+          , renderSidebar state
+          ]
+    )
 
 renderControls
   :: forall m. State -> H.ComponentHTML Action () m
@@ -219,30 +230,23 @@ renderControls state =
             renderTutorialMenu state.tutorialIndex
           else HH.text ""
         ]
-    , let
-        viewQueries = Array.filter
-          (\q -> Array.elem "view" q.tags)
-          state.queryCatalog
-        hasViews = not (Array.null state.viewIndex)
-          || not (Array.null viewQueries)
-        viewLabel = case state.activeQuery of
-          Just q | Array.elem "view" q.tags -> q.name
-          _ -> case state.activeView of
-            Just v -> v.name
-            Nothing -> "Views"
-      in
-        if not hasViews then HH.text ""
-        else
-          HH.div [ cls "tour-menu-wrapper" ]
-            [ HH.button
-                [ cls "control-btn"
-                , HE.onClick \_ -> ToggleViewPicker
-                ]
-                [ HH.text viewLabel ]
-            , if state.showViewPicker then
-                renderViewPicker state viewQueries
-              else HH.text ""
-            ]
+    , if not (Array.null state.viewIndex) then
+        HH.div [ cls "tour-menu-wrapper" ]
+          [ HH.button
+              [ cls "control-btn"
+              , HE.onClick \_ -> ToggleViewPicker
+              ]
+              [ HH.text
+                  ( case state.activeView of
+                      Just v -> v.name
+                      Nothing -> "Views"
+                  )
+              ]
+          , if state.showViewPicker then
+              renderLegacyViewPicker state
+            else HH.text ""
+          ]
+      else HH.text ""
     , HH.button
         [ cls "control-btn"
         , HE.onClick \_ -> FitAll
@@ -286,16 +290,101 @@ renderTutorialMenu entries =
           [ HH.text entry.description ]
       ]
 
-renderViewPicker
+renderQueryPanel
+  :: forall m. State -> H.ComponentHTML Action () m
+renderQueryPanel state =
+  HH.div [ cls "query-panel" ]
+    [ HH.div [ cls "query-panel-header" ]
+        [ HH.h3_ [ HH.text "Queries" ] ]
+    , HH.div [ cls "query-panel-list" ]
+        ( [ HH.div
+              [ cls
+                  ( "query-item"
+                      <> if isNothing state.activeQuery
+                        then " active"
+                        else ""
+                  )
+              , HE.onClick \_ -> ClearQuery
+              ]
+              [ HH.div [ cls "query-item-name" ]
+                  [ HH.text "All" ]
+              ]
+          ]
+            <> map mkEntry state.queryCatalog
+        )
+    , HH.div [ cls "query-panel-params" ]
+        (renderParamForm state)
+    ]
+  where
+  isActive q = case state.activeQuery of
+    Just aq -> aq.id == q.id
+    Nothing -> false
+
+  mkEntry q =
+    HH.div
+      [ cls
+          ( "query-item"
+              <> if isActive q then " active" else ""
+          )
+      , HE.onClick \_ -> SelectQuery q
+      ]
+      [ HH.div [ cls "query-item-name" ]
+          [ HH.text q.name ]
+      , HH.div [ cls "query-item-desc" ]
+          [ HH.text q.description ]
+      ]
+
+renderParamForm
+  :: forall m. State -> Array (H.ComponentHTML Action () m)
+renderParamForm state = case state.activeQuery of
+  Nothing -> []
+  Just q ->
+    if Array.null q.parameters then []
+    else map (renderParam state) q.parameters
+
+renderParam
   :: forall m
    . State
-  -> Array Query.NamedQuery
+  -> Query.Parameter
   -> H.ComponentHTML Action () m
-renderViewPicker state viewQueries =
+renderParam state param =
+  HH.div [ cls "param-field" ]
+    [ HH.label [ cls "param-label" ]
+        [ HH.text param.label ]
+    , HH.select
+        [ cls "param-select"
+        , HE.onValueChange (SetParamValue param.name)
+        ]
+        ( [ HH.option
+              [ HP.value ""
+              , HP.selected (not hasValue)
+              , HP.disabled true
+              ]
+              [ HH.text ("Select " <> param.label <> "...") ]
+          ]
+            <> map mkOption options
+        )
+    ]
+  where
+  hasValue = Map.member param.name state.paramValues
+  options = case Map.lookup param.name state.paramOptions of
+    Just opts -> opts
+    Nothing -> []
+  mkOption v =
+    HH.option
+      [ HP.value v
+      , HP.selected
+          (Map.lookup param.name state.paramValues == Just v)
+      ]
+      [ HH.text v ]
+
+renderLegacyViewPicker
+  :: forall m. State -> H.ComponentHTML Action () m
+renderLegacyViewPicker state =
   HH.div [ cls "tour-menu" ]
     ( [ HH.div
           [ cls "tour-menu-item"
-          , HE.onClick \_ -> ClearQuery
+          , HE.onClick \_ -> SelectAllView
           ]
           [ HH.div [ cls "tour-menu-title" ]
               [ HH.text "All" ]
@@ -303,21 +392,10 @@ renderViewPicker state viewQueries =
               [ HH.text "Full graph" ]
           ]
       ]
-        <> map mkQueryEntry viewQueries
-        <> map mkLegacyEntry state.viewIndex
+        <> map mkEntry state.viewIndex
     )
   where
-  mkQueryEntry q =
-    HH.div
-      [ cls "tour-menu-item"
-      , HE.onClick \_ -> ExecuteQuery q
-      ]
-      [ HH.div [ cls "tour-menu-title" ]
-          [ HH.text q.name ]
-      , HH.div [ cls "tour-menu-desc" ]
-          [ HH.text q.description ]
-      ]
-  mkLegacyEntry entry =
+  mkEntry entry =
     HH.div
       [ cls "tour-menu-item"
       , HE.onClick \_ -> SelectView entry.file
@@ -387,65 +465,6 @@ renderSearchResult cfg result = case result of
           ]
       , HH.span [ cls "search-result-kind" ]
           [ HH.text edge.label ]
-      ]
-
-renderQueryCatalogPanel
-  :: forall m. State -> H.ComponentHTML Action () m
-renderQueryCatalogPanel state =
-  HH.div [ cls "search-container" ]
-    [ HH.div [ cls "query-catalog-header" ]
-        [ HH.input
-            [ cls "search-input"
-            , HP.type_ HP.InputText
-            , HP.placeholder "Filter queries..."
-            , HP.value state.catalogFilter
-            , HE.onValueInput SetCatalogFilter
-            , HE.onFocus \_ -> ToggleQueryCatalog
-            ]
-        , case state.activeQuery of
-            Just q ->
-              HH.button
-                [ cls "query-clear-btn"
-                , HE.onClick \_ -> ClearQuery
-                ]
-                [ HH.text ("Clear: " <> q.name) ]
-            Nothing -> HH.text ""
-        ]
-    , if state.showQueryCatalog then
-        HH.div [ cls "search-results" ]
-          ( map renderQueryEntry filteredCatalog )
-      else HH.text ""
-    ]
-  where
-  lowerFilter = String.toLower state.catalogFilter
-
-  filteredCatalog =
-    if state.catalogFilter == "" then state.queryCatalog
-    else Array.filter matchesFilter state.queryCatalog
-
-  matchesFilter q =
-    String.contains
-      (String.Pattern lowerFilter)
-      (String.toLower q.name)
-      || String.contains
-        (String.Pattern lowerFilter)
-        (String.toLower q.description)
-
-  renderQueryEntry q =
-    HH.div
-      [ cls "search-result-item"
-      , HE.onClick \_ -> ExecuteQuery q
-      ]
-      [ HH.span
-          [ cls "search-dot"
-          , HP.attr (HH.AttrName "style")
-              "background:#58a6ff"
-          ]
-          []
-      , HH.span [ cls "search-result-label" ]
-          [ HH.text q.name ]
-      , HH.span [ cls "search-result-kind" ]
-          [ HH.text q.description ]
       ]
 
 renderSidebar
@@ -885,24 +904,6 @@ handleAction = case _ of
         H.modify_ _ { config = cfg }
         liftEffect $ setDocTitle cfg.title
     state <- H.get
-    liftEffect $ Cy.initCytoscape "cy"
-      (kindsToForeign state.config)
-    tapSub <- liftEffect HS.create
-    liftEffect $ Cy.onNodeTap \nodeId ->
-      HS.notify tapSub.listener
-        (NodeTapped nodeId)
-    void $ H.subscribe tapSub.emitter
-    hoverSub <- liftEffect HS.create
-    liftEffect $ Cy.onNodeHover \nodeId ->
-      HS.notify hoverSub.listener
-        (NodeHovered nodeId)
-    void $ H.subscribe hoverSub.emitter
-    edgeSub <- liftEffect HS.create
-    liftEffect $ Cy.onEdgeHover
-      \src tgt lbl desc ->
-        HS.notify edgeSub.listener
-          (EdgeHovered src tgt lbl desc)
-    void $ H.subscribe edgeSub.emitter
     let
       graphLocation = graphSourceLocation urls state.config
     result <- liftAff
@@ -933,13 +934,39 @@ handleAction = case _ of
       Left _ -> pure unit
       Right catalog ->
         H.modify_ _ { queryCatalog = catalog }
-    -- Load view index
-    viewResult <- liftAff
-      (loadViewIndex (urls.baseUrl <> "data/views/index.json"))
-    case viewResult of
-      Left _ -> pure unit
-      Right vi ->
-        H.modify_ _ { viewIndex = vi }
+    -- Init Cytoscape AFTER catalog loads so the query panel
+    -- is in the DOM and #cy has correct dimensions.
+    stateForCy <- H.get
+    liftEffect $ Cy.initCytoscape "cy"
+      (kindsToForeign stateForCy.config)
+    tapSub <- liftEffect HS.create
+    liftEffect $ Cy.onNodeTap \nodeId ->
+      HS.notify tapSub.listener
+        (NodeTapped nodeId)
+    void $ H.subscribe tapSub.emitter
+    hoverSub <- liftEffect HS.create
+    liftEffect $ Cy.onNodeHover \nodeId ->
+      HS.notify hoverSub.listener
+        (NodeHovered nodeId)
+    void $ H.subscribe hoverSub.emitter
+    edgeSub <- liftEffect HS.create
+    liftEffect $ Cy.onEdgeHover
+      \src tgt lbl desc ->
+        HS.notify edgeSub.listener
+          (EdgeHovered src tgt lbl desc)
+    void $ H.subscribe edgeSub.emitter
+    -- Load legacy view index only when no query catalog views
+    state1 <- H.get
+    let hasQueryViews = Array.any
+          (\q -> Array.elem "view" q.tags)
+          state1.queryCatalog
+    when (not hasQueryViews) do
+      viewResult <- liftAff
+        (loadViewIndex (urls.baseUrl <> "data/views/index.json"))
+      case viewResult of
+        Left _ -> pure unit
+        Right vi ->
+          H.modify_ _ { viewIndex = vi }
     idxResult <- liftAff
       (loadTutorialIndex urls.tutorialIndexUrl)
     case idxResult of
@@ -1289,6 +1316,40 @@ handleAction = case _ of
   SetCatalogFilter q ->
     H.modify_ _ { catalogFilter = q }
 
+  SelectQuery query -> do
+    if Array.null query.parameters then
+      handleAction (ExecuteQuery query)
+    else do
+      state <- H.get
+      case state.oxigraphStore of
+        Nothing -> pure unit
+        Just store -> do
+          -- Discover options for each parameter
+          options <- liftEffect $ discoverParamOptions store
+            query.parameters
+          H.modify_ _
+            { activeQuery = Just query
+            , paramValues = Map.empty
+            , paramOptions = options
+            , showQueryCatalog = false
+            }
+
+  SetParamValue name value -> do
+    state <- H.get
+    let values = Map.insert name value state.paramValues
+    H.modify_ _ { paramValues = values }
+    -- Auto-execute when all params are filled
+    case state.activeQuery of
+      Nothing -> pure unit
+      Just query -> do
+        let allFilled = Array.all
+              (\p -> Map.member p.name values)
+              query.parameters
+        when allFilled do
+          let bound = bindParameters query.sparql values
+          handleAction $ ExecuteQuery
+            query { sparql = bound }
+
   ExecuteQuery query -> do
     state <- H.get
     case state.oxigraphStore of
@@ -1517,6 +1578,59 @@ loadQueryCatalog url = do
       pure case AP.jsonParser body of
         Left err -> Left err
         Right json -> Query.decodeQueryCatalog json
+
+discoverParamOptions
+  :: Oxigraph.OxigraphStore
+  -> Array Query.Parameter
+  -> Effect (Map.Map String (Array String))
+discoverParamOptions store params = do
+  pairs <- traverse discoverOne params
+  pure $ Map.fromFoldable pairs
+  where
+  discoverOne p = do
+    values <- Oxigraph.querySparqlStrings store
+      (discoveryQuery p.paramType)
+    let labels = Array.sort $ Array.nub $
+          map extractLocalName values
+    pure (Tuple p.name labels)
+
+  discoveryQuery "kind" =
+    "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\n"
+      <> "SELECT DISTINCT ?v WHERE { ?node a ?v . FILTER(STRSTARTS(STR(?v), STR(gbk:))) }"
+  discoveryQuery "node" =
+    "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\n"
+      <> "SELECT DISTINCT ?v WHERE { ?node gb:nodeId ?v }"
+  discoveryQuery "group" =
+    "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\n"
+      <> "SELECT DISTINCT ?v WHERE { ?node gb:group ?v }"
+  discoveryQuery _ =
+    "SELECT DISTINCT ?v WHERE { ?s ?p ?v . FILTER(isLiteral(?v)) } LIMIT 100"
+
+  extractLocalName v =
+    let
+      hash = String.lastIndexOf (String.Pattern "#") v
+      slash = String.lastIndexOf (String.Pattern "/") v
+      sep = case hash, slash of
+        Just h, Just s -> Just (max h s)
+        Just h, Nothing -> Just h
+        Nothing, Just s -> Just s
+        Nothing, Nothing -> Nothing
+    in
+      case sep of
+        Just i -> String.drop (i + 1) v
+        Nothing -> v
+
+bindParameters :: String -> Map.Map String String -> String
+bindParameters sparql values =
+  foldl
+    (\acc (Tuple name value) ->
+      String.replaceAll
+        (String.Pattern ("$" <> name))
+        (String.Replacement value)
+        acc
+    )
+    sparql
+    (Map.toUnfoldable values :: Array (Tuple String String))
 
 persistState
   :: forall o

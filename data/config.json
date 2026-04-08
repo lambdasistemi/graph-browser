@@ -2,6 +2,10 @@
   "title": "Graph Browser Architecture",
   "description": "The architecture of graph-browser itself — modules, data flow, build system, and design philosophy.",
   "sourceUrl": "https://github.com/lambdasistemi/graph-browser",
+  "graphSource": {
+    "format": "text/turtle",
+    "path": "data/rdf/graph.ttl"
+  },
   "kinds": {
     "component": { "label": "UI Component", "color": "#f778ba", "shape": "round-octagon" },
     "module": { "label": "Module", "color": "#58a6ff", "shape": "round-rectangle" },

@@ -10,6 +10,7 @@ module FFI.Cytoscape
   , markRoot
   , clearRoot
   , fitAll
+  , resize
   ) where
 
 import Prelude
@@ -54,3 +55,6 @@ foreign import clearRoot :: Effect Unit
 
 -- | Fit the viewport to all elements.
 foreign import fitAll :: Effect Unit
+
+-- | Recalculate dimensions after layout changes.
+foreign import resize :: Effect Unit

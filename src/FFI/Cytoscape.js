@@ -210,3 +210,9 @@ export const fitAll = () => {
   if (!_cy) return;
   _cy.animate({ fit: { padding: 60 }, duration: 300 });
 };
+
+export const resize = () => {
+  if (!_cy) return;
+  _cy.resize();
+  _cy.fit(undefined, 60);
+};

@@ -49,13 +49,15 @@ spec = describe "Self-graph integration" do
       Right catalog ->
         catalog `shouldSatisfy` \a -> Array.length a > 0
 
-  it "every catalog query returns results against graph.ttl" do
+  it "every non-parameterized catalog query returns results against graph.ttl" do
     store <- loadStore graphBase "data/rdf/graph.ttl"
     body <- liftEffect $ readTextFile UTF8 "data/queries.json"
     case jsonParser body >>= decodeQueryCatalog of
       Left err -> fail err
-      Right catalog ->
-        for_ catalog \q -> do
+      Right catalog -> do
+        let static = Array.filter
+              (\q -> Array.null q.parameters) catalog
+        for_ static \q -> do
           ids <- liftEffect $
             Oxigraph.querySparqlNodeIds store q.sparql
           ids `shouldSatisfy` \a -> Array.length a > 0
