@@ -219,23 +219,30 @@ renderControls state =
             renderTutorialMenu state.tutorialIndex
           else HH.text ""
         ]
-    , if Array.null state.viewIndex then HH.text ""
-      else
-        HH.div [ cls "tour-menu-wrapper" ]
-          [ HH.button
-              [ cls "control-btn"
-              , HE.onClick \_ -> ToggleViewPicker
-              ]
-              [ HH.text
-                  ( case state.activeView of
-                      Just v -> v.name
-                      Nothing -> "Views"
-                  )
-              ]
-          , if state.showViewPicker then
-              renderViewPicker state
-            else HH.text ""
-          ]
+    , let
+        viewQueries = Array.filter
+          (\q -> Array.elem "view" q.tags)
+          state.queryCatalog
+        hasViews = not (Array.null state.viewIndex)
+          || not (Array.null viewQueries)
+        viewLabel = case state.activeQuery of
+          Just q | Array.elem "view" q.tags -> q.name
+          _ -> case state.activeView of
+            Just v -> v.name
+            Nothing -> "Views"
+      in
+        if not hasViews then HH.text ""
+        else
+          HH.div [ cls "tour-menu-wrapper" ]
+            [ HH.button
+                [ cls "control-btn"
+                , HE.onClick \_ -> ToggleViewPicker
+                ]
+                [ HH.text viewLabel ]
+            , if state.showViewPicker then
+                renderViewPicker state viewQueries
+              else HH.text ""
+            ]
     , HH.button
         [ cls "control-btn"
         , HE.onClick \_ -> FitAll
@@ -280,12 +287,15 @@ renderTutorialMenu entries =
       ]
 
 renderViewPicker
-  :: forall m. State -> H.ComponentHTML Action () m
-renderViewPicker state =
+  :: forall m
+   . State
+  -> Array Query.NamedQuery
+  -> H.ComponentHTML Action () m
+renderViewPicker state viewQueries =
   HH.div [ cls "tour-menu" ]
     ( [ HH.div
           [ cls "tour-menu-item"
-          , HE.onClick \_ -> SelectAllView
+          , HE.onClick \_ -> ClearQuery
           ]
           [ HH.div [ cls "tour-menu-title" ]
               [ HH.text "All" ]
@@ -293,10 +303,21 @@ renderViewPicker state =
               [ HH.text "Full graph" ]
           ]
       ]
-        <> map mkEntry state.viewIndex
+        <> map mkQueryEntry viewQueries
+        <> map mkLegacyEntry state.viewIndex
     )
   where
-  mkEntry entry =
+  mkQueryEntry q =
+    HH.div
+      [ cls "tour-menu-item"
+      , HE.onClick \_ -> ExecuteQuery q
+      ]
+      [ HH.div [ cls "tour-menu-title" ]
+          [ HH.text q.name ]
+      , HH.div [ cls "tour-menu-desc" ]
+          [ HH.text q.description ]
+      ]
+  mkLegacyEntry entry =
     HH.div
       [ cls "tour-menu-item"
       , HE.onClick \_ -> SelectView entry.file
@@ -1288,6 +1309,7 @@ handleAction = case _ of
               , activeQuery = Just query
               , selected = start
               , showQueryCatalog = false
+              , showViewPicker = false
               , hoveredEdge = Nothing
               , hoveredNode = Nothing
               }
@@ -1301,6 +1323,7 @@ handleAction = case _ of
       , activeQuery = Nothing
       , selected = start
       , catalogFilter = ""
+      , showViewPicker = false
       , hoveredEdge = Nothing
       , hoveredNode = Nothing
       }
