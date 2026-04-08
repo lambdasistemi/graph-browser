@@ -125,7 +125,7 @@ function runLayout(callback) {
       nodeRepulsion: repulsion,
       gravity: grav,
       gravityRange: 1.5,
-      numIter: 8000,
+      numIter: 20000,
       nodeDimensionsIncludeLabels: true,
       stop: function () {
         // Restore console.warn
