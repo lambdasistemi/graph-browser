@@ -224,14 +224,7 @@ renderControls
 renderControls state =
   HH.div [ cls "controls" ]
     [ if not (Array.null state.queryCatalog) then
-        -- Tours are in the query panel; only show exit button
-        if state.tutorialActive then
-          HH.button
-            [ cls "control-btn active"
-            , HE.onClick \_ -> ExitTutorial
-            ]
-            [ HH.text "Exit Tour" ]
-        else HH.text ""
+        HH.text ""
       else
         HH.div [ cls "tour-menu-wrapper" ]
           [ HH.button
