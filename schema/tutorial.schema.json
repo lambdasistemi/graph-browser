@@ -45,6 +45,11 @@
           "narrative": {
             "type": "string",
             "description": "Narrative text. Paragraphs separated by \\n\\n. Supports inline links: [text](node:id) for graph navigation, [text](https://url) for external."
+          },
+          "queryId": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]*$",
+            "description": "Optional query catalog entry ID. When present, this stop executes the SPARQL query instead of centering on node+depth."
           }
         }
       }
