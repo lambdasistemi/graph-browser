@@ -1231,6 +1231,11 @@ handleAction = case _ of
 
   StartTutorial file -> do
     state <- H.get
+    -- Restore full graph when exiting a query to start a tour
+    H.modify_ _
+      { graph = state.fullGraph
+      , activeQuery = Nothing
+      }
     case state.activeView of
       Just view -> do
         -- View-local tour: file is the tour ID
@@ -1441,6 +1446,11 @@ handleAction = case _ of
     H.modify_ _ { catalogFilter = q }
 
   SelectQuery query -> do
+    H.modify_ _
+      { tutorialActive = false
+      , tutorial = Nothing
+      , hoveredNode = Nothing
+      }
     if Array.null query.parameters then
       handleAction (ExecuteQuery query)
     else do
@@ -1527,6 +1537,8 @@ handleAction = case _ of
       , showViewPicker = false
       , hoveredEdge = Nothing
       , hoveredNode = Nothing
+      , tutorialActive = false
+      , tutorial = Nothing
       }
     renderGraph
 
