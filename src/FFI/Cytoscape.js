@@ -106,9 +106,10 @@ function runLayout(callback) {
     origWarn.apply(console, arguments);
   };
   var n = _cy.nodes().length;
-  var edgeLen = n <= 10 ? 350 : n <= 20 ? 250 : 180;
-  var repulsion = n <= 10 ? 50000 : n <= 20 ? 25000 : 8000;
-  var sep = n <= 10 ? 250 : n <= 20 ? 180 : 120;
+  var edgeLen = n <= 8 ? 400 : n <= 20 ? 300 : n <= 40 ? 220 : 160;
+  var repulsion = n <= 8 ? 80000 : n <= 20 ? 40000 : n <= 40 ? 15000 : 8000;
+  var sep = n <= 8 ? 300 : n <= 20 ? 220 : n <= 40 ? 150 : 100;
+  var grav = n <= 20 ? 0.04 : n <= 40 ? 0.06 : 0.1;
   _cy
     .layout({
       name: "fcose",
@@ -117,14 +118,15 @@ function runLayout(callback) {
       animate: true,
       animationDuration: 500,
       fit: true,
-      padding: 80,
+      padding: 60,
       nodeSeparation: sep,
       idealEdgeLength: edgeLen,
-      edgeElasticity: 0.05,
+      edgeElasticity: 0.02,
       nodeRepulsion: repulsion,
-      gravity: 0.08,
-      gravityRange: 1.2,
-      numIter: 5000,
+      gravity: grav,
+      gravityRange: 1.5,
+      numIter: 8000,
+      nodeDimensionsIncludeLabels: true,
       stop: function () {
         // Restore console.warn
         console.warn = origWarn;
