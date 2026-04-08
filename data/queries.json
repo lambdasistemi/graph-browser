@@ -42,6 +42,22 @@
     "tags": []
   },
   {
+    "id": "by-kind",
+    "name": "Nodes by Kind",
+    "description": "All nodes of a selected kind.",
+    "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT ?node WHERE { ?node a gbk:$kind }",
+    "parameters": [{ "name": "kind", "label": "Kind", "type": "kind" }],
+    "tags": []
+  },
+  {
+    "id": "by-group",
+    "name": "Nodes by Group",
+    "description": "All nodes in a selected group.",
+    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT ?node WHERE { ?node gb:group \"$group\" }",
+    "parameters": [{ "name": "group", "label": "Group", "type": "group" }],
+    "tags": []
+  },
+  {
     "id": "build-validation",
     "name": "Build & Validation",
     "description": "Nix build system, schemas, and CI validation pipeline.",

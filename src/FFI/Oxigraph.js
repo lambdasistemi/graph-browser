@@ -82,6 +82,21 @@ export const querySparql = (store) => (sparql) => () => {
   return rows;
 };
 
+export const querySparqlStrings = (store) => (sparql) => () => {
+  const results = store.query(sparql);
+  if (typeof results === "boolean") {
+    return [];
+  }
+  const values = [];
+  for (const binding of results) {
+    for (const [, term] of binding) {
+      values.push(term.value);
+      break;
+    }
+  }
+  return values;
+};
+
 export const querySparqlNodeIds = (store) => (sparql) => () => {
   const results = store.query(sparql);
   if (typeof results === "boolean") {
