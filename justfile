@@ -23,6 +23,9 @@ bundle-lib:
 
 bundle: bundle-app
 
+test:
+    NODE_OPTIONS="--require ./src/oxigraph-shim.cjs" spago test
+
 dev:
     spago build --watch
 
@@ -35,7 +38,7 @@ lint:
 install:
     npm ci
 
-ci: install lint build render-rdf-diagrams validate-rdf bundle
+ci: install lint build test render-rdf-diagrams validate-rdf bundle
 
 export-rdf:
     NODE_OPTIONS="--require ./src/oxigraph-shim.cjs" spago run --main Rdf.Export.Main -- --data-dir data --output-dir data/rdf

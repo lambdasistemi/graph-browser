@@ -31,6 +31,14 @@ package:
     platform: browser
     type: app
 
+  test:
+    main: Test.Main
+    dependencies:
+      - spec
+      - aff
+      - node-fs
+      - node-buffer
+
 workspace:
   packageSet:
     registry: 72.1.0
