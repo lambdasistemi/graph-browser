@@ -333,6 +333,15 @@ renderQueryPanel state =
             ]
             [ HH.text "Tours" ]
         ]
+    , HH.div [ cls "panel-search" ]
+        [ HH.input
+            [ cls "panel-search-input"
+            , HP.type_ HP.InputText
+            , HP.placeholder "Filter..."
+            , HP.value state.catalogFilter
+            , HE.onValueInput SetCatalogFilter
+            ]
+        ]
     , case state.panelTab of
         QueriesTab -> renderQueriesList state
         ToursTab -> renderToursList state
@@ -345,6 +354,26 @@ isQueriesTab _ = false
 isToursTab :: PanelTab -> Boolean
 isToursTab ToursTab = true
 isToursTab _ = false
+
+filterByText
+  :: String -> Array Query.NamedQuery -> Array Query.NamedQuery
+filterByText "" qs = qs
+filterByText filter qs =
+  let f = String.toLower filter
+  in Array.filter
+    (\q -> String.contains (String.Pattern f) (String.toLower q.name)
+        || String.contains (String.Pattern f) (String.toLower q.description))
+    qs
+
+filterToursByText
+  :: String -> Array TutorialEntry -> Array TutorialEntry
+filterToursByText "" ts = ts
+filterToursByText filter ts =
+  let f = String.toLower filter
+  in Array.filter
+    (\t -> String.contains (String.Pattern f) (String.toLower t.title)
+        || String.contains (String.Pattern f) (String.toLower t.description))
+    ts
 
 renderQueriesList
   :: forall m. State -> H.ComponentHTML Action () m
@@ -364,7 +393,8 @@ renderQueriesList state =
                   [ HH.text "All" ]
               ]
           ]
-            <> Array.concatMap mkQueryEntry state.queryCatalog
+            <> Array.concatMap mkQueryEntry
+                (filterByText state.catalogFilter state.queryCatalog)
         )
     , renderPromptBuilder state PromptQuery "New query"
     ]
@@ -394,7 +424,10 @@ renderToursList
 renderToursList state =
   HH.div_
     [ HH.div [ cls "query-panel-list" ]
-        ( map mkTourEntry state.tutorialIndex )
+        ( map mkTourEntry
+            (filterToursByText state.catalogFilter
+              state.tutorialIndex)
+        )
     , renderPromptBuilder state PromptTour "New tour"
     ]
   where
