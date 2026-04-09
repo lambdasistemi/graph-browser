@@ -16,7 +16,8 @@ import Data.Traversable (traverse)
 import FFI.Oxigraph (ImportedRdfQuad)
 import FFI.Uri (decodeUriComponent)
 import Graph.Build (buildGraph)
-import Graph.Types (Edge, Graph, Link, Node)
+import Graph.Types (Edge, Graph, KindDef, Link, Node)
+import Ontology.Extract as Ontology
 
 gbTerms :: String
 gbTerms = "https://lambdasistemi.github.io/graph-browser/vocab/terms#"
@@ -63,15 +64,24 @@ gbFrom = gbTerms <> "from"
 gbTo :: String
 gbTo = gbTerms <> "to"
 
-importGraph :: Array ImportedRdfQuad -> Either String Graph
+importGraph
+  :: Array ImportedRdfQuad
+  -> Either String { graph :: Graph, ontologyKinds :: Map.Map String KindDef }
 importGraph quads = do
   nodeRecords <- traverse (importNode quads) (subjectsWithType gbNode quads)
+  let ontology = Ontology.extractOntology quads
   let
     nodeIdByIri =
       Map.fromFoldable
         (map (\record -> Tuple record.iri record.node.id) nodeRecords)
   edges <- traverse (importEdge quads nodeIdByIri) (subjectsWithType gbEdgeAssertion quads)
-  pure $ buildGraph (map _.node nodeRecords) edges
+  pure
+    { graph:
+        buildGraph
+          (map _.node nodeRecords <> ontology.nodes)
+          (edges <> ontology.edges)
+    , ontologyKinds: ontology.kinds
+    }
 
 type NodeRecord =
   { iri :: String
