@@ -10,5 +10,11 @@
     "title": "The Data Pipeline",
     "description": "Follow the data from JSON files through decoding, indexing, filtering, and rendering.",
     "file": "data/tutorials/data-pipeline.json"
+  },
+  {
+    "id": "ontology-walkthrough",
+    "title": "Ontology Walkthrough",
+    "description": "Explore ontology classes, hierarchy, properties, and alignments from RDF triples.",
+    "file": "data/tutorials/ontology-walkthrough.json"
   }
 ]
