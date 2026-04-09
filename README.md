@@ -1,6 +1,6 @@
 # Graph Browser
 
-An interactive knowledge graph browser with guided tours. Graph-browser itself now runs from RDF-backed graph sources declared in `data/config.json`, while legacy `graph.json` support remains available for compatibility.
+An interactive knowledge graph browser with guided tours. Graph data is declared in `data/config.json` and loaded from RDF graph sources.
 
 **Demo:** https://lambdasistemi.github.io/graph-browser/
 
@@ -37,10 +37,11 @@ Your repository needs a `data/` directory with:
   "title": "My Knowledge Graph",
   "description": "What this graph is about.",
   "sourceUrl": "https://github.com/you/your-repo",
-  "graphSource": {
-    "format": "application/n-quads",
-    "path": "data/rdf/graph.nq"
-  },
+  "graphSources": [
+    { "format": "text/turtle", "path": "data/rdf/graph.ttl" },
+    { "format": "text/turtle", "path": "data/rdf/core-ontology.ttl" },
+    { "format": "text/turtle", "path": "data/rdf/application-ontology.ttl" }
+  ],
   "kinds": {
     "concept": { "label": "Concept", "color": "#79c0ff", "shape": "round-octagon" },
     "entity": { "label": "Entity", "color": "#58a6ff", "shape": "ellipse" }
@@ -48,9 +49,9 @@ Your repository needs a `data/` directory with:
 }
 ```
 
-`graphSource` is optional legacy singleton support. For new RDF-backed repos, prefer `graphSources`. Graph-browser keeps `config.json` as the stable entry point and loads the graph payload from the configured RDF assets.
+`config.json` is the stable entry point. It supplies viewer metadata, node kind styling, and the ordered RDF graph sources to load.
 
-For multi-file RDF deployments, use `graphSources`:
+Use `graphSources` for the primary graph plus ontology layers:
 
 ```json
 {
@@ -68,38 +69,9 @@ For multi-file RDF deployments, use `graphSources`:
 }
 ```
 
-`graphSources` is loaded in order and merged into one runtime dataset for both rendering and SPARQL queries. Single-file `graphSource` remains supported.
+`graphSources` is loaded in order and merged into one runtime dataset for both rendering and SPARQL queries.
 
-### `data/graph.json` (legacy compatibility only)
-
-```json
-{
-  "nodes": [
-    {
-      "id": "unique-id",
-      "label": "Display Name",
-      "kind": "concept",
-      "group": "optional-grouping",
-      "description": "What this node represents and why it matters.",
-      "links": [
-        { "label": "External Link", "url": "https://..." }
-      ]
-    }
-  ],
-  "edges": [
-    {
-      "source": "node-a",
-      "target": "node-b",
-      "label": "relates to",
-      "description": "Why this relationship exists."
-    }
-  ]
-}
-```
-
-`data/graph.json` remains supported for legacy JSON-backed repos. Graph-browser itself no longer uses it as the authored self-graph source of truth.
-
-### RDF graph source via `graphSource` or `graphSources` (optional)
+### RDF graph sources
 
 The current runtime importer supports RDF syntaxes understood by Oxigraph, including Turtle, JSON-LD, and N-Quads. The cleanest machine-oriented option is the exported `graph.nq`:
 
@@ -108,10 +80,9 @@ The current runtime importer supports RDF syntaxes understood by Oxigraph, inclu
   "title": "My Knowledge Graph",
   "description": "What this graph is about.",
   "sourceUrl": "https://github.com/you/your-repo",
-  "graphSource": {
-    "format": "application/n-quads",
-    "path": "data/rdf/graph.nq"
-  },
+  "graphSources": [
+    { "format": "application/n-quads", "path": "data/rdf/graph.nq" }
+  ],
   "kinds": {
     "concept": { "label": "Concept", "color": "#79c0ff", "shape": "round-octagon" }
   }
@@ -123,7 +94,6 @@ In this mode:
 - `config.json` still supplies viewer metadata and node kind styling
 - the graph itself is imported from RDF
 - `graphSources` can merge instance RDF with ontology RDF at runtime
-- existing JSON-backed repos continue to work as compatibility mode
 
 ### `data/tutorials/index.json` (optional)
 
@@ -251,7 +221,7 @@ Add `.graph-browser.json` to your repo root to customize data paths:
 ```json
 {
   "config": "data/config.json",
-  "graph": "data/graph.json",
+  "graph": "data/rdf/graph.ttl",
   "tutorials": "data/tutorials/index.json"
 }
 ```
@@ -296,12 +266,11 @@ The command writes:
 
 That gives downstream applications an explicit contract: they are free to define their own ontology terms, but kinds must still extend `gb:Node`, groups must still use `gb:Group`, and application predicates must still refine `gb:EdgeRelation`.
 
-## JSON Schemas
+## Schemas
 
 Validate your data against the schemas in [`schema/`](schema/):
 
 - [`config.schema.json`](schema/config.schema.json) — configuration
-- [`graph.schema.json`](schema/graph.schema.json) — nodes and edges
 - [`tutorial.schema.json`](schema/tutorial.schema.json) — guided tour
 - [`tutorial-index.schema.json`](schema/tutorial-index.schema.json) — tour list
 - [`view.schema.json`](schema/view.schema.json) — view (subgraph lens with tours)
