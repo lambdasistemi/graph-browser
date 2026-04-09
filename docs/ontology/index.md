@@ -8,6 +8,8 @@ The shared ontology lives at [`/rdf/core-ontology.ttl`](https://lambdasistemi.gi
 
 A generated Mermaid view of the same structure is published at [`/rdf/core-ontology.mmd`](https://lambdasistemi.github.io/graph-browser/rdf/core-ontology.mmd).
 
+The corresponding namespace page is published at [`/vocab/terms`](https://lambdasistemi.github.io/graph-browser/vocab/terms). Hash IRIs like `gb:Node` resolve through that namespace document.
+
 - `gb:Dataset`
 - `gb:Node`
 - `gb:Group`
@@ -26,6 +28,12 @@ It also defines the shared relationships and datatype properties used by exporte
 The application ontology lives at [`/rdf/application-ontology.ttl`](https://lambdasistemi.github.io/graph-browser/rdf/application-ontology.ttl). It is generated from repository data and contains:
 
 A generated Mermaid view of the repository-specific vocabulary is published at [`/rdf/application-ontology.mmd`](https://lambdasistemi.github.io/graph-browser/rdf/application-ontology.mmd).
+
+The corresponding namespace pages are published at:
+
+- [`/vocab/kinds`](https://lambdasistemi.github.io/graph-browser/vocab/kinds)
+- [`/vocab/groups`](https://lambdasistemi.github.io/graph-browser/vocab/groups)
+- [`/vocab/edges`](https://lambdasistemi.github.io/graph-browser/vocab/edges)
 
 - local node kinds
 - local groups
