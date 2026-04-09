@@ -7,6 +7,7 @@ import Data.Argonaut.Parser (jsonParser)
 import Data.Map as Map
 import Data.Set as Set
 import Data.Either (Either(..))
+import Data.Maybe (Maybe(..))
 import Data.Traversable (for_)
 import Effect.Class (liftEffect)
 import FFI.Oxigraph as Oxigraph
@@ -69,6 +70,29 @@ spec = describe "Ontology import" do
           ids `shouldSatisfy` \xs -> Array.length xs > 0
           let idSet = Set.fromFoldable ids
           idSet `shouldSatisfy` \s -> Set.subset s graphNodeIds
+
+  it "falls back to dcterms:description for ontology node text" do
+    let
+      turtle =
+        """
+        @prefix ex: <https://example.org/ontology#> .
+        @prefix owl: <http://www.w3.org/2002/07/owl#> .
+        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+        @prefix dcterms: <http://purl.org/dc/terms/> .
+
+        ex:NodeConcept a owl:Class ;
+          rdfs:label "Node Concept" ;
+          dcterms:description "Description from dcterms." .
+        """
+    quads <- liftEffect $ Oxigraph.parseQuads "text/turtle" fixtureBase turtle
+    case Rdf.Import.importGraph quads of
+      Left err -> fail err
+      Right imported -> do
+        let node = Map.lookup "owl-nodeconcept" imported.graph.nodes
+        case node of
+          Nothing -> fail "missing ontology node"
+          Just ontologyNode ->
+            ontologyNode.description `shouldEqual` "Description from dcterms."
 
   where
   fail msg = shouldEqual msg ""
