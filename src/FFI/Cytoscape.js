@@ -10,6 +10,22 @@ function hexToRgba(hex, alpha) {
   return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
 }
 
+function colorToRgba(color, alpha) {
+  if (typeof color !== "string") return color;
+  if (color[0] === "#" && color.length >= 7) {
+    return hexToRgba(color, alpha);
+  }
+  var rgb = color.match(
+    /^rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/i,
+  );
+  if (rgb) {
+    return (
+      "rgba(" + rgb[1] + "," + rgb[2] + "," + rgb[3] + "," + alpha + ")"
+    );
+  }
+  return color;
+}
+
 function kindStyles(kinds) {
   var styles = [];
   for (var kind in kinds) {
@@ -17,7 +33,7 @@ function kindStyles(kinds) {
     styles.push({
       selector: "node." + kind,
       style: {
-        "background-color": hexToRgba(def.color, 0.13),
+        "background-color": colorToRgba(def.color, 0.13),
         "border-color": def.color,
         shape: def.shape || "ellipse",
       },
