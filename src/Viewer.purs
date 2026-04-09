@@ -210,7 +210,8 @@ render state =
       )
         <>
           [ HH.div [ cls "graph-container" ]
-              [ HH.div [ HP.id "cy" ] []
+              [ renderGraphContext state
+              , HH.div [ HP.id "cy" ] []
               , renderControls state
               , if Array.null state.queryCatalog then
                   renderSearchBox state
@@ -220,6 +221,37 @@ render state =
           , renderSidebar state
           ]
     )
+
+renderGraphContext
+  :: forall m. State -> H.ComponentHTML Action () m
+renderGraphContext state = case graphContext state of
+  Nothing -> HH.text ""
+  Just context ->
+    HH.div [ cls "graph-context-card" ]
+      [ HH.div [ cls "graph-context-label" ]
+          [ HH.text "Current Graph" ]
+      , HH.h1 [ cls "graph-context-title" ]
+          [ HH.text context.title ]
+      , if context.description == "" then
+          HH.text ""
+        else
+          HH.p [ cls "graph-context-description" ]
+            [ HH.text context.description ]
+      ]
+  where
+  graphContext st = case st.activeQuery of
+    Just q ->
+      Just
+        { title: q.name
+        , description: q.description
+        }
+    Nothing | Array.null st.queryCatalog ->
+      Nothing
+    Nothing ->
+      Just
+        { title: "All"
+        , description: "Entire graph without query filtering."
+        }
 
 renderControls
   :: forall m. State -> H.ComponentHTML Action () m
@@ -1870,16 +1902,23 @@ discoverParamOptions store params = do
   where
   discoverOne p = do
     values <- Oxigraph.querySparqlStrings store
-      (discoveryQuery p.paramType)
+      (discoveryQuery p)
     let
       labels = Array.sort $ Array.nub $
         map extractLocalName values
     pure (Tuple p.name labels)
 
-  discoveryQuery "kind" =
+  discoveryQuery p | p.paramType == "kind" =
     "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\n"
       <> "SELECT DISTINCT ?v WHERE { ?node a ?v . FILTER(STRSTARTS(STR(?v), STR(gbk:))) }"
-  discoveryQuery "node" =
+  discoveryQuery p | p.paramType == "node" && p.name == "root" =
+    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+      <> "SELECT DISTINCT ?v WHERE {\n"
+      <> "  ?child rdfs:subClassOf ?ancestor .\n"
+      <> "  FILTER(isIRI(?child) && isIRI(?ancestor) && ?child != ?ancestor)\n"
+      <> "  BIND(CONCAT(\"owl-\", LCASE(REPLACE(REPLACE(STR(?ancestor), \"^.*(#|/)\", \"\"), \"[^A-Za-z0-9]+\", \"-\"))) AS ?v)\n"
+      <> "}"
+  discoveryQuery p | p.paramType == "node" =
     "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\n"
       <> "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n"
       <> "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
@@ -1891,7 +1930,7 @@ discoverParamOptions store params = do
       <> "    BIND(CONCAT(\"owl-\", LCASE(REPLACE(REPLACE(STR(?class), \"^.*(#|/)\", \"\"), \"[^A-Za-z0-9]+\", \"-\"))) AS ?v)\n"
       <> "  }\n"
       <> "}"
-  discoveryQuery "group" =
+  discoveryQuery p | p.paramType == "group" =
     "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\n"
       <> "SELECT DISTINCT ?v WHERE { ?node gb:group ?v }"
   discoveryQuery _ =
