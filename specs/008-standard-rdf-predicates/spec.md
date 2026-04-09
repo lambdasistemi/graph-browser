@@ -53,12 +53,29 @@ A dataset author uses standard ontologies such as PROV-O, SKOS, FOAF, and Dublin
 1. **Given** a dataset that uses standard vocabularies for descriptions, references, and domain relationships, **When** it is loaded into graph-browser, **Then** graph-browser renders it without requiring duplicate gb-specific semantic triples
 2. **Given** a dataset that still uses the current gb-specific predicates everywhere, **When** it is loaded into graph-browser, **Then** existing behavior is unchanged
 
+---
+
+### User Story 4 - Link imported ontology terms to their documentation (Priority: P2)
+
+A graph-browser user hovers or inspects a node or edge whose semantics come from a standard ontology term such as FOAF, OWL, SKOS, PROV-O, or Dublin Core. They want the right pane to preserve the underlying ontology reference instead of stripping it down to plain text, and they want a clickable link to the ontology term documentation when that term is a standard IRI.
+
+**Why this priority**: Standard-predicate support is less useful if the UI discards the identity of the ontology term. The user needs to see not just the rendered label, but where that label comes from.
+
+**Independent Test**: Load RDF where a node kind or edge predicate comes from a standard ontology IRI. Open the node or edge details in the right pane. Verify the pane includes a clickable link to the ontology term rather than only a stripped local label.
+
+**Acceptance Scenarios**:
+
+1. **Given** an imported node or edge that is backed by a standard ontology IRI, **When** the user views its details in the right pane, **Then** graph-browser shows a clickable link to that ontology term
+2. **Given** an imported node or edge whose display label is derived from an ontology term, **When** the user views its details, **Then** graph-browser preserves both the human-readable label and the original ontology reference
+3. **Given** an imported node or edge that is not backed by a standard ontology IRI, **When** the user views its details, **Then** graph-browser does not invent a documentation link
+
 ### Edge Cases
 
 - What happens when multiple standard fallback predicates are present for the same node field? The system must choose a deterministic result rather than exposing inconsistent values across runs.
 - What happens when a fallback predicate value is present but unusable for display, such as an empty literal or malformed link target? The importer must ignore the unusable value and continue evaluating remaining sources.
 - What happens when the dataset uses standard predicates for semantic content but omits required graph-browser presentation hints such as kind or other rendering metadata? The system must fail clearly if those browser-specific requirements are still mandatory.
 - What happens when an edge annotation pattern is syntactically valid RDF but cannot be mapped unambiguously to a single displayed edge? The system must not invent hover text for the wrong edge.
+- What happens when the importer can derive a readable ontology label but the underlying ontology IRI is missing from the UI model? The system must preserve the source IRI strongly enough that the right pane can link to it.
 
 ## Requirements
 
@@ -73,6 +90,8 @@ A dataset author uses standard ontologies such as PROV-O, SKOS, FOAF, and Dublin
 - **FR-007**: The system MUST keep existing RDF datasets that rely on `gb:description`, `gb:externalLink`, and `gb:EdgeAssertion` working without behavior regression.
 - **FR-008**: The system MUST allow datasets to use standard RDF vocabularies as the primary source of semantic content while reserving `gb:` vocabulary for graph-browser-specific presentation metadata.
 - **FR-009**: The system MUST document which standard predicates and edge-annotation patterns are supported, including their precedence relative to existing gb-specific predicates.
+- **FR-010**: The system MUST preserve the original ontology IRI for imported standard node and edge semantics when it derives a rendered label from that ontology term.
+- **FR-011**: The right pane MUST expose a clickable documentation link for imported standard ontology terms when a stable ontology IRI is available.
 
 ### Key Entities
 
@@ -80,6 +99,7 @@ A dataset author uses standard ontologies such as PROV-O, SKOS, FOAF, and Dublin
 - **Presentation Predicate**: A graph-browser-specific RDF predicate used for rendering concerns that do not have a standard semantic equivalent in the browser's model.
 - **Annotated Edge**: A graph relationship whose descriptive metadata is attached directly to the triple through a supported RDF annotation pattern rather than through a standalone `gb:EdgeAssertion` structure.
 - **Predicate Precedence Rule**: The rule that determines which value graph-browser uses when both gb-specific and fallback standard predicates are present.
+- **Ontology Reference**: The original standard ontology IRI behind a rendered node kind, node type, or edge predicate, preserved so the UI can link to the authoritative term documentation.
 
 ## Success Criteria
 
@@ -89,6 +109,7 @@ A dataset author uses standard ontologies such as PROV-O, SKOS, FOAF, and Dublin
 - **SC-002**: A dataset with edge descriptions expressed through a supported edge annotation pattern shows the same edge hover text outcome as an equivalent dataset encoded with `gb:EdgeAssertion`.
 - **SC-003**: Existing RDF-backed datasets that rely on gb-specific predicates continue to render with no loss of node metadata, edge metadata, or link behavior.
 - **SC-004**: Project documentation makes the supported fallback predicates and precedence rules explicit enough that a downstream dataset author can model data correctly without reading the importer source code.
+- **SC-005**: When imported node or edge semantics come from a standard ontology IRI, the right pane exposes a working clickable link to that term instead of only a stripped label.
 
 ## Assumptions
 

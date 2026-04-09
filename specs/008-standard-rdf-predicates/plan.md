@@ -5,7 +5,7 @@
 
 ## Summary
 
-Extend the existing RDF importer so graph-browser can read standard RDF predicates as fallback sources for node descriptions, external links, and edge hover text, while keeping current `gb:` predicates authoritative. Keep the mapping logic in PureScript, use the existing Oxigraph quad parser, and start with standard RDF reification for edge annotations rather than introducing a new parser shape for RDF-star.
+Extend the existing RDF importer so graph-browser can read standard RDF predicates as fallback sources for node descriptions, external links, and edge hover text, while keeping current `gb:` predicates authoritative. Preserve standard ontology IRIs strongly enough that the right pane can link to their documentation instead of stripping them down to local labels. Keep the mapping logic in PureScript, use the existing Oxigraph quad parser, and start with standard RDF reification for edge annotations rather than introducing a new parser shape for RDF-star.
 
 ## Technical Context
 
@@ -17,7 +17,7 @@ Extend the existing RDF importer so graph-browser can read standard RDF predicat
 **Project Type**: Web application plus reusable viewer library  
 **Performance Goals**: Preserve current RDF import responsiveness for repo-scale graphs and avoid extra full-graph passes beyond what is needed for fallback lookup  
 **Constraints**: Preserve backward compatibility for JSON-backed repos and existing gb-vocabulary RDF repos; keep import semantics in PureScript; avoid inventing domain logic in JavaScript  
-**Scale/Scope**: One importer enhancement touching RDF-backed datasets, validation expectations, and documentation of supported RDF predicate precedence
+**Scale/Scope**: One importer and details-pane enhancement touching RDF-backed datasets, UI metadata preservation, validation expectations, and documentation of supported RDF predicate precedence
 
 ## Constitution Check
 
@@ -69,7 +69,7 @@ validate-action/
 README.md
 ```
 
-**Structure Decision**: Keep the change inside the existing shared RDF import path. `Rdf.Import` owns predicate precedence and edge-annotation mapping, `FFI.Oxigraph.*` only changes if an additional parsed term shape becomes unavoidable, `Viewer.purs` remains the caller, `validate-action/action.yml` verifies supported RDF input, and `README.md` documents the accepted RDF contract.
+**Structure Decision**: Keep the change inside the existing shared RDF import path plus the existing details UI. `Rdf.Import` owns predicate precedence, ontology-reference preservation, and edge-annotation mapping; `Graph.Types.purs` carries any extra metadata the UI needs; `Viewer.purs` renders clickable ontology links in the right pane; `FFI.Oxigraph.*` only changes if an additional parsed term shape becomes unavoidable; `validate-action/action.yml` verifies supported RDF input; and `README.md` documents the accepted RDF contract.
 
 ## Phase 0: Research Outcomes
 
@@ -78,20 +78,23 @@ README.md
 - Use `foaf:page` first and `rdfs:seeAlso` second for external-link fallback when no `gb:externalLink` structure exists.
 - Support edge descriptions through standard RDF reification first; do not require RDF-star support in this iteration.
 - Keep the parser output as simple quads; implement annotation matching in PureScript instead of moving import semantics into JS.
+- Preserve ontology IRIs for standard node and edge semantics so the right pane can link to term documentation instead of only showing stripped labels.
 
 ## Phase 1: Design Plan
 
-1. Extend `Rdf.Import` with declarative predicate lookup helpers for literals, named-node fallbacks, and precedence rules.
+1. Extend `Graph.Types.purs` and `Rdf.Import.purs` so imported node and edge records can preserve ontology references alongside rendered labels.
 2. Add node import support for standard description and link predicates without regressing `gb:externalLink`.
 3. Add edge-description extraction from reified statements that point back to an imported source/predicate/target triple.
 4. Preserve current `gb:EdgeAssertion` handling as the highest-precedence source for edge hover text.
-5. Add focused tests and validation fixtures for:
+5. Update `Viewer.purs` so the right pane renders clickable ontology documentation links when preserved ontology IRIs are available.
+6. Add focused tests and validation fixtures for:
    - `dcterms:description`
    - `foaf:page`
    - `rdfs:seeAlso`
    - reified edge descriptions
+   - ontology-reference preservation in the right pane
    - precedence when both gb and standard predicates exist
-6. Update user-facing docs to state the supported predicate set and precedence rules explicitly.
+7. Update user-facing docs to state the supported predicate set, precedence rules, and ontology-link behavior explicitly.
 
 ## Validation Strategy
 

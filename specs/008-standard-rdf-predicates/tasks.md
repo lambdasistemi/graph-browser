@@ -78,8 +78,10 @@
 - [ ] T017 [P] [US3] Add mixed semantic-layer fixture coverage in `test/Test/Fixtures/`
 - [ ] T018 [US3] Add regression cases for mixed gb and standard metadata in `test/Test/RdfImport.purs`
 - [ ] T019 [US3] Tighten importer error messages for ambiguous or unusable fallback metadata in `src/Rdf/Import.purs`
-- [ ] T020 [US3] Align the external contract wording in `README.md`, `specs/008-standard-rdf-predicates/contracts/rdf-import-surface.md`, and `specs/008-standard-rdf-predicates/quickstart.md`
-- [ ] T021 [US3] Verify downstream validation expectations in `validate-action/action.yml`
+- [ ] T020 [US3] Preserve standard ontology IRIs in the imported UI model in `src/Graph/Types.purs` and `src/Rdf/Import.purs`
+- [ ] T021 [US3] Render clickable ontology documentation links in the right pane in `src/Viewer.purs`
+- [ ] T022 [US3] Align the external contract wording in `README.md`, `specs/008-standard-rdf-predicates/contracts/rdf-import-surface.md`, and `specs/008-standard-rdf-predicates/quickstart.md`
+- [ ] T023 [US3] Verify downstream validation expectations in `validate-action/action.yml`
 
 **Checkpoint**: The supported standard-predicate contract is explicit, tested, and consistent across runtime and CI guidance.
 
@@ -89,10 +91,10 @@
 
 **Purpose**: Final verification and cleanup across all stories.
 
-- [ ] T022 [P] Run the RDF import test suite via `test/Test/Main.purs` and related test modules
-- [ ] T023 Run `just ci` from the repository root in `/code/graph-browser-spec-49`
-- [ ] T024 [P] Review docs and examples in `README.md` and `specs/008-standard-rdf-predicates/quickstart.md` for consistency with the implemented precedence rules
-- [ ] T025 Prepare PR summary and issue linkage for the implementation branch in `/code/graph-browser-issue-49`
+- [ ] T024 [P] Run the RDF import test suite via `test/Test/Main.purs` and related test modules
+- [ ] T025 Run `just ci` from the repository root in `/code/graph-browser-spec-49`
+- [ ] T026 [P] Review docs and examples in `README.md` and `specs/008-standard-rdf-predicates/quickstart.md` for consistency with the implemented precedence rules and ontology-link behavior
+- [ ] T027 Prepare PR summary and issue linkage for the implementation branch in `/code/graph-browser-issue-49`
 
 ---
 

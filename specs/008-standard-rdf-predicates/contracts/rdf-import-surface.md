@@ -49,6 +49,19 @@ Rules:
 - If a matching `gb:EdgeAssertion` also exists, the gb-specific description wins.
 - Reified statements do not replace the edge itself; they only contribute metadata.
 
+## Ontology Reference Contract
+
+Supported behavior:
+
+- When a rendered node kind, node type, or edge predicate is backed by a standard ontology IRI, graph-browser preserves that IRI in the imported UI model.
+- The right pane exposes that preserved IRI as a clickable documentation link.
+
+Rules:
+
+- The rendered label and the preserved ontology IRI are both part of the imported contract for standard terms.
+- Graph-browser must not discard the ontology IRI merely because the UI also shows a shortened local label.
+- Graph-browser must not invent documentation links for non-standard or unresolvable terms.
+
 ## Compatibility Guarantees
 
 - Existing RDF datasets that rely only on gb-specific predicates remain valid.
