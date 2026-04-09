@@ -45,7 +45,7 @@
     "id": "ffi-boundary",
     "name": "FFI Boundary",
     "description": "Everything that crosses the PureScript / JavaScript border.",
-    "sparql": "PREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nPREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT DISTINCT ?node WHERE {\n  { ?node a gbk:ffi }\n  UNION { ?e a gb:EdgeAssertion . ?e gb:from ?ffi . ?ffi a gbk:ffi . ?e gb:to ?node }\n  UNION { ?e a gb:EdgeAssertion . ?e gb:to ?ffi . ?ffi a gbk:ffi . ?e gb:from ?node }\n}",
+    "sparql": "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nPREFIX gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#>\nSELECT DISTINCT ?node WHERE {\n  { ?node a gbk:ffi }\n  UNION {\n    ?ffi a gbk:ffi ; ?p ?node .\n    ?node gb:nodeId ?nodeId .\n    FILTER(?p != rdf:type && ?p != gb:group && ?p != dcterms:isPartOf)\n  }\n  UNION {\n    ?node ?p ?ffi .\n    ?ffi a gbk:ffi .\n    ?node gb:nodeId ?nodeId .\n    FILTER(?p != rdf:type && ?p != gb:group && ?p != dcterms:isPartOf)\n  }\n}",
     "tags": ["view"]
   },
   {
@@ -73,14 +73,14 @@
     "id": "leaf-nodes",
     "name": "Leaf Nodes",
     "description": "Entry points and terminal dependencies — nodes with only one connection.",
-    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT ?node WHERE {\n  { SELECT ?node (COUNT(*) AS ?c) WHERE {\n    { ?e a gb:EdgeAssertion . ?e gb:from ?node }\n    UNION { ?e a gb:EdgeAssertion . ?e gb:to ?node }\n  } GROUP BY ?node HAVING (COUNT(*) = 1) }\n}",
+    "sparql": "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT ?node WHERE {\n  { SELECT ?node (COUNT(*) AS ?c) WHERE {\n    { ?node ?p ?other . ?other gb:nodeId ?otherId }\n    UNION { ?other ?p ?node . ?other gb:nodeId ?otherId }\n    FILTER(?p != rdf:type && ?p != gb:group && ?p != dcterms:isPartOf)\n  } GROUP BY ?node HAVING (COUNT(*) = 1) }\n}",
     "tags": []
   },
   {
     "id": "hub-nodes",
     "name": "Hub Nodes",
     "description": "The most connected nodes — architectural load-bearing components.",
-    "sparql": "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT ?node WHERE {\n  { SELECT ?node (COUNT(*) AS ?c) WHERE {\n    { ?e a gb:EdgeAssertion . ?e gb:from ?node }\n    UNION { ?e a gb:EdgeAssertion . ?e gb:to ?node }\n  } GROUP BY ?node HAVING (COUNT(*) > 4) }\n}",
+    "sparql": "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\nSELECT ?node WHERE {\n  { SELECT ?node (COUNT(*) AS ?c) WHERE {\n    { ?node ?p ?other . ?other gb:nodeId ?otherId }\n    UNION { ?other ?p ?node . ?other gb:nodeId ?otherId }\n    FILTER(?p != rdf:type && ?p != gb:group && ?p != dcterms:isPartOf)\n  } GROUP BY ?node HAVING (COUNT(*) > 4) }\n}",
     "tags": []
   },
   {

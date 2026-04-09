@@ -14,7 +14,7 @@ import Data.Maybe (Maybe(..), isJust)
 import Data.String (null) as S
 import Data.Tuple (Tuple(..), snd)
 import FFI.Uri (encodeUriComponent)
-import Graph.Query (NamedQuery, QueryCatalog)
+import Graph.Query (QueryCatalog)
 import Graph.Types (Config, Edge, Graph, Node)
 import Tutorial (Tutorial)
 
@@ -30,7 +30,6 @@ vocabBase = "https://lambdasistemi.github.io/graph-browser/vocab"
 isRdf :: Config -> Boolean
 isRdf config = isJust config.graphSource
 
-
 -- | Build a prompt for a node with its connected edges.
 buildNodePrompt :: Config -> Graph -> Node -> String -> String
 buildNodePrompt config graph node userText =
@@ -43,7 +42,7 @@ buildNodePrompt config graph node userText =
       <> section "Schemas" (schemasBlock config)
       <> section "Current Node" (renderNode config node)
       <> section "Connected Edges"
-          (renderEdges config connectedEdges)
+        (renderEdges config connectedEdges)
       <> section "File Paths" (filePathsBlock config)
       <> userSection userText
       <> prSection config
@@ -89,7 +88,8 @@ buildTourPrompt config graph tours catalog userText =
     <> section "Schemas" (schemasBlock config)
     <> section "Available Nodes" (availableNodesBlock graph)
     <> section "Existing Tours" (existingToursBlock tours)
-    <> ( if Array.null catalog then ""
+    <>
+      ( if Array.null catalog then ""
         else section "Query Catalog"
           (existingQueriesBlock catalog)
       )
@@ -115,10 +115,21 @@ contextBlock config
 prefixBlock :: Config -> String
 prefixBlock config =
   "```sparql\n"
-    <> "PREFIX gb:  <" <> vocabBase <> "/terms#>\n"
-    <> "PREFIX gbk: <" <> vocabBase <> "/kinds#>\n"
-    <> "PREFIX gbg: <" <> vocabBase <> "/groups#>\n"
-    <> "PREFIX gbe: <" <> vocabBase <> "/edges#>\n"
+    <> "PREFIX gb:  <"
+    <> vocabBase
+    <> "/terms#>\n"
+    <> "PREFIX gbk: <"
+    <> vocabBase
+    <> "/kinds#>\n"
+    <> "PREFIX gbg: <"
+    <> vocabBase
+    <> "/groups#>\n"
+    <> "PREFIX gbe: <"
+    <> vocabBase
+    <> "/edges#>\n"
+    <> "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+    <> "PREFIX dcterms: <http://purl.org/dc/terms/>\n"
+    <> "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n"
     <> datasetPrefix config
     <> "```\n\n"
     <> "Node IRIs: `<{sourceUrl}/rdf/node/{id}>`\n"
@@ -127,8 +138,8 @@ prefixBlock config =
     <> "Edge predicates: `gbe:{url-encoded-label}`\n"
     <> "Key properties: `gb:nodeId` (string ID), "
     <> "`gb:group` (group IRI), "
-    <> "`gb:from`/`gb:to` (edge endpoints), "
-    <> "`gb:predicate` (edge relation)"
+    <> "`dcterms:description` (descriptions), "
+    <> "`foaf:page` / `rdfs:seeAlso` (external links)"
 
 datasetPrefix :: Config -> String
 datasetPrefix config
@@ -140,19 +151,25 @@ schemasBlock :: Config -> String
 schemasBlock config =
   if isRdf config then
     "- Config schema: " <> schemaBase <> "config.schema.json\n"
-      <> "- Query catalog schema: " <> schemaBase
+      <> "- Query catalog schema: "
+      <> schemaBase
       <> "query-catalog.schema.json\n"
-      <> "- Tutorial schema: " <> schemaBase
+      <> "- Tutorial schema: "
+      <> schemaBase
       <> "tutorial.schema.json\n"
-      <> "- Tutorial index schema: " <> schemaBase
+      <> "- Tutorial index schema: "
+      <> schemaBase
       <> "tutorial-index.schema.json"
   else
     "- Graph schema: " <> schemaBase <> "graph.schema.json\n"
-      <> "- Config schema: " <> schemaBase
+      <> "- Config schema: "
+      <> schemaBase
       <> "config.schema.json\n"
-      <> "- Tutorial schema: " <> schemaBase
+      <> "- Tutorial schema: "
+      <> schemaBase
       <> "tutorial.schema.json\n"
-      <> "- Tutorial index schema: " <> schemaBase
+      <> "- Tutorial index schema: "
+      <> schemaBase
       <> "tutorial-index.schema.json"
 
 queryCatalogSchemaBlock :: String
@@ -166,32 +183,37 @@ queryCatalogSchemaBlock =
     <> " — type: `string` | `node` | `kind`\n"
     <> "- `tags`: optional — `\"view\"` for views,"
     <> " `\"tour:tour-id\"` for tour stops\n\n"
-    <> "Schema: " <> schemaBase <> "query-catalog.schema.json"
+    <> "Schema: "
+    <> schemaBase
+    <> "query-catalog.schema.json"
 
 existingQueriesBlock :: QueryCatalog -> String
 existingQueriesBlock catalog
   | Array.null catalog = "_No existing queries._"
   | otherwise =
       Array.intercalate "\n" (map queryLine catalog)
-  where
-  queryLine q =
-    "- **" <> q.name <> "** (`" <> q.id <> "`): "
-      <> q.description <> tagsNote q.tags
-  tagsNote tags
-    | Array.null tags = ""
-    | otherwise =
-        " [" <> Array.intercalate ", " tags <> "]"
+      where
+      queryLine q =
+        "- **" <> q.name <> "** (`" <> q.id <> "`): "
+          <> q.description
+          <> tagsNote q.tags
+      tagsNote tags
+        | Array.null tags = ""
+        | otherwise =
+            " [" <> Array.intercalate ", " tags <> "]"
 
 existingToursBlock :: Array Tutorial -> String
 existingToursBlock tours
   | Array.null tours = "_No existing tours._"
   | otherwise =
       Array.intercalate "\n" (map tourLine tours)
-  where
-  tourLine t =
-    "- **" <> t.title <> "** (`" <> t.id <> "`): "
-      <> t.description
-      <> " (" <> show (Array.length t.stops) <> " stops)"
+      where
+      tourLine t =
+        "- **" <> t.title <> "** (`" <> t.id <> "`): "
+          <> t.description
+          <> " ("
+          <> show (Array.length t.stops)
+          <> " stops)"
 
 availableNodesBlock :: Graph -> String
 availableNodesBlock graph =
@@ -217,7 +239,9 @@ availableNodesBlock graph =
                   ( \(Tuple _ n) ->
                       "  - `" <> n.id <> "` — "
                         <> n.label
-                        <> " (" <> n.kind <> ")"
+                        <> " ("
+                        <> n.kind
+                        <> ")"
                   )
                   items
               in
@@ -241,8 +265,8 @@ sparqlExamples =
     <> "Find by edge relationship:\n"
     <> "```sparql\n"
     <> "SELECT DISTINCT ?node WHERE {\n"
-    <> "  ?e a gb:EdgeAssertion ;"
-    <> " gb:from ?node ; gb:predicate gbe:votes%20on\n"
+    <> "  ?node gbe:votes%20on ?target .\n"
+    <> "  ?target gb:nodeId ?targetId\n"
     <> "}\n"
     <> "```\n\n"
     <> "Parameterized (use `$name` placeholders):\n"
@@ -301,29 +325,45 @@ nodeIri config nodeId
   | S.null config.sourceUrl =
       "<urn:graph-browser:"
         <> encodeUriComponent config.title
-        <> "/node/" <> nodeId <> ">"
+        <> "/node/"
+        <> nodeId
+        <> ">"
   | otherwise =
       "<" <> config.sourceUrl <> "/rdf/node/"
-        <> nodeId <> ">"
+        <> nodeId
+        <> ">"
 
 nodeTurtle :: Config -> Node -> String
 nodeTurtle config n =
   "```turtle\n"
-    <> nodeIri config n.id <> "\n"
-    <> "  a gbk:" <> n.kind <> " ;\n"
-    <> "  rdfs:label " <> quote n.label <> " ;\n"
-    <> "  gb:nodeId " <> quote n.id <> " ;\n"
-    <> "  gb:group gbg:" <> n.group <> " ;\n"
+    <> nodeIri config n.id
+    <> "\n"
+    <> "  a gbk:"
+    <> n.kind
+    <> " ;\n"
+    <> "  rdfs:label "
+    <> quote n.label
+    <> " ;\n"
+    <> "  gb:nodeId "
+    <> quote n.id
+    <> " ;\n"
+    <> "  gb:group gbg:"
+    <> n.group
+    <> " ;\n"
     <> "  dcterms:description "
-    <> quote n.description <> " .\n"
+    <> quote n.description
+    <> " .\n"
     <> "```"
 
 edgeTurtle :: Config -> Edge -> String
 edgeTurtle config e =
   "```turtle\n"
     <> nodeIri config e.source
-    <> " gbe:" <> encodeUriComponent e.label <> " "
-    <> nodeIri config e.target <> " .\n"
+    <> " gbe:"
+    <> encodeUriComponent e.label
+    <> " "
+    <> nodeIri config e.target
+    <> " .\n"
     <> "```"
 
 -- JSON rendering (legacy)
@@ -332,13 +372,24 @@ nodeJson :: Node -> String
 nodeJson n =
   "```json\n"
     <> "{\n"
-    <> "  \"id\": " <> quote n.id <> ",\n"
-    <> "  \"label\": " <> quote n.label <> ",\n"
-    <> "  \"kind\": " <> quote n.kind <> ",\n"
-    <> "  \"group\": " <> quote n.group <> ",\n"
-    <> "  \"description\": " <> quote n.description
+    <> "  \"id\": "
+    <> quote n.id
     <> ",\n"
-    <> "  \"links\": [" <> linksJson n.links <> "]\n"
+    <> "  \"label\": "
+    <> quote n.label
+    <> ",\n"
+    <> "  \"kind\": "
+    <> quote n.kind
+    <> ",\n"
+    <> "  \"group\": "
+    <> quote n.group
+    <> ",\n"
+    <> "  \"description\": "
+    <> quote n.description
+    <> ",\n"
+    <> "  \"links\": ["
+    <> linksJson n.links
+    <> "]\n"
     <> "}\n"
     <> "```"
 
@@ -346,10 +397,17 @@ edgeJson :: Edge -> String
 edgeJson e =
   "```json\n"
     <> "{\n"
-    <> "  \"source\": " <> quote e.source <> ",\n"
-    <> "  \"target\": " <> quote e.target <> ",\n"
-    <> "  \"label\": " <> quote e.label <> ",\n"
-    <> "  \"description\": " <> quote e.description
+    <> "  \"source\": "
+    <> quote e.source
+    <> ",\n"
+    <> "  \"target\": "
+    <> quote e.target
+    <> ",\n"
+    <> "  \"label\": "
+    <> quote e.label
+    <> ",\n"
+    <> "  \"description\": "
+    <> quote e.description
     <> "\n"
     <> "}\n"
     <> "```"
@@ -361,10 +419,12 @@ linksJson links
       "\n"
         <> Array.intercalate ",\n" (map linkJson links)
         <> "\n  "
-  where
-  linkJson l =
-    "    { \"label\": " <> quote l.label
-      <> ", \"url\": " <> quote l.url <> " }"
+      where
+      linkJson l =
+        "    { \"label\": " <> quote l.label
+          <> ", \"url\": "
+          <> quote l.url
+          <> " }"
 
 filePathsBlock :: Config -> String
 filePathsBlock config =

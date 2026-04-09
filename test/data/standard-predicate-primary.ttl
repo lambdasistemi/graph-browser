@@ -61,10 +61,10 @@ ex:carol-advises a gb:EdgeAssertion ;
   gb:to ex:bob ;
   gb:predicate ex:advises ;
   rdfs:label "advises" ;
-  gb:description "GB assertion description wins." .
+  gb:description "Legacy assertion description should be ignored." .
 
 [] a rdf:Statement ;
   rdf:subject ex:carol ;
   rdf:predicate ex:advises ;
   rdf:object ex:bob ;
-  dcterms:description "This description should lose to the gb assertion." .
+  dcterms:description "Standard reified description wins." .

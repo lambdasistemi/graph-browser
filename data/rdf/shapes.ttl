@@ -3,6 +3,7 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 gb:DatasetShape a sh:NodeShape ;
@@ -58,14 +59,18 @@ gb:NodeShape a sh:NodeShape ;
     sh:maxCount 1
   ] ;
   sh:property [
-    sh:path gb:description ;
+    sh:path dcterms:description ;
     sh:datatype xsd:string ;
     sh:minCount 1 ;
     sh:maxCount 1
   ] ;
   sh:property [
-    sh:path gb:externalLink ;
-    sh:class gb:ExternalLink
+    sh:path foaf:page ;
+    sh:nodeKind sh:IRI
+  ] ;
+  sh:property [
+    sh:path rdfs:seeAlso ;
+    sh:nodeKind sh:IRI
   ] .
 
 gb:GroupShape a sh:NodeShape ;
@@ -83,38 +88,23 @@ gb:GroupShape a sh:NodeShape ;
     sh:maxCount 1
   ] .
 
-gb:ExternalLinkShape a sh:NodeShape ;
-  sh:targetClass gb:ExternalLink ;
+gb:ReifiedEdgeDescriptionShape a sh:NodeShape ;
+  sh:targetClass rdf:Statement ;
   sh:property [
-    sh:path rdfs:label ;
-    sh:datatype xsd:string ;
-    sh:minCount 1 ;
-    sh:maxCount 1
-  ] ;
-  sh:property [
-    sh:path gb:url ;
-    sh:datatype xsd:anyURI ;
-    sh:minCount 1 ;
-    sh:maxCount 1
-  ] .
-
-gb:EdgeAssertionShape a sh:NodeShape ;
-  sh:targetClass gb:EdgeAssertion ;
-  sh:property [
-    sh:path gb:from ;
+    sh:path rdf:subject ;
     sh:class gb:Node ;
     sh:minCount 1 ;
     sh:maxCount 1
   ] ;
   sh:property [
-    sh:path gb:to ;
-    sh:class gb:Node ;
-    sh:minCount 1 ;
-    sh:maxCount 1
-  ] ;
-  sh:property [
-    sh:path gb:predicate ;
+    sh:path rdf:predicate ;
     sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1
+  ] ;
+  sh:property [
+    sh:path rdf:object ;
+    sh:class gb:Node ;
     sh:minCount 1 ;
     sh:maxCount 1
   ] ;
@@ -125,13 +115,7 @@ gb:EdgeAssertionShape a sh:NodeShape ;
     sh:maxCount 1
   ] ;
   sh:property [
-    sh:path rdfs:label ;
-    sh:datatype xsd:string ;
-    sh:minCount 1 ;
-    sh:maxCount 1
-  ] ;
-  sh:property [
-    sh:path gb:description ;
+    sh:path dcterms:description ;
     sh:datatype xsd:string ;
     sh:minCount 1 ;
     sh:maxCount 1
