@@ -10,6 +10,8 @@ import Data.Map as Map
 import Data.Maybe (Maybe(..), isJust, isNothing)
 import Data.Set as Set
 import Data.String as String
+import Data.String.Common (joinWith, split)
+import Data.String.Pattern (Pattern(..))
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
@@ -922,7 +924,7 @@ renderNodeDetail state node =
     [ HH.span
         [ cls ("badge badge-" <> node.kind) ]
         [ HH.text (kindLabel cfg node.kind) ]
-    , renderOntologyReference "Node ontology" node.ontologyRef
+    , renderOntologyIdentity node
     , HH.p [ cls "description" ]
         [ HH.text node.description ]
     , renderLinks node.links
@@ -957,6 +959,36 @@ renderNodeDetail state node =
           )
           links
       )
+
+  renderOntologyIdentity :: Node -> H.ComponentHTML Action () m
+  renderOntologyIdentity currentNode =
+    case ontologyIdentity currentNode of
+      Nothing -> HH.text ""
+      Just ident ->
+        HH.div [ cls "ontology-identity" ]
+          [ HH.div [ cls "connection-item" ]
+              [ HH.span [ cls "conn-label" ]
+                  [ HH.text "Ontology term" ]
+              , HH.a
+                  [ HP.href ident.iri
+                  , HP.target "_blank"
+                  , HP.rel "noopener"
+                  , cls "conn-node"
+                  ]
+                  [ HH.text ident.compact ]
+              ]
+          , HH.div [ cls "connection-item" ]
+              [ HH.span [ cls "conn-label" ]
+                  [ HH.text "Namespace" ]
+              , HH.a
+                  [ HP.href ident.namespace
+                  , HP.target "_blank"
+                  , HP.rel "noopener"
+                  , cls "conn-node"
+                  ]
+                  [ HH.text ident.namespaceLabel ]
+              ]
+          ]
 
   renderConnections
     :: String
@@ -1071,6 +1103,72 @@ renderLegend cfg =
           ]
           [ HH.text "Source" ]
     ]
+
+type OntologyIdentity =
+  { iri :: String
+  , compact :: String
+  , namespace :: String
+  , namespaceLabel :: String
+  }
+
+ontologyIdentity :: Node -> Maybe OntologyIdentity
+ontologyIdentity node = do
+  iri <- ontologyIri node
+  let
+    compact = compactIri iri
+    namespace = namespaceIri iri
+    namespaceLabel = namespaceName namespace
+  pure { iri, compact, namespace, namespaceLabel }
+
+ontologyIri :: Node -> Maybe String
+ontologyIri node = map _.iri node.ontologyRef
+
+compactIri :: String -> String
+compactIri iri =
+  case Array.find matchPrefix knownPrefixes of
+    Just (Tuple prefix namespace) ->
+      prefix <> ":" <> String.drop (String.length namespace) iri
+    Nothing -> iri
+  where
+  matchPrefix (Tuple _ namespace) =
+    String.take (String.length namespace) iri == namespace
+
+namespaceIri :: String -> String
+namespaceIri iri =
+  case Array.find matchPrefix knownPrefixes of
+    Just (Tuple _ namespace) -> namespace
+    Nothing ->
+      case String.lastIndexOf (Pattern "#") iri of
+        Just idx -> String.take (idx + 1) iri
+        Nothing ->
+          case split (Pattern "/") iri of
+            [] -> iri
+            parts ->
+              case Array.unsnoc parts of
+                Just { init } -> joinWith "/" init <> "/"
+                Nothing -> iri
+  where
+  matchPrefix (Tuple _ namespace) =
+    String.take (String.length namespace) iri == namespace
+
+namespaceName :: String -> String
+namespaceName namespace =
+  case Array.find (\(Tuple _ known) -> known == namespace) knownPrefixes of
+    Just (Tuple prefix _) -> prefix
+    Nothing -> namespace
+
+knownPrefixes :: Array (Tuple String String)
+knownPrefixes =
+  [ Tuple "owl" "http://www.w3.org/2002/07/owl#"
+  , Tuple "rdf" "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  , Tuple "rdfs" "http://www.w3.org/2000/01/rdf-schema#"
+  , Tuple "xsd" "http://www.w3.org/2001/XMLSchema#"
+  , Tuple "dcterms" "http://purl.org/dc/terms/"
+  , Tuple "gb" "https://lambdasistemi.github.io/graph-browser/vocab/terms#"
+  , Tuple "gbkind" "https://lambdasistemi.github.io/graph-browser/vocab/kinds#"
+  , Tuple "gbgroup" "https://lambdasistemi.github.io/graph-browser/vocab/groups#"
+  , Tuple "gbedge" "https://lambdasistemi.github.io/graph-browser/vocab/edges#"
+  ]
 
 handleAction
   :: forall o
