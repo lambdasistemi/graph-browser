@@ -27,7 +27,7 @@ loadStore
 loadStore baseIri path = liftEffect do
   turtle <- readTextFile UTF8 path
   s <- Oxigraph.createStore
-  Oxigraph.loadTurtle s baseIri turtle
+  Oxigraph.loadRdf s "text/turtle" baseIri turtle
   pure s
 
 graphBase :: String
@@ -55,9 +55,10 @@ spec = describe "Self-graph integration" do
     case jsonParser body >>= decodeQueryCatalog of
       Left err -> fail err
       Right catalog -> do
-        let static = Array.filter
-              (\q -> Array.null q.parameters && not (Array.elem "ontology" q.tags))
-              catalog
+        let
+          static = Array.filter
+            (\q -> Array.null q.parameters && not (Array.elem "ontology" q.tags))
+            catalog
         for_ static \q -> do
           ids <- liftEffect $
             Oxigraph.querySparqlNodeIds store q.sparql
@@ -80,8 +81,10 @@ spec = describe "Self-graph integration" do
       case jsonParser body >>= decodeQueryCatalog of
         Left err -> fail err
         Right catalog -> do
-          let views = Array.filter
-                (\q -> Array.elem "view" q.tags) catalog
+          let
+            views = Array.filter
+              (\q -> Array.elem "view" q.tags)
+              catalog
           views `shouldSatisfy` \a -> Array.length a > 0
 
     it "view queries produce subsets of the full graph" do
@@ -93,9 +96,10 @@ spec = describe "Self-graph integration" do
       case jsonParser body >>= decodeQueryCatalog of
         Left err -> fail err
         Right catalog -> do
-          let views = Array.filter
-                (\q -> Array.elem "view" q.tags && not (Array.elem "ontology" q.tags))
-                catalog
+          let
+            views = Array.filter
+              (\q -> Array.elem "view" q.tags && not (Array.elem "ontology" q.tags))
+              catalog
           for_ views \q -> do
             ids <- liftEffect $
               Oxigraph.querySparqlNodeIds store q.sparql
@@ -177,8 +181,10 @@ spec = describe "Self-graph integration" do
                 case stop.queryId of
                   Nothing -> pure unit
                   Just qid -> do
-                    let mQuery = Array.find
-                          (\q -> q.id == qid) catalog
+                    let
+                      mQuery = Array.find
+                        (\q -> q.id == qid)
+                        catalog
                     case mQuery of
                       Nothing ->
                         fail ("query not found: " <> qid)

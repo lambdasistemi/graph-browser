@@ -47,7 +47,20 @@
     },
     "graphSource": {
       "type": "object",
-      "description": "Optional alternate graph payload. Keeps config.json as the entry point while allowing the graph itself to come from RDF instead of graph.json.",
+      "description": "Optional legacy single RDF graph payload. Keeps config.json as the entry point while allowing the graph itself to come from RDF instead of graph.json.",
+      "$ref": "#/$defs/graphSource"
+    },
+    "graphSources": {
+      "type": "array",
+      "description": "Optional ordered list of RDF sources to merge at runtime. Use this when the deployed dataset is split across instance data and ontology files.",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/graphSource"
+      }
+    }
+  },
+  "$defs": {
+    "graphSource": {
       "additionalProperties": false,
       "required": ["format", "path"],
       "properties": {

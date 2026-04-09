@@ -87,6 +87,7 @@ type Config =
   , sourceUrl :: String
   , kinds :: Map KindId KindDef
   , graphSource :: Maybe GraphSource
+  , graphSources :: Array GraphSource
   }
 
 -- | An empty graph.
@@ -106,4 +107,5 @@ emptyConfig =
   , sourceUrl: ""
   , kinds: Map.empty
   , graphSource: Nothing
+  , graphSources: []
   }

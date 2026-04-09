@@ -6,7 +6,7 @@ module FFI.Oxigraph
   , RdfQuad
   , SparqlBinding
   , createStore
-  , loadTurtle
+  , loadRdf
   , parseQuads
   , querySparql
   , querySparqlNodeIds
@@ -64,8 +64,8 @@ type SparqlBinding = Foreign
 
 foreign import createStore :: Effect OxigraphStore
 
-foreign import loadTurtle
-  :: OxigraphStore -> String -> String -> Effect Unit
+foreign import loadRdf
+  :: OxigraphStore -> String -> String -> String -> Effect Unit
 
 foreign import querySparql
   :: OxigraphStore -> String -> Effect (Array SparqlBinding)

@@ -41,7 +41,7 @@ spec = describe "SPARQL store" do
   it "creates a store and loads turtle" do
     store <- liftEffect do
       s <- Oxigraph.createStore
-      Oxigraph.loadTurtle s baseIri sampleTurtle
+      Oxigraph.loadRdf s "text/turtle" baseIri sampleTurtle
       pure s
     -- If we get here without exception, loading succeeded
     pure unit
@@ -49,7 +49,7 @@ spec = describe "SPARQL store" do
   it "queries all nodes" do
     store <- liftEffect do
       s <- Oxigraph.createStore
-      Oxigraph.loadTurtle s baseIri sampleTurtle
+      Oxigraph.loadRdf s "text/turtle" baseIri sampleTurtle
       pure s
     ids <- liftEffect $ Oxigraph.querySparqlNodeIds store
       "SELECT ?node WHERE { ?node a ?type }"
@@ -60,7 +60,7 @@ spec = describe "SPARQL store" do
   it "queries nodes by kind" do
     store <- liftEffect do
       s <- Oxigraph.createStore
-      Oxigraph.loadTurtle s baseIri sampleTurtle
+      Oxigraph.loadRdf s "text/turtle" baseIri sampleTurtle
       pure s
     ids <- liftEffect $ Oxigraph.querySparqlNodeIds store
       "PREFIX gbk: <https://example.org/kinds#>\nSELECT ?node WHERE { ?node a gbk:module }"
@@ -70,7 +70,7 @@ spec = describe "SPARQL store" do
   it "returns empty for no matches" do
     store <- liftEffect do
       s <- Oxigraph.createStore
-      Oxigraph.loadTurtle s baseIri sampleTurtle
+      Oxigraph.loadRdf s "text/turtle" baseIri sampleTurtle
       pure s
     ids <- liftEffect $ Oxigraph.querySparqlNodeIds store
       "PREFIX gbk: <https://example.org/kinds#>\nSELECT ?node WHERE { ?node a gbk:nonexistent }"
@@ -79,7 +79,7 @@ spec = describe "SPARQL store" do
   it "querySparql returns binding records" do
     store <- liftEffect do
       s <- Oxigraph.createStore
-      Oxigraph.loadTurtle s baseIri sampleTurtle
+      Oxigraph.loadRdf s "text/turtle" baseIri sampleTurtle
       pure s
     rows <- liftEffect $ Oxigraph.querySparql store
       "PREFIX gbk: <https://example.org/kinds#>\nSELECT ?node WHERE { ?node a gbk:ffi }"

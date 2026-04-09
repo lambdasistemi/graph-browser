@@ -7,7 +7,7 @@ import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (foldl, for_)
 import Data.Map as Map
-import Data.Maybe (Maybe(..), isNothing)
+import Data.Maybe (Maybe(..), isJust, isNothing)
 import Data.Set as Set
 import Data.String as String
 import Data.Traversable (traverse)
@@ -232,8 +232,8 @@ renderControls state =
           [ HH.button
               [ cls
                   ( "control-btn"
-                      <> if state.tutorialActive
-                        then " active"
+                      <>
+                        if state.tutorialActive then " active"
                         else ""
                   )
               , HE.onClick \_ ->
@@ -282,8 +282,8 @@ renderControls state =
         , HH.button
             [ cls
                 ( "depth-btn"
-                    <> if state.depth >= 99
-                      then " active"
+                    <>
+                      if state.depth >= 99 then " active"
                       else ""
                 )
             , HE.onClick \_ -> SetDepth 99
@@ -298,7 +298,7 @@ renderTutorialMenu
   -> H.ComponentHTML Action () m
 renderTutorialMenu entries =
   HH.div [ cls "tour-menu" ]
-    ( map mkEntry entries )
+    (map mkEntry entries)
   where
   mkEntry entry =
     HH.div
@@ -319,8 +319,9 @@ renderQueryPanel state =
         [ HH.button
             [ cls
                 ( "panel-tab"
-                    <> if isQueriesTab state.panelTab
-                      then " active" else ""
+                    <>
+                      if isQueriesTab state.panelTab then " active"
+                      else ""
                 )
             , HE.onClick \_ -> SetPanelTab QueriesTab
             ]
@@ -328,8 +329,9 @@ renderQueryPanel state =
         , HH.button
             [ cls
                 ( "panel-tab"
-                    <> if isToursTab state.panelTab
-                      then " active" else ""
+                    <>
+                      if isToursTab state.panelTab then " active"
+                      else ""
                 )
             , HE.onClick \_ -> SetPanelTab ToursTab
             ]
@@ -361,21 +363,27 @@ filterByText
   :: String -> Array Query.NamedQuery -> Array Query.NamedQuery
 filterByText "" qs = qs
 filterByText filter qs =
-  let f = String.toLower filter
-  in Array.filter
-    (\q -> String.contains (String.Pattern f) (String.toLower q.name)
-        || String.contains (String.Pattern f) (String.toLower q.description))
-    qs
+  let
+    f = String.toLower filter
+  in
+    Array.filter
+      ( \q -> String.contains (String.Pattern f) (String.toLower q.name)
+          || String.contains (String.Pattern f) (String.toLower q.description)
+      )
+      qs
 
 filterToursByText
   :: String -> Array TutorialEntry -> Array TutorialEntry
 filterToursByText "" ts = ts
 filterToursByText filter ts =
-  let f = String.toLower filter
-  in Array.filter
-    (\t -> String.contains (String.Pattern f) (String.toLower t.title)
-        || String.contains (String.Pattern f) (String.toLower t.description))
-    ts
+  let
+    f = String.toLower filter
+  in
+    Array.filter
+      ( \t -> String.contains (String.Pattern f) (String.toLower t.title)
+          || String.contains (String.Pattern f) (String.toLower t.description)
+      )
+      ts
 
 renderQueriesList
   :: forall m. State -> H.ComponentHTML Action () m
@@ -385,8 +393,8 @@ renderQueriesList state =
         ( [ HH.div
               [ cls
                   ( "query-item"
-                      <> if isNothing state.activeQuery
-                        then " active"
+                      <>
+                        if isNothing state.activeQuery then " active"
                         else ""
                   )
               , HE.onClick \_ -> ClearQuery
@@ -396,7 +404,7 @@ renderQueriesList state =
               ]
           ]
             <> Array.concatMap mkQueryEntry
-                (filterByText state.catalogFilter state.queryCatalog)
+              (filterByText state.catalogFilter state.queryCatalog)
         )
     , renderPromptBuilder state PromptQuery "New query"
     ]
@@ -418,8 +426,9 @@ renderQueriesList state =
         , HH.div [ cls "query-item-desc" ]
             [ HH.text q.description ]
         ]
-    ] <> if isActive q then renderParamForm state
-         else []
+    ] <>
+      if isActive q then renderParamForm state
+      else []
 
 renderToursList
   :: forall m. State -> H.ComponentHTML Action () m
@@ -427,8 +436,9 @@ renderToursList state =
   HH.div_
     [ HH.div [ cls "query-panel-list" ]
         ( map mkTourEntry
-            (filterToursByText state.catalogFilter
-              state.tutorialIndex)
+            ( filterToursByText state.catalogFilter
+                state.tutorialIndex
+            )
         )
     , renderPromptBuilder state PromptTour "New tour"
     ]
@@ -531,8 +541,8 @@ renderSearchBox state =
         HH.text ""
       else
         HH.div [ cls "search-results" ]
-          (Array.take 12 state.searchResults
-            <#> renderSearchResult state.config
+          ( Array.take 12 state.searchResults
+              <#> renderSearchResult state.config
           )
     ]
 
@@ -653,95 +663,95 @@ renderTutorialContent state =
             Nothing -> false
         in
           HH.div [ cls "tutorial-content" ]
-          [ HH.div [ cls "tutorial-topbar" ]
-              [ HH.div [ cls "tutorial-nav" ]
-                  [ if state.tutorialStep > 0 then
-                      HH.button
-                        [ cls "tutorial-nav-btn"
-                        , HE.onClick \_ -> TutorialPrev
+            [ HH.div [ cls "tutorial-topbar" ]
+                [ HH.div [ cls "tutorial-nav" ]
+                    [ if state.tutorialStep > 0 then
+                        HH.button
+                          [ cls "tutorial-nav-btn"
+                          , HE.onClick \_ -> TutorialPrev
+                          ]
+                          [ HH.text "Prev" ]
+                      else HH.text ""
+                    , HH.span [ cls "tutorial-progress" ]
+                        [ HH.text
+                            ( show stepNum <> " / "
+                                <> show total
+                            )
                         ]
-                        [ HH.text "Prev" ]
-                    else HH.text ""
-                  , HH.span [ cls "tutorial-progress" ]
-                      [ HH.text
-                          ( show stepNum <> " / "
-                              <> show total
-                          )
-                      ]
-                  , if onDetour then
-                      HH.button
-                        [ cls "tutorial-nav-btn recenter"
-                        , HE.onClick \_ ->
-                            TutorialRecenter
-                        ]
-                        [ HH.text "Refocus" ]
-                    else HH.text ""
-                  , if stepNum < total then
-                      HH.button
-                        [ cls
-                            "tutorial-nav-btn active"
-                        , HE.onClick \_ -> TutorialNext
-                        ]
-                        [ HH.text "Next" ]
-                    else
-                      HH.button
-                        [ cls "tutorial-nav-btn"
+                    , if onDetour then
+                        HH.button
+                          [ cls "tutorial-nav-btn recenter"
+                          , HE.onClick \_ ->
+                              TutorialRecenter
+                          ]
+                          [ HH.text "Refocus" ]
+                      else HH.text ""
+                    , if stepNum < total then
+                        HH.button
+                          [ cls
+                              "tutorial-nav-btn active"
+                          , HE.onClick \_ -> TutorialNext
+                          ]
+                          [ HH.text "Next" ]
+                      else
+                        HH.button
+                          [ cls "tutorial-nav-btn"
+                          , HE.onClick \_ -> ExitTutorial
+                          ]
+                          [ HH.text "Finish" ]
+                    , HH.button
+                        [ cls "tutorial-exit"
                         , HE.onClick \_ -> ExitTutorial
                         ]
-                        [ HH.text "Finish" ]
-                  , HH.button
-                      [ cls "tutorial-exit"
-                      , HE.onClick \_ -> ExitTutorial
-                      ]
-                      [ HH.text "Exit" ]
-                  ]
-              ]
-          , HH.div [ cls "tutorial-narrative" ]
-              ( map
-                  ( \para ->
-                      HH.p [ cls "tutorial-para" ]
-                        (parseNarrative para)
-                  )
-                  (splitParagraphs stop.narrative)
-              )
-          , case state.hoveredNode of
-              Nothing -> HH.text ""
-              Just node ->
-                HH.div [ cls "tutorial-hovered-node" ]
-                  [ HH.div [ cls "tutorial-hovered-divider" ]
-                      []
-                  , HH.span
-                      [ cls
-                          ( "badge badge-"
-                              <> node.kind
-                          )
-                      ]
-                      [ HH.text
-                          (kindLabel state.config node.kind)
-                      ]
-                  , HH.h3 [ cls "tutorial-hovered-label" ]
-                      [ HH.text node.label ]
-                  , HH.p [ cls "tutorial-hovered-desc" ]
-                      [ HH.text node.description ]
-                  , if Array.null node.links then
-                      HH.text ""
-                    else
-                      HH.ul [ cls "links" ]
-                        ( map
-                            ( \l -> HH.li_
-                                [ HH.a
-                                    [ HP.href l.url
-                                    , HP.target "_blank"
-                                    , HP.rel "noopener"
-                                    ]
-                                    [ HH.text l.label
-                                    ]
-                                ]
+                        [ HH.text "Exit" ]
+                    ]
+                ]
+            , HH.div [ cls "tutorial-narrative" ]
+                ( map
+                    ( \para ->
+                        HH.p [ cls "tutorial-para" ]
+                          (parseNarrative para)
+                    )
+                    (splitParagraphs stop.narrative)
+                )
+            , case state.hoveredNode of
+                Nothing -> HH.text ""
+                Just node ->
+                  HH.div [ cls "tutorial-hovered-node" ]
+                    [ HH.div [ cls "tutorial-hovered-divider" ]
+                        []
+                    , HH.span
+                        [ cls
+                            ( "badge badge-"
+                                <> node.kind
                             )
-                            node.links
-                        )
-                  ]
-          ]
+                        ]
+                        [ HH.text
+                            (kindLabel state.config node.kind)
+                        ]
+                    , HH.h3 [ cls "tutorial-hovered-label" ]
+                        [ HH.text node.label ]
+                    , HH.p [ cls "tutorial-hovered-desc" ]
+                        [ HH.text node.description ]
+                    , if Array.null node.links then
+                        HH.text ""
+                      else
+                        HH.ul [ cls "links" ]
+                          ( map
+                              ( \l -> HH.li_
+                                  [ HH.a
+                                      [ HP.href l.url
+                                      , HP.target "_blank"
+                                      , HP.rel "noopener"
+                                      ]
+                                      [ HH.text l.label
+                                      ]
+                                  ]
+                              )
+                              node.links
+                          )
+                    ]
+            ]
 
 currentStop :: State -> Maybe TutorialStop
 currentStop state = do
@@ -810,17 +820,24 @@ type ParsedLink =
 parseLink :: String -> Maybe ParsedLink
 parseLink str = do
   closeBracket <- String.indexOf
-    (String.Pattern "]") str
-  let linkText = String.take (closeBracket - 1)
-        (String.drop 1 str)
+    (String.Pattern "]")
+    str
+  let
+    linkText = String.take (closeBracket - 1)
+      (String.drop 1 str)
   let afterClose = String.drop (closeBracket + 1) str
-  openParen <- case String.indexOf
-    (String.Pattern "(") afterClose of
-    Just 0 -> Just 0
-    _ -> Nothing
+  openParen <-
+    case
+      String.indexOf
+        (String.Pattern "(")
+        afterClose
+      of
+      Just 0 -> Just 0
+      _ -> Nothing
   let afterParen = String.drop 1 afterClose
   closeParen <- String.indexOf
-    (String.Pattern ")") afterParen
+    (String.Pattern ")")
+    afterParen
   let targetStr = String.take closeParen afterParen
   let consumed = closeBracket + 1 + 1 + closeParen + 1
   let
@@ -996,7 +1013,8 @@ renderPromptBuilder state mode title =
         [ HH.button
             [ cls
                 ( "prompt-copy-btn"
-                    <> if state.promptCopied then " copied"
+                    <>
+                      if state.promptCopied then " copied"
                       else ""
                 )
             , HE.onClick \_ -> CopyPrompt
@@ -1053,9 +1071,9 @@ handleAction = case _ of
         liftEffect $ setDocTitle cfg.title
     state <- H.get
     let
-      graphLocation = graphSourceLocation urls state.config
+      graphLocations = graphSourceLocations urls state.config
     result <- liftAff
-      (loadGraphData graphLocation.format graphLocation.url)
+      (loadGraphData graphLocations)
     case result of
       Left err ->
         H.modify_ _ { error = Just err }
@@ -1069,17 +1087,18 @@ handleAction = case _ of
           , selected = start
           }
     -- If RDF format, create SPARQL store and load turtle
-    when (not $ isJsonGraphFormat graphLocation.format graphLocation.url) do
+    when (isRdfConfig state.config) do
       storeResult <- liftAff
-        (loadSparqlStore graphLocation.format graphLocation.url)
+        (loadSparqlStore graphLocations)
       case storeResult of
         Left _ -> pure unit
         Right store ->
           H.modify_ _ { oxigraphStore = Just store }
     -- Load query catalog
     catalogResult <- liftAff
-      (loadQueryCatalog
-        (urls.baseUrl <> "data/queries.json"))
+      ( loadQueryCatalog
+          (urls.baseUrl <> "data/queries.json")
+      )
     case catalogResult of
       Left _ -> pure unit
       Right catalog ->
@@ -1107,9 +1126,10 @@ handleAction = case _ of
     void $ H.subscribe edgeSub.emitter
     -- Load legacy view index only when no query catalog views
     state1 <- H.get
-    let hasQueryViews = Array.any
-          (\q -> Array.elem "view" q.tags)
-          state1.queryCatalog
+    let
+      hasQueryViews = Array.any
+        (\q -> Array.elem "view" q.tags)
+        state1.queryCatalog
     when (not hasQueryViews) do
       viewResult <- liftAff
         (loadViewIndex (urls.baseUrl <> "data/views/index.json"))
@@ -1146,8 +1166,10 @@ handleAction = case _ of
             case mEntry of
               Nothing -> pure unit
               Just entry -> do
-                let tUrl = resolveUrl
-                      urls.baseUrl entry.file
+                let
+                  tUrl = resolveUrl
+                    urls.baseUrl
+                    entry.file
                 tutResult <- liftAff
                   (loadTutorialFile tUrl)
                 case tutResult of
@@ -1299,8 +1321,10 @@ handleAction = case _ of
     case state.activeView of
       Just view -> do
         -- View-local tour: file is the tour ID
-        let mTour = Array.find
-              (\t -> t.id == file) view.tours
+        let
+          mTour = Array.find
+            (\t -> t.id == file)
+            view.tours
         case mTour of
           Nothing -> pure unit
           Just tut -> do
@@ -1318,9 +1342,10 @@ handleAction = case _ of
           Left _ -> pure unit
           Right tut -> do
             state' <- H.get
-            let alreadyLoaded = Array.any
-                  (\t -> t.id == tut.id)
-                  state'.loadedTutorials
+            let
+              alreadyLoaded = Array.any
+                (\t -> t.id == tut.id)
+                state'.loadedTutorials
             H.modify_ _
               { tutorial = Just tut
               , tutorialStep = 0
@@ -1387,10 +1412,12 @@ handleAction = case _ of
       prompt = case state.promptMode of
         PromptQuery ->
           PB.buildQueryPrompt state.config state.graph
-            state.queryCatalog state.promptInput
+            state.queryCatalog
+            state.promptInput
         PromptTour ->
           PB.buildTourPrompt state.config state.graph
-            state.loadedTutorials state.queryCatalog
+            state.loadedTutorials
+            state.queryCatalog
             state.promptInput
         PromptEdge -> case state.hoveredEdge of
           Just edge ->
@@ -1410,21 +1437,29 @@ handleAction = case _ of
               case srcNode, tgtNode of
                 Just sn, Just tn ->
                   PB.buildEdgePrompt state.config
-                    state.graph rawEdge sn tn
+                    state.graph
+                    rawEdge
+                    sn
+                    tn
                     state.promptInput
                 _, _ ->
                   PB.buildEdgePrompt state.config
-                    state.graph rawEdge
+                    state.graph
+                    rawEdge
                     { id: edge.sourceId
                     , label: edge.sourceLabel
-                    , kind: "", group: ""
-                    , description: "", links: []
+                    , kind: ""
+                    , group: ""
+                    , description: ""
+                    , links: []
                     , ontologyRef: Nothing
                     }
                     { id: edge.targetId
                     , label: edge.targetLabel
-                    , kind: "", group: ""
-                    , description: "", links: []
+                    , kind: ""
+                    , group: ""
+                    , description: ""
+                    , links: []
                     , ontologyRef: Nothing
                     }
                     state.promptInput
@@ -1432,7 +1467,8 @@ handleAction = case _ of
         PromptNode -> case state.selected of
           Just node ->
             PB.buildNodePrompt state.config state.graph
-              node state.promptInput
+              node
+              state.promptInput
           Nothing -> ""
     when (prompt /= "") do
       liftAff $ Clipboard.copyToClipboard prompt
@@ -1440,25 +1476,27 @@ handleAction = case _ of
 
   SelectView file -> do
     state <- H.get
-    let vUrl = resolveUrl
-          state.dataUrls.baseUrl
-          ("data/views/" <> file)
+    let
+      vUrl = resolveUrl
+        state.dataUrls.baseUrl
+        ("data/views/" <> file)
     viewResult <- liftAff (loadViewFile vUrl)
     case viewResult of
       Left _ -> pure unit
       Right view -> do
-        let filtered = Views.filterByView view
-              state.fullGraph
-            start = mostConnectedNode filtered
-            tours = map
-              ( \t ->
-                  { id: t.id
-                  , title: t.title
-                  , description: t.description
-                  , file: t.id
-                  }
-              )
-              view.tours
+        let
+          filtered = Views.filterByView view
+            state.fullGraph
+          start = mostConnectedNode filtered
+          tours = map
+            ( \t ->
+                { id: t.id
+                , title: t.title
+                , description: t.description
+                , file: t.id
+                }
+            )
+            view.tours
         H.modify_ _
           { graph = filtered
           , activeView = Just view
@@ -1478,11 +1516,13 @@ handleAction = case _ of
     let start = mostConnectedNode state.fullGraph
     -- Reload global tutorials
     idxResult <- liftAff
-      (loadTutorialIndex
-        state.dataUrls.tutorialIndexUrl)
-    let globalTours = case idxResult of
-          Left _ -> []
-          Right idx -> idx
+      ( loadTutorialIndex
+          state.dataUrls.tutorialIndexUrl
+      )
+    let
+      globalTours = case idxResult of
+        Left _ -> []
+        Right idx -> idx
     H.modify_ _
       { graph = state.fullGraph
       , activeView = Nothing
@@ -1549,9 +1589,10 @@ handleAction = case _ of
     case state.activeQuery of
       Nothing -> pure unit
       Just query -> do
-        let allFilled = Array.all
-              (\p -> Map.member p.name values)
-              query.parameters
+        let
+          allFilled = Array.all
+            (\p -> Map.member p.name values)
+            query.parameters
         when allFilled do
           let bound = bindParameters query.sparql values
           handleAction $ ExecuteQuery
@@ -1570,15 +1611,17 @@ handleAction = case _ of
           Left err ->
             H.modify_ _ { error = Just (show err) }
           Right nodeIds -> do
-            let filtered = subgraph nodeIds state.fullGraph
-                start = mostConnectedNode filtered
+            let
+              filtered = subgraph nodeIds state.fullGraph
+              start = mostConnectedNode filtered
             -- Keep the original template in activeQuery
             -- (SelectQuery sets it); only set it for
             -- non-parameterized direct executions.
-            let setActive = case state.activeQuery of
-                  Just aq | not (Array.null aq.parameters) ->
-                    identity
-                  _ -> \s -> s { activeQuery = Just query }
+            let
+              setActive = case state.activeQuery of
+                Just aq | not (Array.null aq.parameters) ->
+                  identity
+                _ -> \s -> s { activeQuery = Just query }
             H.modify_ \s -> setActive s
               { graph = filtered
               , selected = start
@@ -1637,9 +1680,8 @@ mostConnectedNode graph =
           case acc of
             Nothing -> Just (Tuple nid count)
             Just (Tuple _ best') ->
-              if count > best'
-                then Just (Tuple nid count)
-                else acc
+              if count > best' then Just (Tuple nid count)
+              else acc
       )
       Nothing
       (Map.toUnfoldable counts :: Array _)
@@ -1668,8 +1710,9 @@ applyTutorialStop = do
     Just stop -> case stop.queryId of
       Just qid -> do
         -- Query-based stop: find and execute the query
-        let mQuery = Array.find (\q -> q.id == qid)
-              state.queryCatalog
+        let
+          mQuery = Array.find (\q -> q.id == qid)
+            state.queryCatalog
         case mQuery of
           Nothing -> pure unit
           Just query ->
@@ -1683,9 +1726,10 @@ applyTutorialStop = do
                 case result of
                   Left _ -> pure unit
                   Right nodeIds -> do
-                    let filtered = subgraph nodeIds
-                          state.fullGraph
-                        start = mostConnectedNode filtered
+                    let
+                      filtered = subgraph nodeIds
+                        state.fullGraph
+                      start = mostConnectedNode filtered
                     H.modify_ _
                       { graph = filtered
                       , activeQuery = Just query
@@ -1749,44 +1793,56 @@ loadConfig url = do
     Right json -> decodeConfig json
 
 loadGraphData
-  :: String
-  -> String
+  :: Array { format :: String, url :: String }
   -> Aff (Either String { graph :: Graph, ontologyKinds :: Map.Map KindId KindDef })
-loadGraphData format url = do
-  resp <- fetch url { method: GET }
-  body <- resp.text
-  if isJsonGraphFormat format url then
-    pure case jsonParser body of
-      Left err -> Left err
-      Right json ->
-        map
-          ( \graph ->
-              { graph
-              , ontologyKinds: Map.empty
-              }
+loadGraphData locations =
+  case Array.uncons locations of
+    Nothing -> pure (Left "no graph source configured")
+    Just { head: location, tail: [] }
+      | isJsonGraphFormat location.format location.url -> do
+          resp <- fetch location.url { method: GET }
+          body <- resp.text
+          pure case jsonParser body of
+            Left err -> Left err
+            Right json ->
+              map
+                ( \graph ->
+                    { graph
+                    , ontologyKinds: Map.empty
+                    }
+                )
+                (decodeGraph json)
+    _ -> do
+      parsed <- try do
+        quadSets <- traverse fetchAndParseRdf locations
+        pure
+          ( Rdf.Import.importGraph
+              (Array.concat quadSets)
           )
-          (decodeGraph json)
-  else do
-    -- Oxigraph requires an absolute base IRI. The fetch URL may be
-    -- relative, so resolve it against the page origin.
-    absUrl <- liftEffect (absoluteUrl url)
-    parsed <- try do
-      quads <- liftEffect
-        (Oxigraph.parseQuads format absUrl body)
-      pure (Rdf.Import.importGraph quads)
-    pure case parsed of
-      Left err -> Left (show err)
-      Right result -> result
+      pure case parsed of
+        Left err -> Left (show err)
+        Right result -> result
+
+fetchAndParseRdf
+  :: { format :: String, url :: String }
+  -> Aff (Array Oxigraph.ImportedRdfQuad)
+fetchAndParseRdf location = do
+  resp <- fetch location.url { method: GET }
+  body <- resp.text
+  absUrl <- liftEffect (absoluteUrl location.url)
+  liftEffect $ Oxigraph.parseQuads location.format absUrl body
 
 loadSparqlStore
-  :: String -> String -> Aff (Either String Oxigraph.OxigraphStore)
-loadSparqlStore _format url = do
-  resp <- fetch url { method: GET }
-  body <- resp.text
+  :: Array { format :: String, url :: String }
+  -> Aff (Either String Oxigraph.OxigraphStore)
+loadSparqlStore locations = do
   parsed <- try do
-    absUrl <- liftEffect (absoluteUrl url)
     store <- liftEffect Oxigraph.createStore
-    liftEffect $ Oxigraph.loadTurtle store absUrl body
+    for_ locations \location -> do
+      resp <- fetch location.url { method: GET }
+      body <- resp.text
+      absUrl <- liftEffect (absoluteUrl location.url)
+      liftEffect $ Oxigraph.loadRdf store location.format absUrl body
     pure store
   pure case parsed of
     Left err -> Left (show err)
@@ -1815,8 +1871,9 @@ discoverParamOptions store params = do
   discoverOne p = do
     values <- Oxigraph.querySparqlStrings store
       (discoveryQuery p.paramType)
-    let labels = Array.sort $ Array.nub $
-          map extractLocalName values
+    let
+      labels = Array.sort $ Array.nub $
+        map extractLocalName values
     pure (Tuple p.name labels)
 
   discoveryQuery "kind" =
@@ -1857,11 +1914,11 @@ discoverParamOptions store params = do
 bindParameters :: String -> Map.Map String String -> String
 bindParameters sparql values =
   foldl
-    (\acc (Tuple name value) ->
-      String.replaceAll
-        (String.Pattern ("$" <> name))
-        (String.Replacement value)
-        acc
+    ( \acc (Tuple name value) ->
+        String.replaceAll
+          (String.Pattern ("$" <> name))
+          (String.Replacement value)
+          acc
     )
     sparql
     (Map.toUnfoldable values :: Array (Tuple String String))
@@ -1899,7 +1956,8 @@ depthBtn n current =
   HH.button
     [ cls
         ( "depth-btn"
-            <> if n == current then " active"
+            <>
+              if n == current then " active"
               else ""
         )
     , HE.onClick \_ -> SetDepth n
@@ -1918,20 +1976,36 @@ resolveUrl base path =
   if String.take 4 path == "http" then path
   else base <> path
 
-graphSourceLocation
+graphSourceLocations
   :: forall r
    . { baseUrl :: String, graphUrl :: String | r }
   -> Config
-  -> { format :: String, url :: String }
-graphSourceLocation urls cfg = case cfg.graphSource of
-  Just source ->
-    { format: source.format
-    , url: resolveUrl urls.baseUrl source.path
-    }
-  Nothing ->
-    { format: "application/json"
-    , url: urls.graphUrl
-    }
+  -> Array { format :: String, url :: String }
+graphSourceLocations urls cfg =
+  case cfg.graphSources of
+    sources | not (Array.null sources) ->
+      map
+        ( \source ->
+            { format: source.format
+            , url: resolveUrl urls.baseUrl source.path
+            }
+        )
+        sources
+    _ ->
+      case cfg.graphSource of
+        Just source ->
+          [ { format: source.format
+            , url: resolveUrl urls.baseUrl source.path
+            }
+          ]
+        Nothing ->
+          [ { format: "application/json"
+            , url: urls.graphUrl
+            }
+          ]
+
+isRdfConfig :: Config -> Boolean
+isRdfConfig cfg = not (Array.null cfg.graphSources) || isJust cfg.graphSource
 
 isJsonGraphFormat :: String -> String -> Boolean
 isJsonGraphFormat format url =
