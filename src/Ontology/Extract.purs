@@ -74,6 +74,9 @@ rdfsLabel = "http://www.w3.org/2000/01/rdf-schema#label"
 rdfsComment :: String
 rdfsComment = "http://www.w3.org/2000/01/rdf-schema#comment"
 
+dctermsDescription :: String
+dctermsDescription = "http://purl.org/dc/terms/description"
+
 owlThing :: String
 owlThing = "http://www.w3.org/2002/07/owl#Thing"
 
@@ -103,7 +106,10 @@ extractClasses quads =
     ( \iri ->
         { iri
         , label: fromMaybe (displayName iri) (literalValue quads iri rdfsLabel)
-        , comment: fromMaybe "" (literalValue quads iri rdfsComment)
+        , comment:
+            fromMaybe
+              (fromMaybe "" (literalValue quads iri dctermsDescription))
+              (literalValue quads iri rdfsComment)
         }
     )
     (subjectsWithType owlClass quads <> subjectsWithType rdfsClass quads # Array.nub)
