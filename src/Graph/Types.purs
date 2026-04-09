@@ -2,6 +2,7 @@
 module Graph.Types
   ( NodeId
   , KindId
+  , OntologyReference
   , KindDef
   , Link
   , Node
@@ -26,6 +27,12 @@ type NodeId = String
 -- | Kind identifier (e.g. "actor", "process").
 type KindId = String
 
+-- | A preserved ontology term reference behind a rendered label.
+type OntologyReference =
+  { label :: String
+  , iri :: String
+  }
+
 -- | Kind definition from config.
 type KindDef =
   { label :: String
@@ -47,6 +54,7 @@ type Node =
   , group :: String
   , description :: String
   , links :: Array Link
+  , ontologyRef :: Maybe OntologyReference
   }
 
 -- | A directed edge in the knowledge graph.
@@ -55,6 +63,7 @@ type Edge =
   , target :: NodeId
   , label :: String
   , description :: String
+  , predicateRef :: Maybe OntologyReference
   }
 
 -- | The full graph: nodes, edges, and adjacency.
