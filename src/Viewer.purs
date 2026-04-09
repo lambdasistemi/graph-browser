@@ -41,6 +41,7 @@ import Graph.Types
   , KindId
   , Link
   , Node
+  , OntologyReference
   , emptyConfig
   , emptyGraph
   )
@@ -72,6 +73,7 @@ type EdgeInfo =
   , targetLabel :: String
   , label :: String
   , description :: String
+  , predicateRef :: Maybe OntologyReference
   }
 
 -- | Entry in the tutorial index.
@@ -129,7 +131,7 @@ data Action
   = Initialize
   | NodeTapped String
   | NodeHovered String
-  | EdgeHovered String String String String
+  | EdgeHovered String String String String String
   | SetDepth Int
   | SetSearch String
   | SelectSearchResult SearchResult
@@ -870,6 +872,7 @@ renderEdgeDetail state edge =
                 [ HH.text edge.targetLabel ]
             ]
         ]
+    , renderOntologyReference "Predicate ontology" edge.predicateRef
     , HH.p [ cls "description" ]
         [ HH.text edge.description ]
     , renderPromptBuilder state PromptEdge "Generate prompt"
@@ -885,6 +888,7 @@ renderNodeDetail state node =
     [ HH.span
         [ cls ("badge badge-" <> node.kind) ]
         [ HH.text (kindLabel cfg node.kind) ]
+    , renderOntologyReference "Node ontology" node.ontologyRef
     , HH.p [ cls "description" ]
         [ HH.text node.description ]
     , renderLinks node.links
@@ -951,6 +955,26 @@ renderNodeDetail state node =
         , HH.span [ cls "conn-node" ]
             [ HH.text targetLabel ]
         ]
+
+renderOntologyReference
+  :: forall m
+   . String
+  -> Maybe OntologyReference
+  -> H.ComponentHTML Action () m
+renderOntologyReference _ Nothing = HH.text ""
+renderOntologyReference title (Just ref) =
+  if shouldRenderOntologyReference ref.iri then
+    HH.div [ cls "connections" ]
+      [ HH.h3_ [ HH.text title ]
+      , HH.a
+          [ HP.href ref.iri
+          , HP.target "_blank"
+          , HP.rel "noopener"
+          ]
+          [ HH.text ref.label ]
+      ]
+  else
+    HH.text ""
 
 renderPromptBuilder
   :: forall m
@@ -1077,9 +1101,9 @@ handleAction = case _ of
     void $ H.subscribe hoverSub.emitter
     edgeSub <- liftEffect HS.create
     liftEffect $ Cy.onEdgeHover
-      \src tgt lbl desc ->
+      \src tgt lbl desc predicateIri ->
         HS.notify edgeSub.listener
-          (EdgeHovered src tgt lbl desc)
+          (EdgeHovered src tgt lbl desc predicateIri)
     void $ H.subscribe edgeSub.emitter
     -- Load legacy view index only when no query catalog views
     state1 <- H.get
@@ -1171,7 +1195,7 @@ handleAction = case _ of
         }
     liftEffect $ Cy.markRoot nodeId
 
-  EdgeHovered srcId tgtId lbl desc -> do
+  EdgeHovered srcId tgtId lbl desc predicateIri -> do
     state <- H.get
     let
       srcNode = Map.lookup srcId state.graph.nodes
@@ -1189,6 +1213,11 @@ handleAction = case _ of
         , targetLabel: tgtLabel
         , label: lbl
         , description: desc
+        , predicateRef:
+            if shouldRenderOntologyReference predicateIri then
+              Just { label: lbl, iri: predicateIri }
+            else
+              Nothing
         }
     state' <- H.get
     if state'.tutorialActive then
@@ -1246,6 +1275,7 @@ handleAction = case _ of
                 , targetLabel
                 , label: edge.label
                 , description: edge.description
+                , predicateRef: edge.predicateRef
                 }
             , searchQuery = ""
             , searchResults = []
@@ -1374,6 +1404,7 @@ handleAction = case _ of
                 , target: edge.targetId
                 , label: edge.label
                 , description: edge.description
+                , predicateRef: edge.predicateRef
                 }
             in
               case srcNode, tgtNode of
@@ -1388,11 +1419,13 @@ handleAction = case _ of
                     , label: edge.sourceLabel
                     , kind: "", group: ""
                     , description: "", links: []
+                    , ontologyRef: Nothing
                     }
                     { id: edge.targetId
                     , label: edge.targetLabel
                     , kind: "", group: ""
                     , description: "", links: []
+                    , ontologyRef: Nothing
                     }
                     state.promptInput
           Nothing -> ""
@@ -1923,6 +1956,14 @@ kindColor cfg kid = (lookupKind cfg kid).color
 
 kindLabel :: Config -> KindId -> String
 kindLabel cfg kid = (lookupKind cfg kid).label
+
+shouldRenderOntologyReference :: String -> Boolean
+shouldRenderOntologyReference iri =
+  (String.take 7 iri == "http://" || String.take 8 iri == "https://")
+    && not
+      ( String.take 52 iri
+          == "https://lambdasistemi.github.io/graph-browser/vocab/"
+      )
 
 kindsToForeign :: Config -> Foreign
 kindsToForeign cfg =

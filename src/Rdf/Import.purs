@@ -6,17 +6,18 @@ import Prelude
 
 import Data.Array as Array
 import Data.Either (Either(..))
+import Data.Foldable (foldl)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.String as String
 import Data.String.Common (split)
 import Data.String.Pattern (Pattern(..))
-import Data.Tuple (Tuple(..))
 import Data.Traversable (traverse)
+import Data.Tuple (Tuple(..))
 import FFI.Oxigraph (ImportedRdfQuad)
 import FFI.Uri (decodeUriComponent)
 import Graph.Build (buildGraph)
-import Graph.Types (Edge, Graph, KindDef, Link, Node)
+import Graph.Types (Edge, Graph, KindDef, Link, Node, OntologyReference)
 import Ontology.Extract as Ontology
 
 gbTerms :: String
@@ -28,11 +29,35 @@ gbKinds = "https://lambdasistemi.github.io/graph-browser/vocab/kinds#"
 gbGroups :: String
 gbGroups = "https://lambdasistemi.github.io/graph-browser/vocab/groups#"
 
+gbEdges :: String
+gbEdges = "https://lambdasistemi.github.io/graph-browser/vocab/edges#"
+
 rdfType :: String
 rdfType = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
 
+rdfStatement :: String
+rdfStatement = "http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement"
+
+rdfSubject :: String
+rdfSubject = "http://www.w3.org/1999/02/22-rdf-syntax-ns#subject"
+
+rdfPredicate :: String
+rdfPredicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate"
+
+rdfObject :: String
+rdfObject = "http://www.w3.org/1999/02/22-rdf-syntax-ns#object"
+
 rdfsLabel :: String
 rdfsLabel = "http://www.w3.org/2000/01/rdf-schema#label"
+
+rdfsSeeAlso :: String
+rdfsSeeAlso = "http://www.w3.org/2000/01/rdf-schema#seeAlso"
+
+dctermsDescription :: String
+dctermsDescription = "http://purl.org/dc/terms/description"
+
+foafPage :: String
+foafPage = "http://xmlns.com/foaf/0.1/page"
 
 gbNode :: String
 gbNode = gbTerms <> "Node"
@@ -64,6 +89,9 @@ gbFrom = gbTerms <> "from"
 gbTo :: String
 gbTo = gbTerms <> "to"
 
+gbPredicate :: String
+gbPredicate = gbTerms <> "predicate"
+
 importGraph
   :: Array ImportedRdfQuad
   -> Either String { graph :: Graph, ontologyKinds :: Map.Map String KindDef }
@@ -74,12 +102,16 @@ importGraph quads = do
     nodeIdByIri =
       Map.fromFoldable
         (map (\record -> Tuple record.iri record.node.id) nodeRecords)
-  edges <- traverse (importEdge quads nodeIdByIri) (subjectsWithType gbEdgeAssertion quads)
+    reifiedDescriptions = reifiedDescriptionMap quads
+    relationEdges = importRelationEdges quads nodeIdByIri reifiedDescriptions
+  assertionEdges <- traverse
+    (importAssertionEdge quads nodeIdByIri reifiedDescriptions)
+    (subjectsWithType gbEdgeAssertion quads)
   pure
     { graph:
         buildGraph
           (map _.node nodeRecords <> ontology.nodes)
-          (edges <> ontology.edges)
+          (mergeEdges (relationEdges <> assertionEdges) <> ontology.edges)
     , ontologyKinds: ontology.kinds
     }
 
@@ -92,7 +124,6 @@ importNode :: Array ImportedRdfQuad -> String -> Either String NodeRecord
 importNode quads iri = do
   id <- requireLiteral quads iri gbNodeId "node id"
   label <- requireLiteral quads iri rdfsLabel "node label"
-  description <- requireLiteral quads iri gbDescription "node description"
   kind <- case findKindIri quads iri of
     Nothing -> Left ("RDF node is missing a graph-browser kind: " <> iri)
     Just kindIri -> Right (decodeVocabularySuffix gbKinds kindIri)
@@ -100,7 +131,14 @@ importNode quads iri = do
   let
     group = fromMaybe (decodeVocabularySuffix gbGroups groupIri)
       (literalValue quads groupIri gbGroupId)
-    links = Array.mapMaybe (importLink quads) (namedObjectValues quads iri gbExternalLink)
+    description = fromMaybe ""
+      (firstLiteralValue quads iri [ gbDescription, dctermsDescription ])
+    links =
+      if Array.null (namedObjectValues quads iri gbExternalLink) then
+        fallbackLinks quads iri
+      else
+        Array.mapMaybe (importGbLink quads) (namedObjectValues quads iri gbExternalLink)
+    ontologyRef = semanticTypeReference quads iri
   pure
     { iri
     , node:
@@ -110,21 +148,64 @@ importNode quads iri = do
         , group
         , description
         , links
+        , ontologyRef
         }
     }
 
-importLink :: Array ImportedRdfQuad -> String -> Maybe Link
-importLink quads iri = do
+importGbLink :: Array ImportedRdfQuad -> String -> Maybe Link
+importGbLink quads iri = do
   url <- literalValue quads iri gbUrl
   let label = fromMaybe url (literalValue quads iri rdfsLabel)
   pure { label, url }
 
-importEdge
+fallbackLinks :: Array ImportedRdfQuad -> String -> Array Link
+fallbackLinks quads subject =
+  dedupeLinks
+    ( Array.mapMaybe (namedLink quads foafPage) (namedObjectValues quads subject foafPage)
+        <> Array.mapMaybe (namedLink quads rdfsSeeAlso) (namedObjectValues quads subject rdfsSeeAlso)
+    )
+
+namedLink :: Array ImportedRdfQuad -> String -> String -> Maybe Link
+namedLink quads predicate url =
+  if isAbsoluteIri url then
+    Just
+      { label: fromMaybe (decodeVocabularySuffix "" predicate) (literalValue quads predicate rdfsLabel)
+      , url
+      }
+  else
+    Nothing
+
+importRelationEdges
   :: Array ImportedRdfQuad
+  -> Map.Map String String
+  -> Map.Map String String
+  -> Array Edge
+importRelationEdges quads nodeIdByIri reifiedDescriptions =
+  Array.mapMaybe
+    ( \quad -> do
+        guardNamedNodeRelation quad nodeIdByIri
+        source <- Map.lookup quad.subject nodeIdByIri
+        target <- Map.lookup quad.object.value nodeIdByIri
+        let label = predicateLabel quads quad.predicate
+        pure
+          { source
+          , target
+          , label
+          , description:
+              fromMaybe ""
+                (Map.lookup (edgeKey quad.subject quad.predicate quad.object.value) reifiedDescriptions)
+          , predicateRef: predicateReference quads quad.predicate
+          }
+    )
+    quads
+
+importAssertionEdge
+  :: Array ImportedRdfQuad
+  -> Map.Map String String
   -> Map.Map String String
   -> String
   -> Either String Edge
-importEdge quads nodeIdByIri iri = do
+importAssertionEdge quads nodeIdByIri reifiedDescriptions iri = do
   sourceIri <- requireNamedObject quads iri gbFrom "edge source"
   targetIri <- requireNamedObject quads iri gbTo "edge target"
   source <- maybe
@@ -136,8 +217,145 @@ importEdge quads nodeIdByIri iri = do
     Right
     (Map.lookup targetIri nodeIdByIri)
   label <- requireLiteral quads iri rdfsLabel "edge label"
-  let description = fromMaybe "" (literalValue quads iri gbDescription)
-  pure { source, target, label, description }
+  let
+    predicateIri =
+      case Array.head (namedObjectValues quads iri gbPredicate) of
+        Just value -> Just value
+        Nothing -> inferPredicateIri quads sourceIri targetIri label
+    description = fromMaybe
+      (fromMaybe "" (predicateIri >>= \pred -> Map.lookup (edgeKey sourceIri pred targetIri) reifiedDescriptions))
+      (literalValue quads iri gbDescription)
+  pure
+    { source
+    , target
+    , label
+    , description
+    , predicateRef: predicateIri >>= predicateReference quads
+    }
+
+mergeEdges :: Array Edge -> Array Edge
+mergeEdges edges =
+  Array.fromFoldable $ Map.values $ foldl insertEdge Map.empty edges
+  where
+  insertEdge acc edge =
+    Map.alter
+      (Just <<< mergeInto edge)
+      (edgeIdentity edge)
+      acc
+
+  mergeInto edge Nothing = edge
+  mergeInto edge (Just existing) =
+    { source: existing.source
+    , target: existing.target
+    , label:
+        if edge.description /= "" && preferNew edge existing then edge.label
+        else existing.label
+    , description:
+        if edge.description /= "" then edge.description
+        else existing.description
+    , predicateRef: choosePredicateRef existing.predicateRef edge.predicateRef
+    }
+
+  preferNew edge existing =
+    case existing.predicateRef, edge.predicateRef of
+      Nothing, Just _ -> true
+      _, _ -> existing.description == ""
+
+  choosePredicateRef left right = case left of
+    Just _ -> left
+    Nothing -> right
+
+  edgeIdentity edge =
+    edge.source <> "|" <> edge.target <> "|" <> predicateKey edge
+
+  predicateKey edge = case edge.predicateRef of
+    Just ref -> ref.iri
+    Nothing -> "label:" <> edge.label
+
+guardNamedNodeRelation
+  :: ImportedRdfQuad
+  -> Map.Map String String
+  -> Maybe Unit
+guardNamedNodeRelation quad nodeIdByIri =
+  if
+    quad.predicate /= rdfType
+      && quad.object.termType == "NamedNode"
+      && Map.member quad.subject nodeIdByIri
+      && Map.member quad.object.value nodeIdByIri then
+    Just unit
+  else
+    Nothing
+
+reifiedDescriptionMap :: Array ImportedRdfQuad -> Map.Map String String
+reifiedDescriptionMap quads =
+  foldl insertDescription Map.empty (subjectsWithType rdfStatement quads)
+  where
+  insertDescription acc statementIri =
+    case
+      literalValue quads statementIri dctermsDescription,
+      Array.head (namedObjectValues quads statementIri rdfSubject),
+      Array.head (namedObjectValues quads statementIri rdfPredicate),
+      Array.head (namedObjectValues quads statementIri rdfObject)
+      of
+      Just description, Just sourceIri, Just predicateIri, Just targetIri ->
+        Map.insert (edgeKey sourceIri predicateIri targetIri) description acc
+      _, _, _, _ -> acc
+
+inferPredicateIri :: Array ImportedRdfQuad -> String -> String -> String -> Maybe String
+inferPredicateIri quads sourceIri targetIri label =
+  let
+    candidates =
+      map _.predicate
+        ( Array.filter
+            ( \quad ->
+                quad.subject == sourceIri
+                  && quad.object.termType == "NamedNode"
+                  && quad.object.value == targetIri
+                  && quad.predicate /= rdfType
+            )
+            quads
+        )
+  in
+    case Array.find (\predicateIri -> predicateLabel quads predicateIri == label) candidates of
+      Just iri -> Just iri
+      Nothing ->
+        if Array.length candidates == 1 then
+          Array.head candidates
+        else
+          Nothing
+
+semanticTypeReference :: Array ImportedRdfQuad -> String -> Maybe OntologyReference
+semanticTypeReference quads iri =
+  Array.findMap
+    ( \typeIri ->
+        if isSemanticOntologyIri typeIri then
+          Just (ontologyReference quads typeIri)
+        else
+          Nothing
+    )
+    (namedObjectValues quads iri rdfType)
+
+predicateReference :: Array ImportedRdfQuad -> String -> Maybe OntologyReference
+predicateReference quads iri =
+  if isSemanticOntologyIri iri then
+    Just (ontologyReference quads iri)
+  else
+    Nothing
+
+ontologyReference :: Array ImportedRdfQuad -> String -> OntologyReference
+ontologyReference quads iri =
+  { label: fromMaybe (decodeVocabularySuffix "" iri) (literalValue quads iri rdfsLabel)
+  , iri
+  }
+
+predicateLabel :: Array ImportedRdfQuad -> String -> String
+predicateLabel quads iri =
+  fromMaybe (decodeVocabularySuffix "" iri) (literalValue quads iri rdfsLabel)
+
+dedupeLinks :: Array Link -> Array Link
+dedupeLinks links =
+  Array.fromFoldable $ Map.values $
+    foldl (\acc link -> Map.insert link.url link acc) Map.empty links
 
 subjectsWithType :: String -> Array ImportedRdfQuad -> Array String
 subjectsWithType typeIri quads =
@@ -159,6 +377,10 @@ findKindIri :: Array ImportedRdfQuad -> String -> Maybe String
 findKindIri quads iri =
   Array.find (\value -> String.take (String.length gbKinds) value == gbKinds)
     (namedObjectValues quads iri rdfType)
+
+firstLiteralValue :: Array ImportedRdfQuad -> String -> Array String -> Maybe String
+firstLiteralValue quads subject =
+  Array.findMap (\predicate -> literalValue quads subject predicate)
 
 literalValue
   :: Array ImportedRdfQuad
@@ -222,11 +444,32 @@ requireNamedObject quads subject predicate fieldName =
     Nothing ->
       Left ("Missing " <> fieldName <> " on RDF subject " <> subject)
 
+edgeKey :: String -> String -> String -> String
+edgeKey sourceIri predicateIri targetIri =
+  sourceIri <> "|" <> predicateIri <> "|" <> targetIri
+
+isSemanticOntologyIri :: String -> Boolean
+isSemanticOntologyIri iri =
+  isAbsoluteIri iri
+    && not (String.take (String.length gbTerms) iri == gbTerms)
+    && not (String.take (String.length gbKinds) iri == gbKinds)
+    && not (String.take (String.length gbGroups) iri == gbGroups)
+    && not (String.take (String.length gbEdges) iri == gbEdges)
+
+isAbsoluteIri :: String -> Boolean
+isAbsoluteIri iri =
+  String.take 7 iri == "http://"
+    || String.take 8 iri == "https://"
+
 decodeVocabularySuffix :: String -> String -> String
 decodeVocabularySuffix prefix iri
-  | String.take (String.length prefix) iri == prefix =
+  | prefix /= ""
+      && String.take (String.length prefix) iri == prefix =
       decodeUriComponent (String.drop (String.length prefix) iri)
   | otherwise =
       case Array.last (split (Pattern "#") iri) of
-        Just suffix -> decodeUriComponent suffix
-        Nothing -> iri
+        Just suffix | suffix /= iri -> decodeUriComponent suffix
+        _ ->
+          case Array.last (split (Pattern "/") iri) of
+            Just suffix -> decodeUriComponent suffix
+            Nothing -> iri

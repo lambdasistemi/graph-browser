@@ -7,6 +7,7 @@ import Prelude
 
 import Data.Array as Array
 import Data.Map as Map
+import Data.Maybe (Maybe(..))
 import Foreign (Foreign, unsafeToForeign)
 import Graph.Types (Edge, Graph, Node)
 
@@ -44,5 +45,8 @@ mkEdgeEl i edge = unsafeToForeign
       , target: edge.target
       , label: edge.label
       , description: edge.description
+      , predicateIri: case edge.predicateRef of
+          Just ref -> ref.iri
+          Nothing -> ""
       }
   }

@@ -15,7 +15,7 @@ import Data.Argonaut.Decode.Error
   )
 import Data.Either (Either(..))
 import Data.Map as Map
-import Data.Maybe (fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Foreign.Object as FO
@@ -75,7 +75,15 @@ decodeNode json = do
   description <- lmap' $ obj .: "description"
   rawLinks <- lmap' $ fromMaybe [] <$> obj .:? "links"
   links <- traverse decodeLink rawLinks
-  pure { id, label, kind, group, description, links }
+  pure
+    { id
+    , label
+    , kind
+    , group
+    , description
+    , links
+    , ontologyRef: Nothing
+    }
 
 decodeLink :: Json -> Either String Link
 decodeLink json = do
@@ -92,7 +100,13 @@ decodeEdge json = do
   label <- lmap' $ obj .: "label"
   description <- lmap' $
     fromMaybe "" <$> obj .:? "description"
-  pure { source, target, label, description }
+  pure
+    { source
+    , target
+    , label
+    , description
+    , predicateRef: Nothing
+    }
 
 decodeGraphSource :: Json -> Either String GraphSource
 decodeGraphSource json = do

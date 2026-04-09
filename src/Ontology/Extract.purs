@@ -192,6 +192,10 @@ classesToNodes classes depths =
           , links:
               [ { label: "Ontology IRI", url: cls.iri }
               ]
+          , ontologyRef: Just
+              { label: cls.label
+              , iri: cls.iri
+              }
           }
     )
     classes
@@ -233,6 +237,10 @@ extractSubclassEdges quads nodeIdByIri =
           , target
           , label: "subclass of"
           , description: ""
+          , predicateRef: Just
+              { label: "subClassOf"
+              , iri: rdfsSubclassOf
+              }
           }
     )
     (extractSubclassLinks quads)
@@ -264,6 +272,10 @@ extractPropertyEdges quads nodeIdByIri =
                             , target
                             , label
                             , description
+                            , predicateRef: Just
+                                { label
+                                , iri: propertyIri
+                                }
                             }
                       )
                       ranges
@@ -294,6 +306,10 @@ extractAlignmentEdges quads nodeIdByIri =
               , target
               , label: "equivalent to"
               , description: ""
+              , predicateRef: Just
+                  { label: "equivalentClass"
+                  , iri: owlEquivalentClass
+                  }
               }
           else
             Nothing
@@ -336,6 +352,10 @@ extractAlignmentEdges quads nodeIdByIri =
                   , target
                   , label: "equivalent property"
                   , description: ""
+                  , predicateRef: Just
+                      { label: "equivalentProperty"
+                      , iri: owlEquivalentProperty
+                      }
                   }
             )
             rights
@@ -475,4 +495,8 @@ dedupeEdges edges =
     )
 
   edgeKey edge =
-    edge.source <> "|" <> edge.target <> "|" <> edge.label
+    edge.source <> "|" <> edge.target <> "|" <> predicateKey edge
+
+  predicateKey edge = case edge.predicateRef of
+    Just ref -> ref.iri
+    Nothing -> "label:" <> edge.label
