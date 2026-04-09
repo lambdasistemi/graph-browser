@@ -14,6 +14,7 @@ import Data.Argonaut.Decode.Error
   , printJsonDecodeError
   )
 import Data.Either (Either(..))
+import Data.Array as Array
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Traversable (traverse)
@@ -42,6 +43,7 @@ decodeConfig json = do
   kindsObj <- lmap' $
     (obj .: "kinds" :: Either JsonDecodeError (FO.Object Json))
   rawGraphSource <- lmap' $ obj .:? "graphSource"
+  rawGraphSources <- lmap' $ fromMaybe [] <$> obj .:? "graphSources"
   kindPairs <- traverse
     ( \(Tuple k v) -> do
         def <- decodeKindDef v
@@ -49,12 +51,22 @@ decodeConfig json = do
     )
     (FO.toUnfoldable kindsObj :: Array _)
   graphSource <- traverse decodeGraphSource rawGraphSource
+  graphSourcesDecoded <- traverse decodeGraphSource rawGraphSources
+  let
+    graphSources =
+      if Array.null graphSourcesDecoded then
+        case graphSource of
+          Just source -> [ source ]
+          Nothing -> []
+      else
+        graphSourcesDecoded
   pure
     { title
     , description
     , sourceUrl
     , kinds: Map.fromFoldable kindPairs
     , graphSource
+    , graphSources
     }
 
 decodeKindDef :: Json -> Either String KindDef

@@ -55,9 +55,9 @@ export const parseQuads = (format) => (baseIri) => (input) => () =>
 
 export const createStore = () => new oxigraph.Store();
 
-export const loadTurtle = (store) => (baseIri) => (turtleContent) => () => {
-  store.load(turtleContent, {
-    format: "text/turtle",
+export const loadRdf = (store) => (format) => (baseIri) => (content) => () => {
+  store.load(content, {
+    format,
     base_iri: baseIri,
   });
 };

@@ -12,6 +12,7 @@ import Data.Array as Array
 import Data.Map as Map
 import Data.Maybe (Maybe(..), isJust)
 import Data.String (null) as S
+import Data.String.Common (joinWith)
 import Data.Tuple (Tuple(..), snd)
 import FFI.Uri (encodeUriComponent)
 import Graph.Query (QueryCatalog)
@@ -28,7 +29,7 @@ vocabBase = "https://lambdasistemi.github.io/graph-browser/vocab"
 
 -- | Whether the config declares an RDF graph source.
 isRdf :: Config -> Boolean
-isRdf config = isJust config.graphSource
+isRdf config = not (Array.null config.graphSources) || isJust config.graphSource
 
 -- | Build a prompt for a node with its connected edges.
 buildNodePrompt :: Config -> Graph -> Node -> String -> String
@@ -429,16 +430,30 @@ linksJson links
 filePathsBlock :: Config -> String
 filePathsBlock config =
   if isRdf config then
-    case config.graphSource of
-      Just gs ->
-        "- Graph (RDF, edit this): `" <> gs.path <> "`\n"
-          <> "- Config: `data/config.json`\n"
-          <> "- Query catalog: `data/queries.json`\n"
-          <> "- Tutorials: `data/tutorials/`"
-      Nothing ->
-        "- Config: `data/config.json`\n"
-          <> "- Query catalog: `data/queries.json`\n"
-          <> "- Tutorials: `data/tutorials/`"
+    let
+      rdfPaths =
+        if Array.null config.graphSources then
+          case config.graphSource of
+            Just gs -> [ gs.path ]
+            Nothing -> []
+        else
+          map _.path config.graphSources
+      graphLines = case rdfPaths of
+        [] -> []
+        [ path ] -> [ "- Graph (RDF, edit this): `" <> path <> "`" ]
+        paths ->
+          [ "- Graph sources (RDF, edit these): "
+              <> joinWith ", " (map (\path -> "`" <> path <> "`") paths)
+          ]
+    in
+      joinWith "\n"
+        ( graphLines
+            <>
+              [ "- Config: `data/config.json`"
+              , "- Query catalog: `data/queries.json`"
+              , "- Tutorials: `data/tutorials/`"
+              ]
+        )
   else
     "- Graph: `data/graph.json`\n"
       <> "- Config: `data/config.json`\n"
@@ -454,8 +469,7 @@ prSection config
   | S.null config.sourceUrl = ""
   | isRdf config = section "How to Submit Changes"
       ( "Fork " <> config.sourceUrl
-          <> ". For graph data, edit the RDF file listed above"
-          <> " (Turtle). "
+          <> ". For graph data, edit the RDF source file(s) listed above. "
           <> "For queries, edit `data/queries.json`. "
           <> "For tours, add/edit in `data/tutorials/`. "
           <> "Validate against schemas and open a PR."
