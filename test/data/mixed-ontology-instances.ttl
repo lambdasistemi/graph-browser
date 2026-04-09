@@ -1,0 +1,44 @@
+@prefix ex: <https://example.org/ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#> .
+@prefix gbk: <https://lambdasistemi.github.io/graph-browser/vocab/kinds#> .
+@prefix gbg: <https://lambdasistemi.github.io/graph-browser/vocab/groups#> .
+
+ex:DomainEntity a owl:Class ;
+  rdfs:label "Domain Entity" .
+
+ex:Person a owl:Class ;
+  rdfs:label "Person" ;
+  rdfs:subClassOf ex:DomainEntity .
+
+ex:Student a owl:Class ;
+  rdfs:label "Student" ;
+  rdfs:subClassOf ex:Person .
+
+ex:Course a owl:Class ;
+  rdfs:label "Course" ;
+  rdfs:subClassOf ex:DomainEntity .
+
+ex:enrolledIn a owl:ObjectProperty ;
+  rdfs:label "enrolled in" ;
+  rdfs:domain ex:Student ;
+  rdfs:range ex:Course .
+
+ex:alice a gb:Node, gbk:component, ex:Student ;
+  gb:nodeId "alice" ;
+  rdfs:label "Alice" ;
+  gb:description "A graph-browser node representing a student instance." ;
+  gb:group gbg:instances .
+
+ex:courseGraph a gb:Node, gbk:module, ex:Course ;
+  gb:nodeId "course-graph" ;
+  rdfs:label "Course Graph" ;
+  gb:description "A graph-browser node representing a course instance." ;
+  gb:group gbg:instances .
+
+ex:alice-enrolled a gb:EdgeAssertion ;
+  gb:from ex:alice ;
+  gb:to ex:courseGraph ;
+  rdfs:label "enrolled in" ;
+  gb:description "Instance-level relation between Alice and the course." .
