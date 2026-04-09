@@ -47,7 +47,7 @@
 - [x] T010 [US1] Implement `extractSubclassEdges :: Array ImportedRdfQuad -> Map String String -> Array Edge` in `src/Ontology/Extract.purs` — find all `rdfs:subClassOf` quads, map subject/object IRIs to `owl-` prefixed node IDs, label `"subclass of"`
 - [x] T011 [US1] Wire `extractSubclassEdges` into the main extraction pipeline called from `importGraph` in `src/Rdf/Import.purs`
 - [x] T012 [US1] Create a test Turtle file `test/data/ontology-only.ttl` with 5+ classes, 3+ depth levels, `rdfs:subClassOf` relationships, and `rdfs:label`/`rdfs:comment` annotations
-- [ ] T013 [US1] Verify with Playwright: load `ontology-only.ttl`, confirm class nodes appear as diamonds with depth-based purple shading and subclass edges render
+- [x] T013 [US1] Verify with Playwright: load `ontology-only.ttl`, confirm class nodes appear as diamonds with depth-based purple shading and subclass edges render
 
 **Checkpoint**: Pure ontology datasets render as browsable class hierarchies.
 
@@ -64,7 +64,7 @@
 - [x] T014 [US5] Add "ontology-classes" query to `data/queries.json` — SPARQL selecting all nodes with `gb:group gbgroups:ontology`
 - [x] T015 [US5] Add "class-hierarchy" query to `data/queries.json` — SPARQL selecting ontology nodes connected by edges labeled "subclass of"
 - [x] T016 [US5] Add "ontology-subtree" parameterized query to `data/queries.json` — SPARQL selecting a root class node and all descendants via transitive subclass edges, with a `$root` parameter of type `node`
-- [ ] T017 [US5] Verify with Playwright: load mixed dataset, execute "ontology-classes" query, confirm only ontology nodes displayed
+- [x] T017 [US5] Verify with Playwright: load mixed dataset, execute "ontology-classes" query, confirm only ontology nodes displayed
 
 **Checkpoint**: Ontology can be viewed in isolation within 2 clicks.
 
@@ -82,7 +82,7 @@
 - [x] T019 [US2] Wire `extractPropertyEdges` into the extraction pipeline in `src/Rdf/Import.purs`
 - [x] T020 [US2] Add `owl:ObjectProperty` declarations with `rdfs:domain`/`rdfs:range` to `test/data/ontology-only.ttl`
 - [x] T021 [US2] Add "ontology-properties" query to `data/queries.json` — SPARQL selecting ontology nodes connected by property edges (edges whose label is not "subclass of" and not "equivalent to")
-- [ ] T022 [US2] Verify with Playwright: load updated test file, confirm property edges appear between domain/range classes
+- [x] T022 [US2] Verify with Playwright: load updated test file, confirm property edges appear between domain/range classes
 
 **Checkpoint**: Object properties visible as edges between classes.
 
@@ -97,8 +97,8 @@
 ### Implementation for User Story 4
 
 - [x] T023 [US4] Create test Turtle file `test/data/mixed-ontology-instances.ttl` with both `gb:Node` instances and `owl:Class` triples, where some instances are typed as ontology classes
-- [ ] T024 [US4] Verify with Playwright: load mixed dataset, confirm both ontology (diamond) and instance (round/rectangle) nodes render, visually distinct
-- [ ] T025 [US4] Verify edge case: a `gb:Node` instance typed as an `owl:Class` that also appears in the ontology — confirm no duplicate node, instance node takes precedence (or both appear with distinct IDs per D5)
+- [x] T024 [US4] Verify with Playwright: load mixed dataset, confirm both ontology (diamond) and instance (round/rectangle) nodes render, visually distinct
+- [x] T025 [US4] Verify edge case: a `gb:Node` instance typed as an `owl:Class` that also appears in the ontology — confirm no duplicate node, instance node takes precedence (or both appear with distinct IDs per D5)
 
 **Checkpoint**: Mixed datasets work correctly, no regressions on instance-only datasets.
 
@@ -114,7 +114,7 @@
 
 - [x] T026 [US6] Create `data/tutorials/ontology-walkthrough.json` with query-based stops: overview (queryId: `ontology-classes`), class hierarchy (queryId: `class-hierarchy`), property relationships (queryId: `ontology-properties`), alignments (queryId: `ontology-alignments`)
 - [x] T027 [US6] Add ontology walkthrough entry to `data/tutorials/index.json`
-- [ ] T028 [US6] Verify with Playwright: start ontology tour, advance through stops, confirm each stop filters to the correct ontology subset
+- [x] T028 [US6] Verify with Playwright: start ontology tour, advance through stops, confirm each stop filters to the correct ontology subset
 
 **Checkpoint**: Guided tour navigable from tutorials panel.
 
@@ -132,7 +132,7 @@
 - [x] T030 [US3] Wire `extractAlignmentEdges` into the extraction pipeline in `src/Rdf/Import.purs`
 - [x] T031 [US3] Add `owl:equivalentClass` triples to `test/data/ontology-only.ttl` (e.g., mapping domain classes to `gb:` vocabulary classes)
 - [x] T032 [US3] Add "ontology-alignments" query to `data/queries.json` — SPARQL selecting nodes connected by "equivalent to" edges
-- [ ] T033 [US3] Verify with Playwright: load updated test file, confirm alignment edges render between mapped classes
+- [x] T033 [US3] Verify with Playwright: load updated test file, confirm alignment edges render between mapped classes
 
 **Checkpoint**: All ontology relationship types visible.
 
@@ -142,7 +142,7 @@
 
 **Purpose**: Final validation and cleanup.
 
-- [ ] T034 Verify backward compatibility: load existing `data/rdf/graph.ttl` (no ontology triples), confirm identical rendering to current behavior
+- [x] T034 Verify backward compatibility: load existing `data/rdf/graph.ttl` (no ontology triples), confirm identical rendering to current behavior
 - [x] T035 Run `nix build` to verify clean build
 - [ ] T036 Verify all queries and tour work end-to-end with a real ontology (e.g., `cardano.ttl` from cardano-knowledge-maps)
 
