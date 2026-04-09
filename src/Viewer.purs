@@ -645,7 +645,9 @@ renderTutorialContent state =
       in
         let
           onDetour = case state.selected of
-            Just sel -> sel.id /= stop.node
+            Just sel -> case stop.queryId of
+              Just _ -> false
+              Nothing -> sel.id /= stop.node
             Nothing -> false
         in
           HH.div [ cls "tutorial-content" ]
@@ -1033,11 +1035,13 @@ handleAction = case _ of
     case result of
       Left err ->
         H.modify_ _ { error = Just err }
-      Right graph -> do
-        let start = mostConnectedNode graph
-        H.modify_ _
-          { graph = graph
-          , fullGraph = graph
+      Right loaded -> do
+        let start = mostConnectedNode loaded.graph
+        H.modify_ \s -> s
+          { config = s.config
+              { kinds = mergeKinds s.config.kinds loaded.ontologyKinds }
+          , graph = loaded.graph
+          , fullGraph = loaded.graph
           , selected = start
           }
     -- If RDF format, create SPARQL store and load turtle
@@ -1711,14 +1715,24 @@ loadConfig url = do
     Left err -> Left err
     Right json -> decodeConfig json
 
-loadGraphData :: String -> String -> Aff (Either String Graph)
+loadGraphData
+  :: String
+  -> String
+  -> Aff (Either String { graph :: Graph, ontologyKinds :: Map.Map KindId KindDef })
 loadGraphData format url = do
   resp <- fetch url { method: GET }
   body <- resp.text
   if isJsonGraphFormat format url then
     pure case jsonParser body of
       Left err -> Left err
-      Right json -> decodeGraph json
+      Right json ->
+        map
+          ( \graph ->
+              { graph
+              , ontologyKinds: Map.empty
+              }
+          )
+          (decodeGraph json)
   else do
     -- Oxigraph requires an absolute base IRI. The fetch URL may be
     -- relative, so resolve it against the page origin.
@@ -1777,7 +1791,16 @@ discoverParamOptions store params = do
       <> "SELECT DISTINCT ?v WHERE { ?node a ?v . FILTER(STRSTARTS(STR(?v), STR(gbk:))) }"
   discoveryQuery "node" =
     "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\n"
-      <> "SELECT DISTINCT ?v WHERE { ?node gb:nodeId ?v }"
+      <> "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n"
+      <> "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+      <> "SELECT DISTINCT ?v WHERE {\n"
+      <> "  { ?node gb:nodeId ?v }\n"
+      <> "  UNION {\n"
+      <> "    { ?class a owl:Class }\n"
+      <> "    UNION { ?class a rdfs:Class }\n"
+      <> "    BIND(CONCAT(\"owl-\", LCASE(REPLACE(REPLACE(STR(?class), \"^.*(#|/)\", \"\"), \"[^A-Za-z0-9]+\", \"-\"))) AS ?v)\n"
+      <> "  }\n"
+      <> "}"
   discoveryQuery "group" =
     "PREFIX gb: <https://lambdasistemi.github.io/graph-browser/vocab/terms#>\n"
       <> "SELECT DISTINCT ?v WHERE { ?node gb:group ?v }"
@@ -1912,3 +1935,13 @@ kindsToForeign cfg =
             :: Array (Tuple String KindDef)
         )
     )
+
+mergeKinds
+  :: Map.Map KindId KindDef
+  -> Map.Map KindId KindDef
+  -> Map.Map KindId KindDef
+mergeKinds base extra =
+  foldl
+    (\acc (Tuple kindId kindDef) -> Map.insert kindId kindDef acc)
+    base
+    (Map.toUnfoldable extra :: Array (Tuple KindId KindDef))
