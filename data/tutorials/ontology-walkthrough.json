@@ -4,28 +4,28 @@
   "description": "A guided tour of the ontology structure hidden inside the loaded RDF graph.",
   "stops": [
     {
-      "node": "owl-dataset",
+      "node": "tutorial",
       "depth": 2,
       "title": "Ontology Overview",
       "narrative": "This view isolates every OWL/RDFS class that graph-browser auto-detected from the RDF source. The ontology nodes are generated directly from the triples, so there is no second hand-maintained graph model to keep in sync.",
       "queryId": "ontology-classes"
     },
     {
-      "node": "owl-node",
+      "node": "graph-types",
       "depth": 2,
       "title": "Class Hierarchy",
       "narrative": "Subclass edges reveal the taxonomy of the dataset. Root concepts sit at the shallowest depth, and deeper classes inherit structure as the hierarchy expands.",
       "queryId": "class-hierarchy"
     },
     {
-      "node": "owl-edgerelation",
+      "node": "graph-views",
       "depth": 2,
       "title": "Property Relationships",
       "narrative": "Object properties connect classes through their declared domains and ranges. This turns the ontology from a pure tree into a navigable relational model.",
       "queryId": "ontology-properties"
     },
     {
-      "node": "owl-querycatalog",
+      "node": "schema-graph",
       "depth": 2,
       "title": "Alignment Edges",
       "narrative": "Equivalent classes and equivalent properties expose where this ontology aligns with neighboring vocabularies. Those mappings are useful when comparing datasets or tracing interoperability boundaries.",
