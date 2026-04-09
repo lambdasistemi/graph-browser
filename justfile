@@ -47,10 +47,16 @@ render-rdf-diagrams: export-rdf
     mmdc -p mermaid-puppeteer-config.json -i data/rdf/core-ontology.mmd -o data/rdf/core-ontology.svg -t dark -b transparent
     mmdc -p mermaid-puppeteer-config.json -i data/rdf/application-ontology.mmd -o data/rdf/application-ontology.svg -t dark -b transparent
 
+publish-vocab:
+    NODE_OPTIONS="--require ./src/oxigraph-shim.cjs" spago run --main Vocab.Publish.Main -- --output-dir dist --site-base-path /graph-browser --sources data/rdf/core-ontology.ttl,data/rdf/application-ontology.ttl
+
 build-docs: render-rdf-diagrams
     mkdocs build --strict --site-dir dist/docs
     rm -rf dist/rdf
     cp -r data/rdf dist/rdf
+    just publish-vocab
+
+build-site: build-docs
 
 validate-rdf:
     shacl validate --shapes data/rdf/shapes.ttl --data data/rdf/graph.ttl

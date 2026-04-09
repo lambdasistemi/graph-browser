@@ -233,7 +233,9 @@ Without a manifest, the app looks for `data/` on the repo's main branch via raw 
 ```bash
 nix develop -c just ci          # lint + build + bundle
 nix develop -c just export-rdf  # regenerate data/rdf from the graph sources declared in data/config.json
+nix develop -c just publish-vocab # generate /vocab/... namespace pages from ontology Turtle
 nix develop -c just validate-rdf # validate RDF artifacts with SHACL
+nix develop -c just build-docs  # build docs, copy RDF artifacts, and publish /vocab/... pages into dist
 nix develop -c just serve       # serve example on port 10002
 nix develop -c just dev         # watch mode
 nix develop -c just bundle-app  # bundle app (with repo panel)
@@ -258,6 +260,27 @@ The command writes:
 - `data/rdf/application-shapes.ttl`
 
 `core-ontology.ttl` is the shared graph-browser ontology. `application-ontology.ttl` is the repo-specific extension generated from local kinds, groups, and edge labels. `core-ontology.mmd` and `application-ontology.mmd` are generated Mermaid views of the same structures for lightweight visualization and Pages publishing.
+
+`just publish-vocab` reads the ontology Turtle artifacts and generates human-browsable namespace pages under:
+
+- `dist/vocab/terms`
+- `dist/vocab/kinds`
+- `dist/vocab/groups`
+- `dist/vocab/edges`
+
+Those pages are generated automatically from Turtle during the docs/site build. They are not maintained as a separate hardcoded term catalog.
+
+This matters because ontology IRIs like `https://lambdasistemi.github.io/graph-browser/vocab/terms#Node` rely on the namespace document `https://lambdasistemi.github.io/graph-browser/vocab/terms` being published. The `#Node` fragment is client-side only.
+
+Downstream repos can use the same Turtle-driven generator through the reusable action:
+
+```yaml
+- uses: lambdasistemi/graph-browser/vocab-publish-action@main
+  with:
+    sources: data/rdf/core-ontology.ttl,data/rdf/application-ontology.ttl
+    output-dir: site
+    site-base-path: /your-repo-name
+```
 
 `just validate-rdf` runs two SHACL checks:
 

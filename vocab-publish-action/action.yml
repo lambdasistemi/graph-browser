@@ -1,0 +1,58 @@
+name: 'Publish Ontology Vocab Pages'
+description: 'Generate dereferenceable ontology namespace pages from Turtle files'
+
+inputs:
+  sources:
+    description: 'Comma-separated Turtle files to read'
+    required: false
+    default: 'data/rdf/core-ontology.ttl,data/rdf/application-ontology.ttl'
+  output-dir:
+    description: 'Directory containing the Pages artifact to update'
+    required: false
+    default: 'site'
+  site-base-path:
+    description: 'Base path to strip from namespace IRIs, such as /graph-browser for GitHub project Pages'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: paolino/dev-assets/setup-nix@v0.0.1
+
+    - name: Generate namespace pages
+      shell: bash
+      env:
+        SOURCE_PATHS: ${{ inputs.sources }}
+        OUTPUT_DIR: ${{ inputs.output-dir }}
+        SITE_BASE_PATH: ${{ inputs.site-base-path }}
+      run: |
+        set -euo pipefail
+
+        ACTION_DIR="$GITHUB_ACTION_PATH"
+        WORKSPACE_DIR="$GITHUB_WORKSPACE"
+
+        absolutize() {
+          case "$1" in
+            /*) printf '%s' "$1" ;;
+            *) printf '%s/%s' "$WORKSPACE_DIR" "$1" ;;
+          esac
+        }
+
+        IFS=',' read -r -a source_parts <<< "$SOURCE_PATHS"
+        abs_sources=()
+        for source in "${source_parts[@]}"; do
+          [ -z "$source" ] && continue
+          abs_sources+=("$(absolutize "$source")")
+        done
+
+        sources_csv=$(IFS=','; echo "${abs_sources[*]}")
+        output_dir="$(absolutize "$OUTPUT_DIR")"
+
+        cd "$ACTION_DIR"
+        npm ci
+        NODE_OPTIONS="--require ./src/oxigraph-shim.cjs" \
+          nix develop --quiet -c spago run --main Vocab.Publish.Main -- \
+            --output-dir "$output_dir" \
+            --site-base-path "$SITE_BASE_PATH" \
+            --sources "$sources_csv"
