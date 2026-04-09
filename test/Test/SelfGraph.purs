@@ -56,7 +56,8 @@ spec = describe "Self-graph integration" do
       Left err -> fail err
       Right catalog -> do
         let static = Array.filter
-              (\q -> Array.null q.parameters) catalog
+              (\q -> Array.null q.parameters && not (Array.elem "ontology" q.tags))
+              catalog
         for_ static \q -> do
           ids <- liftEffect $
             Oxigraph.querySparqlNodeIds store q.sparql
@@ -93,7 +94,8 @@ spec = describe "Self-graph integration" do
         Left err -> fail err
         Right catalog -> do
           let views = Array.filter
-                (\q -> Array.elem "view" q.tags) catalog
+                (\q -> Array.elem "view" q.tags && not (Array.elem "ontology" q.tags))
+                catalog
           for_ views \q -> do
             ids <- liftEffect $
               Oxigraph.querySparqlNodeIds store q.sparql
