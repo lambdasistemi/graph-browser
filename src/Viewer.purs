@@ -213,9 +213,6 @@ render state =
               [ renderGraphContext state
               , HH.div [ HP.id "cy" ] []
               , renderControls state
-              , if Array.null state.queryCatalog then
-                  renderSearchBox state
-                else HH.text ""
               , renderLegend state.config
               ]
           , renderSidebar state
@@ -228,9 +225,7 @@ renderGraphContext state = case graphContext state of
   Nothing -> HH.text ""
   Just context ->
     HH.div [ cls "graph-context-card" ]
-      [ HH.div [ cls "graph-context-label" ]
-          [ HH.text "Current Graph" ]
-      , HH.h1 [ cls "graph-context-title" ]
+      [ HH.h1 [ cls "graph-context-title" ]
           [ HH.text context.title ]
       , if context.description == "" then
           HH.text ""
@@ -257,33 +252,7 @@ renderControls
   :: forall m. State -> H.ComponentHTML Action () m
 renderControls state =
   HH.div [ cls "controls" ]
-    [ if not (Array.null state.queryCatalog) then
-        HH.text ""
-      else
-        HH.div [ cls "tour-menu-wrapper" ]
-          [ HH.button
-              [ cls
-                  ( "control-btn"
-                      <>
-                        if state.tutorialActive then " active"
-                        else ""
-                  )
-              , HE.onClick \_ ->
-                  if state.tutorialActive then
-                    ExitTutorial
-                  else ToggleTutorialMenu
-              ]
-              [ HH.text
-                  ( if state.tutorialActive then
-                      "Exit Tour"
-                    else "Guided Tours"
-                  )
-              ]
-          , if state.showTutorialMenu then
-              renderTutorialMenu state.tutorialIndex
-            else HH.text ""
-          ]
-    , if not (Array.null state.viewIndex) then
+    [ if not (Array.null state.viewIndex) then
         HH.div [ cls "tour-menu-wrapper" ]
           [ HH.button
               [ cls "control-btn"
@@ -338,7 +307,7 @@ renderTutorialMenu entries =
       , HE.onClick \_ -> StartTutorial entry.file
       ]
       [ HH.div [ cls "tour-menu-title" ]
-          [ HH.text entry.title ]
+          [ HH.text (displayTourTitle entry.title) ]
       , HH.div [ cls "tour-menu-desc" ]
           [ HH.text entry.description ]
       ]
@@ -481,7 +450,7 @@ renderToursList state =
       , HE.onClick \_ -> StartTutorial entry.file
       ]
       [ HH.div [ cls "query-item-name" ]
-          [ HH.text entry.title ]
+          [ HH.text (displayTourTitle entry.title) ]
       , HH.div [ cls "query-item-desc" ]
           [ HH.text entry.description ]
       ]
@@ -656,6 +625,22 @@ renderSidebar state =
       Nothing -> case state.selected of
         Nothing -> state.config.title
         Just n -> n.label
+
+displayTourTitle :: String -> String
+displayTourTitle title =
+  if endsWith " tour" lowerTitle then
+    title
+  else
+    title <> " tour"
+  where
+  lowerTitle = String.toLower title
+  endsWith suffix str =
+    let
+      suffixLen = String.length suffix
+      strLen = String.length str
+    in
+      strLen >= suffixLen
+        && String.drop (strLen - suffixLen) str == suffix
 
 renderEmptyState
   :: forall m. Config -> H.ComponentHTML Action () m
