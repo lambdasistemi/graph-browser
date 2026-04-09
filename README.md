@@ -1,6 +1,6 @@
 # Graph Browser
 
-An interactive knowledge graph browser with guided tours. Point it at any repository with the right JSON data format.
+An interactive knowledge graph browser with guided tours. Graph-browser itself now runs from RDF-backed graph sources declared in `data/config.json`, while legacy `graph.json` support remains available for compatibility.
 
 **Demo:** https://lambdasistemi.github.io/graph-browser/
 
@@ -22,8 +22,9 @@ An interactive knowledge graph browser with guided tours. Point it at any reposi
 - **Views**: named subgraph lenses — filter a shared node/edge catalog by topic with per-view tours
 - **Self-documenting**: graph-browser's own architecture is browsable as a graph with views
 - **CI validation action**: reusable GitHub Action to validate any data repo
-- **Build action**: assemble a deployable site from JSON data with zero build tools
-- **RDF export**: derive Turtle and N-Quads from the authored JSON graph through the Oxigraph FFI path
+- **Build action**: assemble a deployable site from graph-browser data with zero build tools
+- **RDF-first self-graph**: graph-browser’s own architecture is authored and served from RDF graph sources
+- **RDF export**: derive Turtle and N-Quads from the authored graph model through the Oxigraph FFI path
 
 ## Data Format
 
@@ -47,7 +48,7 @@ Your repository needs a `data/` directory with:
 }
 ```
 
-`graphSource` is optional legacy singleton support. If omitted, graph-browser loads `data/graph.json` as before. If present, graph-browser keeps `config.json` as the stable entry point and loads the graph payload from the configured RDF asset instead.
+`graphSource` is optional legacy singleton support. For new RDF-backed repos, prefer `graphSources`. Graph-browser keeps `config.json` as the stable entry point and loads the graph payload from the configured RDF assets.
 
 For multi-file RDF deployments, use `graphSources`:
 
@@ -69,7 +70,7 @@ For multi-file RDF deployments, use `graphSources`:
 
 `graphSources` is loaded in order and merged into one runtime dataset for both rendering and SPARQL queries. Single-file `graphSource` remains supported.
 
-### `data/graph.json` (required)
+### `data/graph.json` (legacy compatibility only)
 
 ```json
 {
@@ -96,7 +97,7 @@ For multi-file RDF deployments, use `graphSources`:
 }
 ```
 
-`data/graph.json` is required for the legacy JSON flow. It may be omitted by RDF-backed repos when `data/config.json` declares `graphSource`.
+`data/graph.json` remains supported for legacy JSON-backed repos. Graph-browser itself no longer uses it as the authored self-graph source of truth.
 
 ### RDF graph source via `graphSource` or `graphSources` (optional)
 
@@ -122,7 +123,7 @@ In this mode:
 - `config.json` still supplies viewer metadata and node kind styling
 - the graph itself is imported from RDF
 - `graphSources` can merge instance RDF with ontology RDF at runtime
-- existing JSON-backed repos continue to work unchanged
+- existing JSON-backed repos continue to work as compatibility mode
 
 ### `data/tutorials/index.json` (optional)
 
@@ -261,7 +262,7 @@ Without a manifest, the app looks for `data/` on the repo's main branch via raw 
 
 ```bash
 nix develop -c just ci          # lint + build + bundle
-nix develop -c just export-rdf  # regenerate data/rdf from data/config.json + data/graph.json
+nix develop -c just export-rdf  # regenerate data/rdf from the graph sources declared in data/config.json
 nix develop -c just validate-rdf # validate RDF artifacts with SHACL
 nix develop -c just serve       # serve example on port 10002
 nix develop -c just dev         # watch mode
@@ -273,7 +274,7 @@ nix build .#lib                 # nix build lib output
 
 ## RDF Export
 
-`just export-rdf` runs the PureScript export entrypoint `Rdf.Export.Main`, which owns the JSON-to-RDF mapping logic. The low-level triple storage and serialization is delegated through the thin Oxigraph FFI layer in `src/FFI/Oxigraph.js`.
+`just export-rdf` runs the PureScript export entrypoint `Rdf.Export.Main`, which reconstructs the graph model from the configured graph sources and emits the derived RDF artifacts. The low-level triple storage and serialization is delegated through the thin Oxigraph FFI layer in `src/FFI/Oxigraph.js`.
 
 The command writes:
 

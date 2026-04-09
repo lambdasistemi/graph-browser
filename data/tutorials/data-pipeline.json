@@ -1,7 +1,7 @@
 {
   "id": "data-pipeline",
   "title": "The Data Pipeline",
-  "description": "Follow the data from JSON files through decoding, indexing, filtering, and rendering.",
+  "description": "Follow the data from configured graph sources through decoding, indexing, filtering, and rendering.",
   "stops": [
     {
       "node": "graph-types",
@@ -14,7 +14,7 @@
       "node": "graph-decode",
       "depth": 2,
       "title": "JSON to Types",
-      "narrative": "[Graph.Decode](node:graph-decode) bridges raw JSON and typed PureScript. It uses Argonaut decode combinators to parse config.json into a Config record and graph.json into arrays of Nodes and Edges.\n\nOptional fields (like links) default to empty arrays. Invalid JSON produces typed errors, not runtime crashes.",
+      "narrative": "[Graph.Decode](node:graph-decode) parses config.json into a typed Config record, including RDF-backed graph source declarations. When the repo is RDF-backed, the viewer then imports Turtle or N-Quads into the in-memory Node and Edge model.\n\nThe typed decoding step still protects against malformed configuration before rendering begins.",
       "queryId": "decode-nodes"
     },
     {

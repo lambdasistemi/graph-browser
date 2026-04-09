@@ -138,28 +138,35 @@ runs:
               if(viewFiles.length>0) msg+=', '+viewFiles.length+' view(s)';
               console.log(msg+' — validation passed');
             }
-          } else if (c.graphSource) {
+          } else {
             const oxigraph=require('oxigraph');
-            const sourcePath='./'+c.graphSource.path;
-            if(!fs.existsSync(sourcePath)){
-              console.error('Configured RDF graph source not found: '+sourcePath);
+            const sources=Array.isArray(c.graphSources)&&c.graphSources.length>0
+              ? c.graphSources
+              : (c.graphSource ? [c.graphSource] : []);
+            if(sources.length===0){
+              console.error('Missing data/graph.json and no config.graphSource/config.graphSources configured');
               ok=false;
             } else {
-              try {
-                const store=new oxigraph.Store();
-                store.load(fs.readFileSync(sourcePath,'utf8'), {
-                  format: c.graphSource.format,
-                  base_iri: 'https://graph-browser.invalid/'
-                });
-                console.log('RDF graph source parsed: '+c.graphSource.path);
-              } catch (err) {
-                console.error('Failed to parse RDF graph source '+c.graphSource.path+': '+err);
-                ok=false;
-              }
+              const store=new oxigraph.Store();
+              sources.forEach((source, index)=>{
+                const sourcePath='./'+source.path;
+                if(!fs.existsSync(sourcePath)){
+                  console.error('Configured RDF graph source not found: '+sourcePath);
+                  ok=false;
+                  return;
+                }
+                try {
+                  store.load(fs.readFileSync(sourcePath,'utf8'), {
+                    format: source.format,
+                    base_iri: 'https://graph-browser.invalid/'
+                  });
+                  console.log('RDF graph source parsed ['+index+']: '+source.path);
+                } catch (err) {
+                  console.error('Failed to parse RDF graph source '+source.path+': '+err);
+                  ok=false;
+                }
+              });
             }
-          } else {
-            console.error('Missing data/graph.json and no config.graphSource configured');
-            ok=false;
           }
           if(!ok) process.exit(1);
         "

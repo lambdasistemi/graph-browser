@@ -1,5 +1,6 @@
 module Rdf.Import
   ( importGraph
+  , importInstanceGraph
   ) where
 
 import Prelude
@@ -75,21 +76,26 @@ importGraph
   :: Array ImportedRdfQuad
   -> Either String { graph :: Graph, ontologyKinds :: Map.Map String KindDef }
 importGraph quads = do
-  nodeRecords <- traverse (importNode quads) (subjectsWithType gbNode quads)
+  baseGraph <- importInstanceGraph quads
   let ontology = Ontology.extractOntology quads
+  pure
+    { graph: buildGraph (Array.fromFoldable (Map.values baseGraph.nodes) <> ontology.nodes) (baseGraph.edges <> ontology.edges)
+    , ontologyKinds: ontology.kinds
+    }
+
+importInstanceGraph :: Array ImportedRdfQuad -> Either String Graph
+importInstanceGraph quads = do
+  nodeRecords <- traverse (importNode quads) (subjectsWithType gbNode quads)
   let
     nodeIdByIri =
       Map.fromFoldable
         (map (\record -> Tuple record.iri record.node.id) nodeRecords)
     reifiedDescriptions = reifiedDescriptionMap quads
     relationEdges = importRelationEdges quads nodeIdByIri reifiedDescriptions
-  pure
-    { graph:
-        buildGraph
-          (map _.node nodeRecords <> ontology.nodes)
-          (mergeEdges relationEdges <> ontology.edges)
-    , ontologyKinds: ontology.kinds
-    }
+  pure $
+    buildGraph
+      (map _.node nodeRecords)
+      (mergeEdges relationEdges)
 
 type NodeRecord =
   { iri :: String
