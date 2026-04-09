@@ -42,6 +42,18 @@ gbEdges = vocabBase <> "/edges#"
 rdfType :: String
 rdfType = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
 
+rdfStatement :: String
+rdfStatement = "http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement"
+
+rdfSubject :: String
+rdfSubject = "http://www.w3.org/1999/02/22-rdf-syntax-ns#subject"
+
+rdfPredicate :: String
+rdfPredicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate"
+
+rdfObject :: String
+rdfObject = "http://www.w3.org/1999/02/22-rdf-syntax-ns#object"
+
 rdfProperty :: String
 rdfProperty = "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
 
@@ -50,6 +62,9 @@ rdfsClass = "http://www.w3.org/2000/01/rdf-schema#Class"
 
 rdfsLabel :: String
 rdfsLabel = "http://www.w3.org/2000/01/rdf-schema#label"
+
+rdfsSeeAlso :: String
+rdfsSeeAlso = "http://www.w3.org/2000/01/rdf-schema#seeAlso"
 
 dctermsTitle :: String
 dctermsTitle = "http://purl.org/dc/terms/title"
@@ -60,11 +75,14 @@ dctermsDescription = "http://purl.org/dc/terms/description"
 dctermsIsPartOf :: String
 dctermsIsPartOf = "http://purl.org/dc/terms/isPartOf"
 
-xsdInteger :: String
-xsdInteger = "http://www.w3.org/2001/XMLSchema#integer"
+foafPage :: String
+foafPage = "http://xmlns.com/foaf/0.1/page"
 
 xsdAnyUri :: String
 xsdAnyUri = "http://www.w3.org/2001/XMLSchema#anyURI"
+
+xsdInteger :: String
+xsdInteger = "http://www.w3.org/2001/XMLSchema#integer"
 
 exportFiles :: Config -> Graph -> Effect ExportFiles
 exportFiles config graph = do
@@ -149,14 +167,7 @@ buildQuads config graph =
               Array.concat
                 ( Array.mapWithIndex
                     ( \index link ->
-                        let
-                          linkIri = iri <> "/link/" <> show index
-                        in
-                          [ quadNamed linkIri rdfType (gbTerms <> "ExternalLink")
-                          , quadLiteral linkIri rdfsLabel link.label
-                          , quadTypedLiteral linkIri (gbTerms <> "url") link.url xsdAnyUri
-                          , quadNamed iri (gbTerms <> "externalLink") linkIri
-                          ]
+                        [ quadNamed iri (linkPredicate index link.label) link.url ]
                     )
                     node.links
                 )
@@ -167,7 +178,7 @@ buildQuads config graph =
             , quadLiteral iri (gbTerms <> "nodeId") node.id
             , quadLiteral iri rdfsLabel node.label
             , quadNamed iri (gbTerms <> "group") (groupIri node.group)
-            , quadLiteral iri (gbTerms <> "description") node.description
+            , quadLiteral iri dctermsDescription node.description
             ]
               <> linkQuads
       )
@@ -181,18 +192,20 @@ buildQuads config graph =
                 source = nodeIri dataset edge.source
                 target = nodeIri dataset edge.target
                 predicate = edgePredicateIri edge.label
-                assertion = dataset <> "/edge/" <> show index
+                statement = dataset <> "/edge/" <> show index
               in
-                [ quadNamed source predicate target
-                , quadNamed assertion rdfType (gbTerms <> "EdgeAssertion")
-                , quadNamed assertion dctermsIsPartOf dataset
-                , quadTypedLiteral assertion (gbTerms <> "edgeIndex") (show index) xsdInteger
-                , quadNamed assertion (gbTerms <> "from") source
-                , quadNamed assertion (gbTerms <> "to") target
-                , quadNamed assertion (gbTerms <> "predicate") predicate
-                , quadLiteral assertion rdfsLabel edge.label
-                , quadLiteral assertion (gbTerms <> "description") edge.description
-                ]
+                [ quadNamed source predicate target ]
+                  <>
+                    if edge.description == "" then []
+                    else
+                      [ quadNamed statement rdfType rdfStatement
+                      , quadNamed statement dctermsIsPartOf dataset
+                      , quadTypedLiteral statement (gbTerms <> "edgeIndex") (show index) xsdInteger
+                      , quadNamed statement rdfSubject source
+                      , quadNamed statement rdfPredicate predicate
+                      , quadNamed statement rdfObject target
+                      , quadLiteral statement dctermsDescription edge.description
+                      ]
           )
           graph.edges
       )
@@ -257,6 +270,11 @@ quadTypedLiteral subject predicate value datatype =
       , datatype
       }
   }
+
+linkPredicate :: Int -> String -> String
+linkPredicate index label
+  | index == 0 || label == "Source" || label == "Homepage" || label == "Home" = foafPage
+  | otherwise = rdfsSeeAlso
 
 coreOntologyTurtle :: String
 coreOntologyTurtle =
@@ -335,11 +353,12 @@ coreOntologyLines =
   , "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ."
   , "@prefix owl: <http://www.w3.org/2002/07/owl#> ."
   , "@prefix dcterms: <http://purl.org/dc/terms/> ."
+  , "@prefix foaf: <http://xmlns.com/foaf/0.1/> ."
   , "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> ."
   , ""
   , "<" <> vocabBase <> "/ontology> a owl:Ontology ;"
   , "  rdfs:label \"Graph Browser core vocabulary\" ;"
-  , "  dcterms:description \"Shared graph-browser ontology for datasets, views, tutorials, queries, and edge assertions.\" ;"
+  , "  dcterms:description \"Shared graph-browser ontology for datasets, views, tutorials, and queries, aligned to standard RDF descriptions and links.\" ;"
   , "  owl:versionInfo \"0.1.0\" ."
   , ""
   , "gb:Dataset a owl:Class ;"
@@ -353,14 +372,6 @@ coreOntologyLines =
   , "gb:Group a owl:Class ;"
   , "  rdfs:label \"Group\" ;"
   , "  dcterms:description \"An organizational group used by graph-browser nodes.\" ."
-  , ""
-  , "gb:EdgeAssertion a owl:Class ;"
-  , "  rdfs:label \"Edge assertion\" ;"
-  , "  dcterms:description \"Metadata resource preserving the original graph-browser edge record.\" ."
-  , ""
-  , "gb:ExternalLink a owl:Class ;"
-  , "  rdfs:label \"External link\" ;"
-  , "  dcterms:description \"External URL associated with a graph-browser node.\" ."
   , ""
   , "gb:Tutorial a owl:Class ;"
   , "  rdfs:label \"Tutorial\" ;"
@@ -451,24 +462,6 @@ coreOntologyLines =
   , "    owl:maxQualifiedCardinality \"1\"^^xsd:nonNegativeInteger ;"
   , "    owl:onDataRange xsd:string"
   , "  ] ."
-  , ""
-  , "gb:EdgeAssertion rdfs:subClassOf"
-  , "  [ a owl:Restriction ;"
-  , "    owl:onProperty gb:from ;"
-  , "    owl:qualifiedCardinality \"1\"^^xsd:nonNegativeInteger ;"
-  , "    owl:onClass gb:Node"
-  , "  ] ,"
-  , "  [ a owl:Restriction ;"
-  , "    owl:onProperty gb:to ;"
-  , "    owl:qualifiedCardinality \"1\"^^xsd:nonNegativeInteger ;"
-  , "    owl:onClass gb:Node"
-  , "  ] ,"
-  , "  [ a owl:Restriction ;"
-  , "    owl:onProperty gb:predicate ;"
-  , "    owl:qualifiedCardinality \"1\"^^xsd:nonNegativeInteger ;"
-  , "    owl:onClass rdf:Property"
-  , "  ] ."
-  , ""
   , "gb:EdgeRelation a owl:ObjectProperty ;"
   , "  rdfs:label \"edge relation\" ;"
   , "  dcterms:description \"A direct relationship predicate between two graph-browser nodes.\" ;"
@@ -515,21 +508,6 @@ coreOntologyLines =
   , "  rdfs:label \"group\" ;"
   , "  rdfs:domain gb:Node ;"
   , "  rdfs:range gb:Group ."
-  , ""
-  , "gb:description a owl:DatatypeProperty ;"
-  , "  rdfs:label \"description\" ;"
-  , "  rdfs:domain gb:Node ;"
-  , "  rdfs:range xsd:string ."
-  , ""
-  , "gb:externalLink a owl:ObjectProperty ;"
-  , "  rdfs:label \"external link\" ;"
-  , "  rdfs:domain gb:Node ;"
-  , "  rdfs:range gb:ExternalLink ."
-  , ""
-  , "gb:url a owl:DatatypeProperty ;"
-  , "  rdfs:label \"url\" ;"
-  , "  rdfs:domain gb:ExternalLink ;"
-  , "  rdfs:range xsd:anyURI ."
   , ""
   , "gb:hasTutorial a owl:ObjectProperty ;"
   , "  rdfs:label \"has tutorial\" ;"
@@ -630,25 +608,9 @@ coreOntologyLines =
   , "  rdfs:label \"tag\" ;"
   , "  rdfs:domain gb:NamedQuery ;"
   , "  rdfs:range xsd:string ."
-  , ""
-  , "gb:predicate a owl:ObjectProperty ;"
-  , "  rdfs:label \"predicate\" ;"
-  , "  rdfs:domain gb:EdgeAssertion ;"
-  , "  rdfs:range rdf:Property ."
-  , ""
-  , "gb:from a owl:ObjectProperty ;"
-  , "  rdfs:label \"from\" ;"
-  , "  rdfs:domain gb:EdgeAssertion ;"
-  , "  rdfs:range gb:Node ."
-  , ""
-  , "gb:to a owl:ObjectProperty ;"
-  , "  rdfs:label \"to\" ;"
-  , "  rdfs:domain gb:EdgeAssertion ;"
-  , "  rdfs:range gb:Node ."
-  , ""
   , "gb:edgeIndex a owl:DatatypeProperty ;"
   , "  rdfs:label \"edge index\" ;"
-  , "  rdfs:domain gb:EdgeAssertion ;"
+  , "  rdfs:domain rdf:Statement ;"
   , "  rdfs:range xsd:integer ."
   ]
 
@@ -660,8 +622,6 @@ coreOntologyMermaid =
     , "  Dataset[\"gb:Dataset\"]"
     , "  Node[\"gb:Node\"]"
     , "  Group[\"gb:Group\"]"
-    , "  EdgeAssertion[\"gb:EdgeAssertion\"]"
-    , "  ExternalLink[\"gb:ExternalLink\"]"
     , "  Tutorial[\"gb:Tutorial\"]"
     , "  TutorialStop[\"gb:TutorialStop\"]"
     , "  View[\"gb:View\"]"
@@ -673,8 +633,6 @@ coreOntologyMermaid =
     , "  Core --> Dataset"
     , "  Core --> Node"
     , "  Core --> Group"
-    , "  Core --> EdgeAssertion"
-    , "  Core --> ExternalLink"
     , "  Core --> Tutorial"
     , "  Core --> TutorialStop"
     , "  Core --> View"
@@ -688,7 +646,6 @@ coreOntologyMermaid =
     , "  Dataset -->|has views| View"
     , "  Dataset -->|has query catalogs| QueryCatalog"
     , "  Node -->|belongs to 1| Group"
-    , "  Node -->|links to| ExternalLink"
     , "  Tutorial -->|has stops 0..*| TutorialStop"
     , "  TutorialStop -->|focuses on| Node"
     , "  View -->|has edge refs 0..*| EdgeReference"
@@ -697,9 +654,6 @@ coreOntologyMermaid =
     , "  EdgeReference -->|edge target| Node"
     , "  QueryCatalog -->|has named queries 0..*| NamedQuery"
     , "  NamedQuery -->|has parameters 0..*| QueryParameter"
-    , "  EdgeAssertion -->|from 1| Node"
-    , "  EdgeAssertion -->|to 1| Node"
-    , "  EdgeAssertion -->|predicate 1| EdgeRelation"
     ]
 
 applicationOntologyMermaid :: Config -> Graph -> String

@@ -18,7 +18,7 @@ fixtureBase :: String
 fixtureBase = "https://example.org/standard#"
 
 spec :: Spec Unit
-spec = describe "RDF import fallback behavior" do
+spec = describe "RDF import standard metadata behavior" do
 
   it "imports standard descriptions, links, predicate IRIs, and reified edge descriptions" do
     turtle <- liftEffect $ readTextFile UTF8 "test/data/standard-predicate-primary.ttl"
@@ -51,11 +51,11 @@ spec = describe "RDF import fallback behavior" do
         case advisesEdge of
           Nothing -> fail "missing advises edge"
           Just edge -> do
-            edge.description `shouldEqual` "GB assertion description wins."
+            edge.description `shouldEqual` "Standard reified description wins."
             edge.predicateRef `shouldEqual`
               Just { label: "advises", iri: "https://example.org/standard#advises" }
 
-  it "keeps gb-specific node metadata authoritative over standard fallbacks" do
+  it "ignores legacy gb-specific descriptions and links" do
     turtle <- liftEffect $ readTextFile UTF8 "test/data/standard-predicate-primary.ttl"
     quads <- liftEffect $ Oxigraph.parseQuads "text/turtle" fixtureBase turtle
     case Rdf.Import.importGraph quads of
@@ -65,10 +65,9 @@ spec = describe "RDF import fallback behavior" do
         case carol of
           Nothing -> fail "missing carol node"
           Just node -> do
-            node.description `shouldEqual` "GB Carol description"
+            node.description `shouldEqual` "Standard Carol description"
             node.links `shouldSatisfy` \links ->
-              Array.length links == 1
-                && Array.head (map _.url links) == Just "https://example.org/carol-gb"
+              Array.null links
 
   where
   fail msg = shouldEqual msg ""

@@ -8,7 +8,7 @@ import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (foldl)
 import Data.Map as Map
-import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String as String
 import Data.String.Common (split)
 import Data.String.Pattern (Pattern(..))
@@ -62,9 +62,6 @@ foafPage = "http://xmlns.com/foaf/0.1/page"
 gbNode :: String
 gbNode = gbTerms <> "Node"
 
-gbEdgeAssertion :: String
-gbEdgeAssertion = gbTerms <> "EdgeAssertion"
-
 gbNodeId :: String
 gbNodeId = gbTerms <> "nodeId"
 
@@ -73,24 +70,6 @@ gbGroup = gbTerms <> "group"
 
 gbGroupId :: String
 gbGroupId = gbTerms <> "groupId"
-
-gbDescription :: String
-gbDescription = gbTerms <> "description"
-
-gbExternalLink :: String
-gbExternalLink = gbTerms <> "externalLink"
-
-gbUrl :: String
-gbUrl = gbTerms <> "url"
-
-gbFrom :: String
-gbFrom = gbTerms <> "from"
-
-gbTo :: String
-gbTo = gbTerms <> "to"
-
-gbPredicate :: String
-gbPredicate = gbTerms <> "predicate"
 
 importGraph
   :: Array ImportedRdfQuad
@@ -104,14 +83,11 @@ importGraph quads = do
         (map (\record -> Tuple record.iri record.node.id) nodeRecords)
     reifiedDescriptions = reifiedDescriptionMap quads
     relationEdges = importRelationEdges quads nodeIdByIri reifiedDescriptions
-  assertionEdges <- traverse
-    (importAssertionEdge quads nodeIdByIri reifiedDescriptions)
-    (subjectsWithType gbEdgeAssertion quads)
   pure
     { graph:
         buildGraph
           (map _.node nodeRecords <> ontology.nodes)
-          (mergeEdges (relationEdges <> assertionEdges) <> ontology.edges)
+          (mergeEdges relationEdges <> ontology.edges)
     , ontologyKinds: ontology.kinds
     }
 
@@ -131,13 +107,8 @@ importNode quads iri = do
   let
     group = fromMaybe (decodeVocabularySuffix gbGroups groupIri)
       (literalValue quads groupIri gbGroupId)
-    description = fromMaybe ""
-      (firstLiteralValue quads iri [ gbDescription, dctermsDescription ])
-    links =
-      if Array.null (namedObjectValues quads iri gbExternalLink) then
-        fallbackLinks quads iri
-      else
-        Array.mapMaybe (importGbLink quads) (namedObjectValues quads iri gbExternalLink)
+    description = fromMaybe "" (literalValue quads iri dctermsDescription)
+    links = fallbackLinks quads iri
     ontologyRef = semanticTypeReference quads iri
   pure
     { iri
@@ -151,12 +122,6 @@ importNode quads iri = do
         , ontologyRef
         }
     }
-
-importGbLink :: Array ImportedRdfQuad -> String -> Maybe Link
-importGbLink quads iri = do
-  url <- literalValue quads iri gbUrl
-  let label = fromMaybe url (literalValue quads iri rdfsLabel)
-  pure { label, url }
 
 fallbackLinks :: Array ImportedRdfQuad -> String -> Array Link
 fallbackLinks quads subject =
@@ -198,40 +163,6 @@ importRelationEdges quads nodeIdByIri reifiedDescriptions =
           }
     )
     quads
-
-importAssertionEdge
-  :: Array ImportedRdfQuad
-  -> Map.Map String String
-  -> Map.Map String String
-  -> String
-  -> Either String Edge
-importAssertionEdge quads nodeIdByIri reifiedDescriptions iri = do
-  sourceIri <- requireNamedObject quads iri gbFrom "edge source"
-  targetIri <- requireNamedObject quads iri gbTo "edge target"
-  source <- maybe
-    (Left ("RDF edge references unknown source node: " <> sourceIri))
-    Right
-    (Map.lookup sourceIri nodeIdByIri)
-  target <- maybe
-    (Left ("RDF edge references unknown target node: " <> targetIri))
-    Right
-    (Map.lookup targetIri nodeIdByIri)
-  label <- requireLiteral quads iri rdfsLabel "edge label"
-  let
-    predicateIri =
-      case Array.head (namedObjectValues quads iri gbPredicate) of
-        Just value -> Just value
-        Nothing -> inferPredicateIri quads sourceIri targetIri label
-    description = fromMaybe
-      (fromMaybe "" (predicateIri >>= \pred -> Map.lookup (edgeKey sourceIri pred targetIri) reifiedDescriptions))
-      (literalValue quads iri gbDescription)
-  pure
-    { source
-    , target
-    , label
-    , description
-    , predicateRef: predicateIri >>= predicateReference quads
-    }
 
 mergeEdges :: Array Edge -> Array Edge
 mergeEdges edges =
@@ -301,29 +232,6 @@ reifiedDescriptionMap quads =
         Map.insert (edgeKey sourceIri predicateIri targetIri) description acc
       _, _, _, _ -> acc
 
-inferPredicateIri :: Array ImportedRdfQuad -> String -> String -> String -> Maybe String
-inferPredicateIri quads sourceIri targetIri label =
-  let
-    candidates =
-      map _.predicate
-        ( Array.filter
-            ( \quad ->
-                quad.subject == sourceIri
-                  && quad.object.termType == "NamedNode"
-                  && quad.object.value == targetIri
-                  && quad.predicate /= rdfType
-            )
-            quads
-        )
-  in
-    case Array.find (\predicateIri -> predicateLabel quads predicateIri == label) candidates of
-      Just iri -> Just iri
-      Nothing ->
-        if Array.length candidates == 1 then
-          Array.head candidates
-        else
-          Nothing
-
 semanticTypeReference :: Array ImportedRdfQuad -> String -> Maybe OntologyReference
 semanticTypeReference quads iri =
   Array.findMap
@@ -377,10 +285,6 @@ findKindIri :: Array ImportedRdfQuad -> String -> Maybe String
 findKindIri quads iri =
   Array.find (\value -> String.take (String.length gbKinds) value == gbKinds)
     (namedObjectValues quads iri rdfType)
-
-firstLiteralValue :: Array ImportedRdfQuad -> String -> Array String -> Maybe String
-firstLiteralValue quads subject =
-  Array.findMap (\predicate -> literalValue quads subject predicate)
 
 literalValue
   :: Array ImportedRdfQuad
