@@ -1,0 +1,62 @@
+@prefix ex: <https://example.org/ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:DomainEntity a owl:Class ;
+  rdfs:label "Domain Entity" ;
+  rdfs:comment "Root class for the example ontology." .
+
+ex:Person a owl:Class ;
+  rdfs:label "Person" ;
+  rdfs:comment "A person in the ontology." ;
+  rdfs:subClassOf ex:DomainEntity .
+
+ex:Student a owl:Class ;
+  rdfs:label "Student" ;
+  rdfs:comment "Learners enrolled in courses." ;
+  rdfs:subClassOf ex:Person .
+
+ex:GraduateStudent a owl:Class ;
+  rdfs:label "Graduate Student" ;
+  rdfs:comment "Advanced students with research supervision." ;
+  rdfs:subClassOf ex:Student .
+
+ex:Teacher a owl:Class ;
+  rdfs:label "Teacher" ;
+  rdfs:comment "People who teach courses." ;
+  rdfs:subClassOf ex:Person .
+
+ex:Course a owl:Class ;
+  rdfs:label "Course" ;
+  rdfs:comment "A course that can be taken or taught." ;
+  rdfs:subClassOf ex:DomainEntity ;
+  owl:equivalentClass ex:LearningUnit .
+
+ex:LearningUnit a owl:Class ;
+  rdfs:label "Learning Unit" ;
+  rdfs:comment "An aligned concept from another vocabulary." .
+
+ex:teaches a owl:ObjectProperty ;
+  rdfs:label "teaches" ;
+  rdfs:comment "Links a teacher to a course." ;
+  rdfs:domain ex:Teacher ;
+  rdfs:range ex:Course ;
+  owl:equivalentProperty ex:instructs .
+
+ex:mentors a owl:ObjectProperty ;
+  rdfs:label "mentors" ;
+  rdfs:comment "Links a teacher to a student." ;
+  rdfs:domain ex:Teacher ;
+  rdfs:range ex:Student .
+
+ex:enrolledIn a owl:ObjectProperty ;
+  rdfs:label "enrolled in" ;
+  rdfs:comment "Links a student to a course." ;
+  rdfs:domain ex:Student ;
+  rdfs:range ex:Course .
+
+ex:instructs a owl:ObjectProperty ;
+  rdfs:label "instructs" ;
+  rdfs:comment "Aligned property for course delivery." ;
+  rdfs:domain ex:Teacher ;
+  rdfs:range ex:LearningUnit .
