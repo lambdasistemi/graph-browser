@@ -102,6 +102,8 @@ type State =
   , selected :: Maybe Node
   , hoveredNode :: Maybe Node
   , hoveredEdge :: Maybe EdgeInfo
+  , selectedEdge :: Maybe EdgeInfo
+  , hoverPos :: { x :: Number, y :: Number }
   , depth :: Int
   , searchQuery :: String
   , searchResults :: Array SearchResult
@@ -132,8 +134,11 @@ type State =
 data Action
   = Initialize
   | NodeTapped String
-  | NodeHovered String
-  | EdgeHovered String String String String String
+  | NodeHovered String Number Number
+  | EdgeHovered String String String String String Number Number
+  | EdgeTapped String String String String String
+  | NodeHoverOut
+  | EdgeHoverOut
   | SetDepth Int
   | SetSearch String
   | SelectSearchResult SearchResult
@@ -172,6 +177,8 @@ viewer = H.mkComponent
       , selected: Nothing
       , hoveredNode: Nothing
       , hoveredEdge: Nothing
+      , selectedEdge: Nothing
+      , hoverPos: { x: 0.0, y: 0.0 }
       , depth: 99
       , searchQuery: ""
       , searchResults: []
@@ -214,6 +221,7 @@ render state =
           [ HH.div [ cls "graph-container" ]
               [ renderGraphContext state
               , HH.div [ HP.id "cy" ] []
+              , renderHoverTooltip state
               , renderControls state
               , renderLegend state.config
               ]
@@ -249,6 +257,51 @@ renderGraphContext state = case graphContext state of
         { title: "All"
         , description: "Entire graph without query filtering."
         }
+
+renderHoverTooltip
+  :: forall m. State -> H.ComponentHTML Action () m
+renderHoverTooltip state =
+  let
+    content = case state.hoveredEdge of
+      Just edge
+        | not (isSameEdge state.selectedEdge edge) ->
+            Just
+              { title: edge.label
+              , badge: "relationship"
+              , badgeCls: "badge badge-mechanism"
+              , desc: edge.description
+              }
+      _ -> case state.hoveredNode of
+        Just node
+          | state.selected /= Just node ->
+              Just
+                { title: node.label
+                , badge: kindLabel state.config node.kind
+                , badgeCls: "badge badge-" <> node.kind
+                , desc: node.description
+                }
+        _ -> Nothing
+    isSameEdge Nothing _ = false
+    isSameEdge (Just a) b =
+      a.sourceId == b.sourceId
+        && a.targetId == b.targetId
+        && a.label == b.label
+  in
+    case content of
+      Nothing -> HH.text ""
+      Just c ->
+        HH.div
+          [ cls "hover-tooltip"
+          , HP.style
+              ( "left:" <> show state.hoverPos.x <> "px;"
+                  <> "top:" <> show state.hoverPos.y <> "px;"
+              )
+          ]
+          [ HH.span [ cls c.badgeCls ] [ HH.text c.badge ]
+          , HH.strong_ [ HH.text (" " <> c.title) ]
+          , if c.desc == "" then HH.text ""
+            else HH.p [ cls "tooltip-desc" ] [ HH.text c.desc ]
+          ]
 
 renderControls
   :: forall m. State -> H.ComponentHTML Action () m
@@ -598,23 +651,12 @@ renderSidebar state =
         [ HH.h2_ [ HH.text sidebarTitle ]
         ]
     , HH.div [ cls "sidebar-content" ]
-        [ if state.tutorialActive then
-            HH.div_
-              ( [ renderTutorialContent state ]
-                  <> case state.hoveredEdge of
-                    Just edge ->
-                      [ renderEdgeDetail state edge ]
-                    Nothing -> case state.hoveredNode of
-                      Just node ->
-                        [ renderNodeDetail state node ]
-                      Nothing -> []
-              )
-          else case state.hoveredEdge of
-            Just edge -> renderEdgeDetail state edge
-            Nothing -> case state.selected of
-              Nothing -> renderEmptyState state.config
-              Just node -> renderNodeDetail state node
-        ]
+        ( if state.tutorialActive then
+            [ renderTutorialContent state ]
+              <> pinnedContent
+          else
+            pinnedContent
+        )
     ]
   where
   sidebarTitle =
@@ -622,11 +664,20 @@ renderSidebar state =
       case currentStop state of
         Just stop -> stop.title
         Nothing -> "Tutorial"
-    else case state.hoveredEdge of
-      Just edge -> edge.label
-      Nothing -> case state.selected of
+    else case state.selected of
+      Just n -> n.label
+      Nothing -> case state.selectedEdge of
+        Just edge -> edge.label
         Nothing -> state.config.title
-        Just n -> n.label
+
+  -- Pinned content: the clicked/selected item
+  pinnedContent :: Array (H.ComponentHTML Action () m)
+  pinnedContent =
+    case state.selectedEdge of
+      Just edge -> [ renderEdgeDetail state edge ]
+      Nothing -> case state.selected of
+        Just node -> [ renderNodeDetail state node ]
+        Nothing -> [ renderEmptyState state.config ]
 
 displayTourTitle :: String -> String
 displayTourTitle title =
@@ -733,43 +784,6 @@ renderTutorialContent state =
                     )
                     (splitParagraphs stop.narrative)
                 )
-            , case state.hoveredNode of
-                Nothing -> HH.text ""
-                Just node ->
-                  HH.div [ cls "tutorial-hovered-node" ]
-                    [ HH.div [ cls "tutorial-hovered-divider" ]
-                        []
-                    , HH.span
-                        [ cls
-                            ( "badge badge-"
-                                <> node.kind
-                            )
-                        ]
-                        [ HH.text
-                            (kindLabel state.config node.kind)
-                        ]
-                    , HH.h3 [ cls "tutorial-hovered-label" ]
-                        [ HH.text node.label ]
-                    , HH.p [ cls "tutorial-hovered-desc" ]
-                        [ HH.text node.description ]
-                    , if Array.null node.links then
-                        HH.text ""
-                      else
-                        HH.ul [ cls "links" ]
-                          ( map
-                              ( \l -> HH.li_
-                                  [ HH.a
-                                      [ HP.href l.url
-                                      , HP.target "_blank"
-                                      , HP.rel "noopener"
-                                      ]
-                                      [ HH.text l.label
-                                      ]
-                                  ]
-                              )
-                              node.links
-                          )
-                    ]
             ]
 
 currentStop :: State -> Maybe TutorialStop
@@ -889,7 +903,16 @@ splitOn sep str = go str []
 renderEdgeDetail
   :: forall m. State -> EdgeInfo -> H.ComponentHTML Action () m
 renderEdgeDetail state edge =
-  HH.div_
+  HH.div_ (edgeDetailContent edge <> [ renderPromptBuilder state PromptEdge "Generate prompt" ])
+
+renderEdgePreview
+  :: forall m. EdgeInfo -> H.ComponentHTML Action () m
+renderEdgePreview edge =
+  HH.div_ (edgeDetailContent edge)
+
+edgeDetailContent
+  :: forall m. EdgeInfo -> Array (H.ComponentHTML Action () m)
+edgeDetailContent edge =
     [ HH.span [ cls "badge badge-mechanism" ]
         [ HH.text "relationship" ]
     , HH.div [ cls "edge-detail" ]
@@ -911,7 +934,6 @@ renderEdgeDetail state edge =
     , renderOntologyReference "Predicate ontology" edge.predicateRef
     , HH.p [ cls "description" ]
         [ HH.text edge.description ]
-    , renderPromptBuilder state PromptEdge "Generate prompt"
     ]
 
 renderNodeDetail
@@ -920,7 +942,22 @@ renderNodeDetail
   -> Node
   -> H.ComponentHTML Action () m
 renderNodeDetail state node =
-  HH.div_
+  HH.div_ (nodeDetailContent state node <> [ renderPromptBuilder state PromptNode "Generate prompt" ])
+
+renderNodePreview
+  :: forall m
+   . State
+  -> Node
+  -> H.ComponentHTML Action () m
+renderNodePreview state node =
+  HH.div_ (nodeDetailContent state node)
+
+nodeDetailContent
+  :: forall m
+   . State
+  -> Node
+  -> Array (H.ComponentHTML Action () m)
+nodeDetailContent state node =
     [ HH.span
         [ cls ("badge badge-" <> node.kind) ]
         [ HH.text (kindLabel cfg node.kind) ]
@@ -930,7 +967,6 @@ renderNodeDetail state node =
     , renderLinks node.links
     , renderConnections "Connects to" outEdges
     , renderConnections "Connected from" inEdges
-    , renderPromptBuilder state PromptNode "Generate prompt"
     ]
   where
   cfg = state.config
@@ -1229,16 +1265,30 @@ handleAction = case _ of
         (NodeTapped nodeId)
     void $ H.subscribe tapSub.emitter
     hoverSub <- liftEffect HS.create
-    liftEffect $ Cy.onNodeHover \nodeId ->
+    liftEffect $ Cy.onNodeHover \nodeId x y ->
       HS.notify hoverSub.listener
-        (NodeHovered nodeId)
+        (NodeHovered nodeId x y)
     void $ H.subscribe hoverSub.emitter
     edgeSub <- liftEffect HS.create
     liftEffect $ Cy.onEdgeHover
-      \src tgt lbl desc predicateIri ->
+      \src tgt lbl desc predicateIri x y ->
         HS.notify edgeSub.listener
-          (EdgeHovered src tgt lbl desc predicateIri)
+          (EdgeHovered src tgt lbl desc predicateIri x y)
     void $ H.subscribe edgeSub.emitter
+    edgeTapSub <- liftEffect HS.create
+    liftEffect $ Cy.onEdgeTap
+      \src tgt lbl desc predicateIri ->
+        HS.notify edgeTapSub.listener
+          (EdgeTapped src tgt lbl desc predicateIri)
+    void $ H.subscribe edgeTapSub.emitter
+    nodeHoverOutSub <- liftEffect HS.create
+    liftEffect $ Cy.onNodeHoverOut
+      (HS.notify nodeHoverOutSub.listener NodeHoverOut)
+    void $ H.subscribe nodeHoverOutSub.emitter
+    edgeHoverOutSub <- liftEffect HS.create
+    liftEffect $ Cy.onEdgeHoverOut
+      (HS.notify edgeHoverOutSub.listener EdgeHoverOut)
+    void $ H.subscribe edgeHoverOutSub.emitter
     -- Load legacy view index only when no query catalog views
     state1 <- H.get
     let
@@ -1304,35 +1354,21 @@ handleAction = case _ of
   NodeTapped nodeId -> do
     state <- H.get
     let node = Map.lookup nodeId state.graph.nodes
-    H.modify_ _ { selected = node }
-    if state.tutorialActive then do
-      liftEffect $ Cy.markRoot nodeId
-      persistState
-    else
-      renderGraph
+    H.modify_ _ { selected = node, selectedEdge = Nothing }
+    liftEffect $ Cy.clearEdge
+    liftEffect $ Cy.markRoot nodeId
+    when state.tutorialActive persistState
 
-  NodeHovered nodeId -> do
+  NodeHovered nodeId x y -> do
     state <- H.get
     let node = Map.lookup nodeId state.graph.nodes
-    if state.tutorialActive then
-      H.modify_ _
-        { hoveredNode = node
-        , hoveredEdge = Nothing
-        , promptInput = ""
-        , promptCopied = false
-        , promptMode = PromptNode
-        }
-    else
-      H.modify_ _
-        { selected = node
-        , hoveredEdge = Nothing
-        , promptInput = ""
-        , promptCopied = false
-        , promptMode = PromptNode
-        }
-    liftEffect $ Cy.markRoot nodeId
+    H.modify_ _
+      { hoveredNode = node
+      , hoveredEdge = Nothing
+      , hoverPos = { x, y }
+      }
 
-  EdgeHovered srcId tgtId lbl desc predicateIri -> do
+  EdgeHovered srcId tgtId lbl desc predicateIri x y -> do
     state <- H.get
     let
       srcNode = Map.lookup srcId state.graph.nodes
@@ -1356,24 +1392,53 @@ handleAction = case _ of
             else
               Nothing
         }
-    state' <- H.get
-    if state'.tutorialActive then
-      H.modify_ _
-        { hoveredNode = Nothing
-        , hoveredEdge = Just edgeInfo
-        , promptInput = ""
-        , promptCopied = false
-        , promptMode = PromptEdge
+    H.modify_ _
+      { hoveredNode = Nothing
+      , hoveredEdge = Just edgeInfo
+      , hoverPos = { x, y }
+      }
+
+  EdgeTapped srcId tgtId lbl desc predicateIri -> do
+    state <- H.get
+    let
+      srcNode = Map.lookup srcId state.graph.nodes
+      tgtNode = Map.lookup tgtId state.graph.nodes
+      srcLabel = case srcNode of
+        Just n -> n.label
+        Nothing -> srcId
+      tgtLabel = case tgtNode of
+        Just n -> n.label
+        Nothing -> tgtId
+      edgeInfo =
+        { sourceId: srcId
+        , targetId: tgtId
+        , sourceLabel: srcLabel
+        , targetLabel: tgtLabel
+        , label: lbl
+        , description: desc
+        , predicateRef:
+            if shouldRenderOntologyReference predicateIri then
+              Just { label: lbl, iri: predicateIri }
+            else
+              Nothing
         }
-    else
-      H.modify_ _
-        { hoveredNode = Nothing
-        , hoveredEdge = Just edgeInfo
-        , selected = Nothing
-        , promptInput = ""
-        , promptCopied = false
-        , promptMode = PromptEdge
-        }
+    H.modify_ _
+      { selectedEdge = Just edgeInfo
+      , selected = Nothing
+      , hoveredEdge = Nothing
+      , hoveredNode = Nothing
+      , promptInput = ""
+      , promptCopied = false
+      , promptMode = PromptEdge
+      }
+    liftEffect $ Cy.clearRoot
+    liftEffect $ Cy.markEdge srcId tgtId
+
+  NodeHoverOut ->
+    H.modify_ _ { hoveredNode = Nothing }
+
+  EdgeHoverOut ->
+    H.modify_ _ { hoveredEdge = Nothing }
 
   SetDepth d -> do
     H.modify_ _ { depth = d }

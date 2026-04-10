@@ -384,7 +384,27 @@
 
   .close-btn:hover { background: #21262d; color: #f0f6fc; }
 
-  .sidebar-content { padding: 20px; flex: 1; }
+  .sidebar-content { padding: 20px; flex: 1; overflow-y: auto; }
+
+  .hover-tooltip {
+    position: absolute;
+    z-index: 100;
+    background: #1c2128;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 10px 14px;
+    width: max-content;
+    max-width: min(400px, 50vw);
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    transform: translate(12px, -50%);
+  }
+  .hover-tooltip strong { color: #f0f6fc; font-size: 14px; }
+  .hover-tooltip .tooltip-desc {
+    color: #8b949e;
+    font-size: 12px;
+    margin: 6px 0 0 0;
+  }
 
   .empty-state {
     display: flex;

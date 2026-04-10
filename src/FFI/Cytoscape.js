@@ -95,6 +95,17 @@ function baseStyle(kinds) {
       },
     },
     {
+      selector: "edge.selected-edge",
+      style: {
+        "text-opacity": 1,
+        "line-color": "#f0f6fc",
+        "target-arrow-color": "#f0f6fc",
+        width: 3,
+        opacity: 1,
+        "z-index": 10,
+      },
+    },
+    {
       selector: "edge.neighbor",
       style: {
         "text-opacity": 1,
@@ -196,7 +207,8 @@ export const onNodeTap = (callback) => () => {
 export const onNodeHover = (callback) => () => {
   if (!_cy) return;
   _cy.on("mouseover", "node", function (evt) {
-    callback(evt.target.id())();
+    var pos = evt.renderedPosition || evt.position;
+    callback(evt.target.id())(pos.x)(pos.y)();
   });
 };
 
@@ -204,10 +216,51 @@ export const onEdgeHover = (callback) => () => {
   if (!_cy) return;
   _cy.on("mouseover", "edge", function (evt) {
     var d = evt.target.data();
+    var pos = evt.renderedPosition || evt.position;
+    callback(d.source)(d.target)(d.label || "")(d.description || "")(
+      d.predicateIri || "",
+    )(pos.x)(pos.y)();
+  });
+};
+
+export const onNodeHoverOut = (callback) => () => {
+  if (!_cy) return;
+  _cy.on("mouseout", "node", function () {
+    callback();
+  });
+};
+
+export const onEdgeHoverOut = (callback) => () => {
+  if (!_cy) return;
+  _cy.on("mouseout", "edge", function () {
+    callback();
+  });
+};
+
+export const onEdgeTap = (callback) => () => {
+  if (!_cy) return;
+  _cy.on("tap", "edge", function (evt) {
+    var d = evt.target.data();
     callback(d.source)(d.target)(d.label || "")(d.description || "")(
       d.predicateIri || "",
     )();
   });
+};
+
+export const markEdge = (sourceId) => (targetId) => () => {
+  if (!_cy) return;
+  _cy.edges().removeClass("selected-edge");
+  _cy.edges().forEach(function (edge) {
+    var d = edge.data();
+    if (d.source === sourceId && d.target === targetId) {
+      edge.addClass("selected-edge");
+    }
+  });
+};
+
+export const clearEdge = () => {
+  if (!_cy) return;
+  _cy.edges().removeClass("selected-edge");
 };
 
 export const markRoot = (nodeId) => () => {
