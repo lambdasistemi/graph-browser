@@ -49,9 +49,10 @@ runs:
         sources_csv=$(IFS=','; echo "${abs_sources[*]}")
         output_dir="$(absolutize "$OUTPUT_DIR")"
 
+        REPO_ROOT="$(cd "$ACTION_DIR/.." && pwd)"
         cd "$ACTION_DIR"
         npm ci
-        NODE_OPTIONS="--require $ACTION_DIR/src/oxigraph-shim.cjs" \
+        NODE_OPTIONS="--require $REPO_ROOT/src/oxigraph-shim.cjs" \
           nix develop --quiet -c spago run --main Vocab.Publish.Main -- \
             --output-dir "$output_dir" \
             --site-base-path "$SITE_BASE_PATH" \
