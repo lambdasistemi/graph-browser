@@ -45,7 +45,9 @@ renderHoverTooltip state =
           [ cls "hover-tooltip"
           , HP.style
               ( "left:" <> show state.hoverPos.x <> "px;"
-                  <> "top:" <> show state.hoverPos.y <> "px;"
+                  <> "top:"
+                  <> show state.hoverPos.y
+                  <> "px;"
               )
           ]
           [ HH.span [ cls c.badgeCls ] [ HH.text c.badge ]
