@@ -32,28 +32,28 @@ renderEdgePreview edge =
 edgeDetailContent
   :: forall m. EdgeInfo -> Array (H.ComponentHTML Action () m)
 edgeDetailContent edge =
-    [ HH.span [ cls "badge badge-mechanism" ]
-        [ HH.text "relationship" ]
-    , HH.div [ cls "edge-detail" ]
-        [ HH.div [ cls "edge-endpoint" ]
-            [ HH.span [ cls "edge-role" ]
-                [ HH.text "From" ]
-            , HH.span [ cls "edge-name" ]
-                [ HH.text edge.sourceLabel ]
-            ]
-        , HH.div [ cls "edge-label" ]
-            [ HH.text edge.label ]
-        , HH.div [ cls "edge-endpoint" ]
-            [ HH.span [ cls "edge-role" ]
-                [ HH.text "To" ]
-            , HH.span [ cls "edge-name" ]
-                [ HH.text edge.targetLabel ]
-            ]
-        ]
-    , renderOntologyReference "Predicate ontology" edge.predicateRef
-    , HH.p [ cls "description" ]
-        [ HH.text edge.description ]
-    ]
+  [ HH.span [ cls "badge badge-mechanism" ]
+      [ HH.text "relationship" ]
+  , HH.div [ cls "edge-detail" ]
+      [ HH.div [ cls "edge-endpoint" ]
+          [ HH.span [ cls "edge-role" ]
+              [ HH.text "From" ]
+          , HH.span [ cls "edge-name" ]
+              [ HH.text edge.sourceLabel ]
+          ]
+      , HH.div [ cls "edge-label" ]
+          [ HH.text edge.label ]
+      , HH.div [ cls "edge-endpoint" ]
+          [ HH.span [ cls "edge-role" ]
+              [ HH.text "To" ]
+          , HH.span [ cls "edge-name" ]
+              [ HH.text edge.targetLabel ]
+          ]
+      ]
+  , renderOntologyReference "Predicate ontology" edge.predicateRef
+  , HH.p [ cls "description" ]
+      [ HH.text edge.description ]
+  ]
 
 renderNodeDetail
   :: forall m
@@ -77,16 +77,16 @@ nodeDetailContent
   -> Node
   -> Array (H.ComponentHTML Action () m)
 nodeDetailContent state node =
-    [ HH.span
-        [ cls ("badge badge-" <> node.kind) ]
-        [ HH.text (kindLabel cfg node.kind) ]
-    , renderOntologyIdentity node
-    , HH.p [ cls "description" ]
-        [ HH.text node.description ]
-    , renderLinks node.links
-    , renderConnections "Connects to" outEdges
-    , renderConnections "Connected from" inEdges
-    ]
+  [ HH.span
+      [ cls ("badge badge-" <> node.kind) ]
+      [ HH.text (kindLabel cfg node.kind) ]
+  , renderOntologyIdentity node
+  , HH.p [ cls "description" ]
+      [ HH.text node.description ]
+  , renderLinks node.links
+  , renderConnections "Connects to" outEdges
+  , renderConnections "Connected from" inEdges
+  ]
   where
   cfg = state.config
   graph = state.graph
