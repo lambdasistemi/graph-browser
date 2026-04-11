@@ -22,6 +22,7 @@ import RepoDiscovery as RD
 import RepoManager as RM
 import Type.Proxy (Proxy(..))
 import Viewer as Viewer
+import Viewer.Types (DataUrls) as Viewer
 
 main :: Effect Unit
 main = HA.runHalogenAff do

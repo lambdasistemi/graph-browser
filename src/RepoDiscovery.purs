@@ -12,7 +12,7 @@ import Data.Maybe (Maybe(..))
 import Data.String as String
 import Effect.Aff (Aff, try)
 import Fetch (Method(..), fetch)
-import Viewer (DataUrls)
+import Viewer.Types (DataUrls)
 
 -- | Parsed repo source with derived URLs.
 type RepoSource =
