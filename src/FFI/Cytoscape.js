@@ -26,6 +26,17 @@ function colorToRgba(color, alpha) {
   return color;
 }
 
+function cssVar(name, fallback) {
+  try {
+    var v = getComputedStyle(document.documentElement)
+      .getPropertyValue(name)
+      .trim();
+    return v || fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
 function kindStyles(kinds) {
   var styles = [];
   for (var kind in kinds) {
@@ -43,6 +54,11 @@ function kindStyles(kinds) {
 }
 
 function baseStyle(kinds) {
+  var textPrimary = cssVar("--text-primary", "#f0f6fc");
+  var textSecondary = cssVar("--text-secondary", "#c9d1d9");
+  var textMuted = cssVar("--text-muted", "#8b949e");
+  var border = cssVar("--border", "#30363d");
+  var bgBase = cssVar("--bg-base", "#0d1117");
   return [
     {
       selector: "node",
@@ -53,14 +69,14 @@ function baseStyle(kinds) {
         "font-size": "11px",
         "font-family":
           "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif",
-        color: "#f0f6fc",
+        color: textPrimary,
         "text-valign": "center",
         "text-halign": "center",
         width: "label",
         height: "label",
         "padding": "12px",
         "border-width": 2,
-        "text-outline-color": "#0d1117",
+        "text-outline-color": bgBase,
         "text-outline-width": 2,
       },
     },
@@ -69,8 +85,8 @@ function baseStyle(kinds) {
       selector: "edge",
       style: {
         width: 1.5,
-        "line-color": "#30363d",
-        "target-arrow-color": "#30363d",
+        "line-color": border,
+        "target-arrow-color": border,
         "target-arrow-shape": "triangle",
         "arrow-scale": 0.8,
         "curve-style": "bezier",
@@ -78,9 +94,9 @@ function baseStyle(kinds) {
         "font-size": "11px",
         "font-family":
           "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif",
-        color: "#c9d1d9",
+        color: textSecondary,
         "text-rotation": "autorotate",
-        "text-outline-color": "#0d1117",
+        "text-outline-color": bgBase,
         "text-outline-width": 2,
         "text-opacity": 0,
         opacity: 0.6,
@@ -90,7 +106,7 @@ function baseStyle(kinds) {
       selector: "node.root",
       style: {
         "border-width": 4,
-        "border-color": "#f0f6fc",
+        "border-color": textPrimary,
         "z-index": 10,
       },
     },
@@ -98,8 +114,8 @@ function baseStyle(kinds) {
       selector: "edge.selected-edge",
       style: {
         "text-opacity": 1,
-        "line-color": "#f0f6fc",
-        "target-arrow-color": "#f0f6fc",
+        "line-color": textPrimary,
+        "target-arrow-color": textPrimary,
         width: 3,
         opacity: 1,
         "z-index": 10,
@@ -109,8 +125,8 @@ function baseStyle(kinds) {
       selector: "edge.neighbor",
       style: {
         "text-opacity": 1,
-        "line-color": "#8b949e",
-        "target-arrow-color": "#8b949e",
+        "line-color": textMuted,
+        "target-arrow-color": textMuted,
         width: 2,
         opacity: 1,
       },
@@ -163,6 +179,13 @@ function runLayout(callback) {
     .run();
 }
 
+var _kinds = {};
+
+function applyTheme() {
+  if (!_cy) return;
+  _cy.style().fromJson(baseStyle(_kinds)).update();
+}
+
 // kinds is a plain JS object: { "actor": { color, shape }, ... }
 export const initCytoscape = (containerId) => (kinds) => () => {
   var container = document.getElementById(containerId);
@@ -171,6 +194,7 @@ export const initCytoscape = (containerId) => (kinds) => () => {
     _cy.destroy();
     _cy = null;
   }
+  _kinds = kinds;
   _cy = cytoscape({
     container: container,
     elements: [],
@@ -179,6 +203,22 @@ export const initCytoscape = (containerId) => (kinds) => () => {
     minZoom: 0.15,
     maxZoom: 3,
   });
+  if (!initCytoscape._themeBound) {
+    initCytoscape._themeBound = true;
+    var media = window.matchMedia
+      ? window.matchMedia("(prefers-color-scheme: light)")
+      : null;
+    var observer = new MutationObserver(applyTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    if (media) {
+      var listener = function () { applyTheme(); };
+      if (media.addEventListener) media.addEventListener("change", listener);
+      else if (media.addListener) media.addListener(listener);
+    }
+  }
 };
 
 export const setElements = (elements) => () => {
