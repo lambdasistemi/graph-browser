@@ -84,14 +84,31 @@ mkRepoSource owner repo =
 -- | Tries manifest first (main then master branch),
 -- | falls back to convention data/ paths on GitHub Pages.
 discoverDataUrls :: RepoSource -> Aff (Either String DataUrls)
-discoverDataUrls = discoverDataUrlsAuth Nothing
+discoverDataUrls src = discoverDataUrlsAuth Nothing Nothing src
 
--- | Discover with optional auth token.
+-- | Discover with optional auth token and optional branch override.
+-- | When a branch is given, only that branch is tried (no main/master
+-- | fallback). Without a branch, tries main, then master, then
+-- | convention URLs on main.
 discoverDataUrlsAuth
   :: Maybe String
+  -> Maybe String
   -> RepoSource
   -> Aff (Either String DataUrls)
-discoverDataUrlsAuth mToken src = do
+discoverDataUrlsAuth mToken (Just branch) src = do
+  let rawBranch = src.rawBaseUrl <> "/" <> branch <> "/"
+  manifestResult <- tryFetchManifest mToken rawBranch
+    (rawBranch <> ".graph-browser.json")
+  case manifestResult of
+    Right urls -> pure (Right urls)
+    Left _ -> do
+      let urls = conventionUrlsAt rawBranch
+      reachable <- tryFetchUrl mToken urls.configUrl
+      if reachable then pure (Right urls)
+      else pure (Left
+        ("No graph data found on branch '" <> branch
+          <> "'. Add data/ directory or .graph-browser.json to that branch"))
+discoverDataUrlsAuth mToken Nothing src = do
   let rawMain = src.rawBaseUrl <> "/main/"
   let rawMaster = src.rawBaseUrl <> "/master/"
   mainResult <- tryFetchManifest mToken rawMain
@@ -156,14 +173,16 @@ parseManifest base body =
 -- | Convention-based URLs when no manifest exists.
 -- | Uses raw GitHub URLs so data/ works without GitHub Pages.
 conventionUrls :: RepoSource -> DataUrls
-conventionUrls src =
-  let raw = src.rawBaseUrl <> "/main/"
-  in
-    { configUrl: raw <> "data/config.json"
-    , graphUrl: raw <> "data/graph.json"
-    , tutorialIndexUrl: raw <> "data/tutorials/index.json"
-    , baseUrl: raw
-    }
+conventionUrls src = conventionUrlsAt (src.rawBaseUrl <> "/main/")
+
+-- | Convention URLs rooted at an arbitrary raw base (any branch).
+conventionUrlsAt :: String -> DataUrls
+conventionUrlsAt raw =
+  { configUrl: raw <> "data/config.json"
+  , graphUrl: raw <> "data/graph.json"
+  , tutorialIndexUrl: raw <> "data/tutorials/index.json"
+  , baseUrl: raw
+  }
 
 -- | Check if a URL is reachable (returns 2xx).
 tryFetchUrl :: Maybe String -> String -> Aff Boolean

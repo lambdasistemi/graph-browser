@@ -44,6 +44,7 @@ type AppState =
   { repos :: Array Persist.RepoListEntry
   , activeRepo :: Maybe Persist.RepoListEntry
   , dataUrls :: Maybe Viewer.DataUrls
+  , branch :: Maybe String
   , loading :: Boolean
   }
 
@@ -58,6 +59,7 @@ appComponent = H.mkComponent
       { repos: []
       , activeRepo: Nothing
       , dataUrls: Nothing
+      , branch: Nothing
       , loading: false
       }
   , render: appRender
@@ -94,7 +96,10 @@ appHandleAction = case _ of
   AppInit -> do
     liftEffect Resize.initResize
     repos <- liftEffect Persist.loadRepoList
-    H.modify_ _ { repos = repos }
+    -- Capture ?branch= once at startup so the whole session uses it
+    branchParam <- liftEffect Url.getBranchParam
+    let mBranch = if branchParam == "" then Nothing else Just branchParam
+    H.modify_ _ { repos = repos, branch = mBranch }
     void $ H.tell _repoManager unit
       (RM.SetRepos repos)
     -- Check for ?repo= deep link
@@ -118,7 +123,9 @@ appHandleAction = case _ of
           H.modify_ _ { loading = true }
           void $ H.tell _repoManager unit
             (RM.SetError Nothing)
-          result <- liftAff (RD.discoverDataUrls src)
+          mBranch <- H.gets _.branch
+          result <- liftAff
+            (RD.discoverDataUrlsAuth Nothing mBranch src)
           case result of
             Left err -> do
               H.modify_ _ { loading = false }
@@ -179,6 +186,8 @@ appHandleAction = case _ of
         void $ H.tell _repoManager unit
           (RM.SetActive Nothing)
         liftEffect $ Url.setRepoParam ""
+        liftEffect $ Url.setBranchParam ""
+        H.modify_ _ { branch = Nothing }
 
     RM.ClearAll -> do
       state <- H.get
@@ -189,12 +198,14 @@ appHandleAction = case _ of
         { repos = []
         , activeRepo = Nothing
         , dataUrls = Nothing
+        , branch = Nothing
         }
       void $ H.tell _repoManager unit
         (RM.SetRepos [])
       void $ H.tell _repoManager unit
         (RM.SetActive Nothing)
       liftEffect $ Url.setRepoParam ""
+      liftEffect $ Url.setBranchParam ""
 
 selectRepo
   :: forall o
@@ -204,7 +215,9 @@ selectRepo entry = do
   case RD.normalizeInput entry.id of
     Nothing -> pure unit
     Just src -> do
-      result <- liftAff (RD.discoverDataUrls src)
+      mBranch <- H.gets _.branch
+      result <- liftAff
+        (RD.discoverDataUrlsAuth Nothing mBranch src)
       case result of
         Left _ -> pure unit
         Right urls -> do
@@ -215,6 +228,9 @@ selectRepo entry = do
           void $ H.tell _repoManager unit
             (RM.SetActive (Just entry.id))
           liftEffect $ Url.setRepoParam entry.id
+          case mBranch of
+            Just b -> liftEffect $ Url.setBranchParam b
+            Nothing -> liftEffect $ Url.setBranchParam ""
 
 -- Helpers
 

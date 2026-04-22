@@ -29,3 +29,19 @@ export const setViewParam = (view) => () => {
   }
   history.replaceState(null, "", url);
 };
+
+export const getBranchParam = () => {
+  var params = new URLSearchParams(window.location.search);
+  var branch = params.get("branch");
+  return branch || "";
+};
+
+export const setBranchParam = (branch) => () => {
+  var url = new URL(window.location);
+  if (branch === "") {
+    url.searchParams.delete("branch");
+  } else {
+    url.searchParams.set("branch", branch);
+  }
+  history.replaceState(null, "", url);
+};

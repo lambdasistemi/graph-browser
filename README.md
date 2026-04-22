@@ -204,6 +204,12 @@ No build tools needed — the actions download the app and assemble the site.
 
 Visit `https://lambdasistemi.github.io/graph-browser/?repo=owner/repo` to browse any repo with a `data/` directory.
 
+Supported URL parameters:
+
+- `?repo=owner/repo` — the data repository to load.
+- `?branch=<ref>` — load `data/` from a non-`main` git ref (branch, tag, or commit SHA) via raw GitHub URLs. Without this parameter the viewer tries `main`, then `master`. Useful for previewing in-progress work before merge.
+- `?theme=light|dark|auto` — force a colour palette or follow the OS preference.
+
 ### Option 3: Use as a Nix flake input
 
 ```nix
@@ -226,7 +232,7 @@ Add `.graph-browser.json` to your repo root to customize data paths:
 }
 ```
 
-Without a manifest, the app looks for `data/` on the repo's main branch via raw GitHub URLs.
+Without a manifest, the app looks for `data/` on the repo's main branch via raw GitHub URLs. When `?branch=<ref>` is set, the manifest and the `data/` fallback are both resolved against that ref.
 
 ## Development
 
