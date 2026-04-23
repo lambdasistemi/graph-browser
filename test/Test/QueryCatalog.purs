@@ -4,7 +4,9 @@ import Prelude
 
 import Data.Argonaut.Parser (jsonParser)
 import Data.Either (Either(..), isLeft)
+import Data.Maybe (Maybe(..))
 import Graph.Query (decodeQueryCatalog)
+import Layout (LayoutId(..))
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual, shouldSatisfy)
 
@@ -26,6 +28,7 @@ spec = describe "Graph.Query.decodeQueryCatalog" do
         (map _.name catalog) `shouldEqual` [ "All Nodes" ]
         (map _.parameters catalog) `shouldEqual` [ [] ]
         (map _.tags catalog) `shouldEqual` [ [] ]
+        (map _.layout catalog) `shouldEqual` [ Nothing ]
 
   it "decodes parameters and tags" do
     let
@@ -47,6 +50,7 @@ spec = describe "Graph.Query.decodeQueryCatalog" do
         let q = catalog
         (map _.tags q) `shouldEqual`
           [ [ "view", "parameterized" ] ]
+        (map _.layout q) `shouldEqual` [ Nothing ]
         case map _.parameters q of
           [ [ p ] ] -> do
             p.name `shouldEqual` "kind"
@@ -59,6 +63,35 @@ spec = describe "Graph.Query.decodeQueryCatalog" do
       Left err -> fail err
       Right catalog ->
         catalog `shouldEqual` []
+
+  it "decodes an optional layout" do
+    let
+      json = """[{
+        "id": "module-flow",
+        "name": "Module Flow",
+        "description": "Flow view",
+        "sparql": "SELECT ?node WHERE { ?node ?p ?o }",
+        "tags": ["view"],
+        "layout": "dagre"
+      }]"""
+    case jsonParser json >>= decodeQueryCatalog of
+      Left err -> fail err
+      Right catalog ->
+        (map _.layout catalog) `shouldEqual` [ Just Dagre ]
+
+  it "ignores an invalid layout value" do
+    let
+      json = """[{
+        "id": "broken-layout",
+        "name": "Broken Layout",
+        "description": "Still decodes",
+        "sparql": "SELECT ?node WHERE { ?node ?p ?o }",
+        "layout": "unknown-layout"
+      }]"""
+    case jsonParser json >>= decodeQueryCatalog of
+      Left err -> fail err
+      Right catalog ->
+        (map _.layout catalog) `shouldEqual` [ Nothing ]
 
   it "rejects missing required fields" do
     let

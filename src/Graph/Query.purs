@@ -18,6 +18,7 @@ import Data.Argonaut.Decode.Error
 import Data.Either (Either(..))
 import Data.Maybe (Maybe, fromMaybe)
 import Data.Traversable (traverse)
+import Layout (LayoutId, parseLayoutId)
 
 -- | A parameter slot in a SPARQL query template.
 type Parameter =
@@ -35,6 +36,7 @@ type NamedQuery =
   , sparql :: String
   , parameters :: Array Parameter
   , tags :: Array String
+  , layout :: Maybe LayoutId
   }
 
 -- | The full query catalog.
@@ -56,7 +58,9 @@ decodeNamedQuery json = do
   rawParams <- lmap' $ fromMaybe [] <$> obj .:? "parameters"
   parameters <- traverse decodeParameter rawParams
   tags <- lmap' $ fromMaybe [] <$> obj .:? "tags"
-  pure { id, name, description, sparql, parameters, tags }
+  rawLayout <- lmap' $ obj .:? "layout"
+  let layout = rawLayout >>= parseLayoutId
+  pure { id, name, description, sparql, parameters, tags, layout }
 
 decodeParameter :: Json -> Either String Parameter
 decodeParameter json = do

@@ -4,6 +4,7 @@ module FFI.Cytoscape
   ( initCytoscape
   , setElements
   , setFocusElements
+  , setLayout
   , onNodeTap
   , onNodeHover
   , onEdgeHover
@@ -32,12 +33,16 @@ foreign import initCytoscape
 
 -- | Replace all elements and re-run layout.
 foreign import setElements
-  :: Foreign -> Effect Unit
+  :: String -> Foreign -> Effect Unit
 
 -- | Replace elements for focus mode.
 -- | All edge labels visible.
 foreign import setFocusElements
-  :: Foreign -> Effect Unit
+  :: String -> Foreign -> Effect Unit
+
+-- | Re-run layout on the existing elements.
+foreign import setLayout
+  :: String -> Effect Unit
 
 -- | Register a tap callback on nodes.
 foreign import onNodeTap

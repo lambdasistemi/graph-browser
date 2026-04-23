@@ -5,6 +5,8 @@ module Persist
   ( PersistedState
   , save
   , restore
+  , saveLayoutPreference
+  , loadLayoutPreference
   , RepoListEntry
   , saveRepoList
   , loadRepoList
@@ -25,8 +27,9 @@ import Data.Argonaut.Encode.Class (encodeJson)
 import Data.Argonaut.Parser (jsonParser)
 import Data.Array as Array
 import Data.Either (hush)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe, fromMaybe)
 import Effect (Effect)
+import Layout (LayoutId, layoutIdToString, parseLayoutId)
 import Web.HTML as Web.HTML
 import Web.HTML.Window as Window
 import Web.Storage.Storage as Storage
@@ -49,6 +52,9 @@ storageKey title = "graph-browser:" <> title
 
 repoListKey :: String
 repoListKey = "graph-browser:repos"
+
+layoutKey :: String -> String
+layoutKey identity = "graph-browser:layout:" <> identity
 
 save :: String -> PersistedState -> Effect Unit
 save title st = do
@@ -78,6 +84,25 @@ restore title = do
     tutorialId <- hush (obj .:? "tutorialId")
     tutorialStep <- hush (obj .:? "tutorialStep")
     pure { selectedNodeId, depth, tutorialId, tutorialStep }
+
+saveLayoutPreference :: String -> LayoutId -> Effect Unit
+saveLayoutPreference identity layout = do
+  w <- Web.HTML.window
+  storage <- Window.localStorage w
+  let json = encodeJson { layout: layoutIdToString layout }
+  Storage.setItem (layoutKey identity) (stringify json) storage
+
+loadLayoutPreference :: String -> Effect (Maybe LayoutId)
+loadLayoutPreference identity = do
+  w <- Web.HTML.window
+  storage <- Window.localStorage w
+  mRaw <- Storage.getItem (layoutKey identity) storage
+  pure do
+    raw <- mRaw
+    json <- hush (jsonParser raw)
+    obj <- hush (decodeJson json)
+    rawLayout <- hush (obj .:? "layout")
+    rawLayout >>= parseLayoutId
 
 saveRepoList :: Array RepoListEntry -> Effect Unit
 saveRepoList repos = do
@@ -117,6 +142,7 @@ deleteRepo repoId = do
   w <- Web.HTML.window
   storage <- Window.localStorage w
   Storage.removeItem (storageKey repoId) storage
+  Storage.removeItem (layoutKey repoId) storage
   Storage.removeItem (tokenKey repoId) storage
   repos <- loadRepoList
   let filtered = Array.filter (\r -> r.id /= repoId) repos

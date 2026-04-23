@@ -9,6 +9,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Layout (allLayouts, defaultLayout, layoutIdToString, layoutLabel, parseLayoutId)
 import Viewer.Helpers (cls, depthBtn)
 import Viewer.Types (Action(..), State)
 
@@ -64,6 +65,16 @@ renderControls state =
             else HH.text ""
           ]
       else HH.text ""
+    , HH.select
+        [ cls "param-select"
+        , HP.attr (HH.AttrName "style")
+            "width:auto; min-width:132px;"
+        , HE.onValueChange \raw ->
+            case parseLayoutId raw of
+              Just layout -> SetLayout layout
+              Nothing -> SetLayout defaultLayout
+        ]
+        (map mkLayoutOption allLayouts)
     , HH.button
         [ cls "control-btn"
         , HE.onClick \_ -> FitAll
@@ -87,6 +98,14 @@ renderControls state =
             [ HH.text "All" ]
         ]
     ]
+  where
+  mkLayoutOption layout =
+    HH.option
+      [ HP.value (layoutIdToString layout)
+      , HP.selected
+          (state.activeLayout == layout)
+      ]
+      [ HH.text (layoutLabel layout) ]
 
 renderThemeToggle
   :: forall m. State -> H.ComponentHTML Action () m
