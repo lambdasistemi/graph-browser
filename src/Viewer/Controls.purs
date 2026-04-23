@@ -46,7 +46,8 @@ renderControls
   :: forall m. State -> H.ComponentHTML Action () m
 renderControls state =
   HH.div [ cls "controls" ]
-    [ if not (Array.null state.viewIndex) then
+    [ renderThemeToggle state
+    , if not (Array.null state.viewIndex) then
         HH.div [ cls "tour-menu-wrapper" ]
           [ HH.button
               [ cls "control-btn"
@@ -86,6 +87,25 @@ renderControls state =
             [ HH.text "All" ]
         ]
     ]
+
+renderThemeToggle
+  :: forall m. State -> H.ComponentHTML Action () m
+renderThemeToggle state =
+  HH.button
+    [ cls "control-btn theme-toggle-btn"
+    , HP.attr (HH.AttrName "aria-label") label
+    , HP.attr (HH.AttrName "title") label
+    , HE.onClick \_ -> ToggleTheme
+    ]
+    [ HH.text icon ]
+  where
+  isLight = state.theme == "light"
+  label =
+    if isLight then "Switch to dark theme"
+    else "Switch to light theme"
+  icon =
+    if isLight then "☾"
+    else "☀"
 
 renderLegend
   :: forall m. Config -> H.ComponentHTML Action () m

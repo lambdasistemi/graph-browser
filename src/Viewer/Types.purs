@@ -50,6 +50,7 @@ type State =
   , graph :: Graph
   , fullGraph :: Graph
   , dataUrls :: DataUrls
+  , theme :: String
   , selected :: Maybe Node
   , hoveredNode :: Maybe Node
   , hoveredEdge :: Maybe EdgeInfo
@@ -99,6 +100,7 @@ data Action
   | SetSearch String
   | SelectSearchResult SearchResult
   | FitAll
+  | ToggleTheme
   | NavigateTo String
   | ToggleTutorialMenu
   | StartTutorial String

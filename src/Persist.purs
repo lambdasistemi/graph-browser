@@ -12,6 +12,8 @@ module Persist
   , saveToken
   , loadToken
   , deleteToken
+  , saveThemePreference
+  , loadThemePreference
   ) where
 
 import Prelude
@@ -140,3 +142,21 @@ deleteToken repoId = do
   w <- Web.HTML.window
   storage <- Window.localStorage w
   Storage.removeItem (tokenKey repoId) storage
+
+themeKey :: String
+themeKey = "graph-browser:theme"
+
+saveThemePreference :: String -> Effect Unit
+saveThemePreference theme = do
+  w <- Web.HTML.window
+  storage <- Window.localStorage w
+  if theme == "" then
+    Storage.removeItem themeKey storage
+  else
+    Storage.setItem themeKey theme storage
+
+loadThemePreference :: Effect (Maybe String)
+loadThemePreference = do
+  w <- Web.HTML.window
+  storage <- Window.localStorage w
+  Storage.getItem themeKey storage

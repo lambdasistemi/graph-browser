@@ -6,8 +6,15 @@
 <title>Graph Browser</title>
 <script>
   (function () {
+    function loadStoredTheme() {
+      try {
+        return window.localStorage ? window.localStorage.getItem('graph-browser:theme') : null;
+      } catch (_) {
+        return null;
+      }
+    }
     var params = new URLSearchParams(window.location.search);
-    var requested = (params.get('theme') || 'auto').toLowerCase();
+    var requested = (params.get('theme') || loadStoredTheme() || 'auto').toLowerCase();
     if (requested !== 'light' && requested !== 'dark' && requested !== 'auto') {
       requested = 'auto';
     }
@@ -189,6 +196,15 @@
 
   .control-btn:hover { background: var(--border); border-color: var(--text-muted); }
   .control-btn.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+  .theme-toggle-btn {
+    min-width: 36px;
+    padding: 6px 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    line-height: 1;
+  }
 
   .search-container {
     position: absolute;
