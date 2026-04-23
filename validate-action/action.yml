@@ -2,6 +2,15 @@ name: 'Validate Graph Browser Data'
 description: 'Validate graph-browser data/ directory against schemas and referential integrity'
 
 inputs:
+  version:
+    description: |
+      graph-browser release tag whose schemas to validate against
+      (for example "v0.4.1"). REQUIRED unless 'schema-dir' is given.
+      The schemas are downloaded from the release's 'schemas.tar.gz'
+      asset, so each data repository pins exactly which schema version
+      it conforms to.
+    required: false
+    default: ''
   data-dir:
     description: 'Path to the data directory'
     required: false
@@ -10,12 +19,8 @@ inputs:
     description: 'Path to the RDF directory for optional SHACL validation'
     required: false
     default: 'data/rdf'
-  schema-ref:
-    description: 'Git ref to fetch schemas from (tag, branch, or SHA)'
-    required: false
-    default: 'main'
   schema-dir:
-    description: 'Local path to schemas (skips fetching from GitHub)'
+    description: 'Local path to schemas (overrides version: when set)'
     required: false
     default: ''
 
@@ -33,12 +38,16 @@ runs:
       run: |
         if [ -n "${{ inputs.schema-dir }}" ]; then
           echo "SCHEMA_DIR=${{ inputs.schema-dir }}" >> "$GITHUB_ENV"
-        else
+        elif [ -n "${{ inputs.version }}" ]; then
           SCHEMA_DIR=$(mktemp -d)
           echo "SCHEMA_DIR=$SCHEMA_DIR" >> "$GITHUB_ENV"
-          for f in config.schema.json graph.schema.json tutorial-index.schema.json tutorial.schema.json view.schema.json; do
-            curl -sfL "https://raw.githubusercontent.com/lambdasistemi/graph-browser/${{ inputs.schema-ref }}/schema/$f" -o "$SCHEMA_DIR/$f"
-          done
+          URL="https://github.com/lambdasistemi/graph-browser/releases/download/${{ inputs.version }}/schemas.tar.gz"
+          echo "Fetching $URL"
+          curl -sfL "$URL" | tar -xz -C "$SCHEMA_DIR"
+        else
+          echo "::error::validate-action requires either 'version:' (e.g. v0.4.1) or 'schema-dir:'." >&2
+          echo "See https://github.com/lambdasistemi/graph-browser/releases for available versions." >&2
+          exit 1
         fi
 
     - name: Install validator
