@@ -200,22 +200,25 @@ namespaceTitle namespace =
 
 namespaceRelativePath :: String -> String -> String
 namespaceRelativePath siteBasePath namespace =
-  let path = namespacePath namespace
-      trimmedBase = normalizedBasePath siteBasePath
-      withoutBase =
-        if trimmedBase /= "" && String.take (String.length trimmedBase) path == trimmedBase then
-          String.drop (String.length trimmedBase) path
-        else
-          path
-      parts = Array.filter (_ /= "") (split (Pattern "/") withoutBase)
-  in joinWith "/" parts
+  let
+    path = namespacePath namespace
+    trimmedBase = normalizedBasePath siteBasePath
+    withoutBase =
+      if trimmedBase /= "" && String.take (String.length trimmedBase) path == trimmedBase then
+        String.drop (String.length trimmedBase) path
+      else
+        path
+    parts = Array.filter (_ /= "") (split (Pattern "/") withoutBase)
+  in
+    joinWith "/" parts
 
 namespaceKey :: String -> String -> Maybe String
 namespaceKey siteBasePath iri = do
   idx <- String.lastIndexOf (Pattern "#") iri
-  let namespace = String.take (idx + 1) iri
-      path = namespacePath namespace
-      base = normalizedBasePath siteBasePath
+  let
+    namespace = String.take (idx + 1) iri
+    path = namespacePath namespace
+    base = normalizedBasePath siteBasePath
   if isHttpNamespace namespace && isVocabPath base path then
     Just namespace
   else
@@ -260,17 +263,21 @@ isVocabPath :: String -> String -> Boolean
 isVocabPath base path
   | base == "" = String.take 7 path == "/vocab/"
   | otherwise =
-      let prefix = base <> "/vocab/"
-      in String.take (String.length prefix) path == prefix
+      let
+        prefix = base <> "/vocab/"
+      in
+        String.take (String.length prefix) path == prefix
 
 namespaceTail :: String -> String
 namespaceTail namespace =
-  let withoutHash =
-        case String.lastIndexOf (Pattern "#") namespace of
-          Just idx -> String.take idx namespace
-          Nothing -> namespace
-      pieces = Array.filter (_ /= "") (split (Pattern "/") withoutHash)
-  in fromMaybe namespace (Array.last pieces)
+  let
+    withoutHash =
+      case String.lastIndexOf (Pattern "#") namespace of
+        Just idx -> String.take idx namespace
+        Nothing -> namespace
+    pieces = Array.filter (_ /= "") (split (Pattern "/") withoutHash)
+  in
+    fromMaybe namespace (Array.last pieces)
 
 fallbackLabel :: String -> String
 fallbackLabel fragment = decodeOrOriginal fragment
@@ -281,8 +288,10 @@ decodeOrOriginal value =
 
 hushDecode :: String -> Maybe String
 hushDecode value =
-  let decoded = decodeUriComponent value
-  in Just decoded
+  let
+    decoded = decodeUriComponent value
+  in
+    Just decoded
 
 literalValue :: Array ImportedRdfQuad -> String -> String -> Maybe String
 literalValue quads subject predicate =
@@ -370,8 +379,10 @@ renderSourceArtifacts sourcePaths =
   joinWith ", "
     ( map
         ( \path ->
-            let href = publishedArtifactHref path
-            in "<a href=\"" <> escapeHtml href <> "\">" <> escapeHtml href <> "</a>"
+            let
+              href = publishedArtifactHref path
+            in
+              "<a href=\"" <> escapeHtml href <> "\">" <> escapeHtml href <> "</a>"
         )
         sourcePaths
     )

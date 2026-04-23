@@ -83,8 +83,10 @@ loadRdfGraph sources = do
   pure case sequence quadSets of
     Left err -> Left err
     Right loaded ->
-      let quads = Array.concat loaded
-      in Import.importInstanceGraph quads
+      let
+        quads = Array.concat loaded
+      in
+        Import.importInstanceGraph quads
 
 loadSourceQuads :: GraphSource -> Effect (Either String (Array Oxigraph.ImportedRdfQuad))
 loadSourceQuads source = do
