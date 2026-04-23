@@ -27,7 +27,8 @@ type RepoSource =
 -- | "https://owner.github.io/repo/", direct manifest URL.
 normalizeInput :: String -> Maybe RepoSource
 normalizeInput input =
-  let trimmed = String.trim input
+  let
+    trimmed = String.trim input
   in
     parseOwnerSlashRepo trimmed
       <|> parseGitHubUrl trimmed
@@ -38,11 +39,9 @@ parseOwnerSlashRepo str = do
   let parts = splitFirst "/" str
   case parts of
     Just { before: owner, after: repo } ->
-      if String.contains (String.Pattern "/") repo
-        then Nothing
-        else if owner == "" || repo == ""
-          then Nothing
-          else Just (mkRepoSource owner repo)
+      if String.contains (String.Pattern "/") repo then Nothing
+      else if owner == "" || repo == "" then Nothing
+      else Just (mkRepoSource owner repo)
     Nothing -> Nothing
 
 parseGitHubUrl :: String -> Maybe RepoSource
@@ -53,9 +52,8 @@ parseGitHubUrl str = do
   case parts of
     Just { before: owner, after: rest2 } -> do
       let repo = stripSuffix ".git" (takeUntil "/" rest2)
-      if owner == "" || repo == ""
-        then Nothing
-        else Just (mkRepoSource owner repo)
+      if owner == "" || repo == "" then Nothing
+      else Just (mkRepoSource owner repo)
     Nothing -> Nothing
 
 parseGitHubPagesUrl :: String -> Maybe RepoSource
@@ -65,9 +63,8 @@ parseGitHubPagesUrl str = do
   case parts of
     Just { before: owner, after: rest2 } -> do
       let repo = stripTrailingSlash (takeUntil "/" rest2)
-      if owner == "" || repo == ""
-        then Nothing
-        else Just (mkRepoSource owner repo)
+      if owner == "" || repo == "" then Nothing
+      else Just (mkRepoSource owner repo)
     Nothing -> Nothing
 
 mkRepoSource :: String -> String -> RepoSource
@@ -75,9 +72,13 @@ mkRepoSource owner repo =
   { owner
   , repo
   , rawBaseUrl: "https://raw.githubusercontent.com/"
-      <> owner <> "/" <> repo
+      <> owner
+      <> "/"
+      <> repo
   , pagesBaseUrl: "https://" <> owner
-      <> ".github.io/" <> repo <> "/"
+      <> ".github.io/"
+      <> repo
+      <> "/"
   }
 
 -- | Discover data URLs for a repo.
@@ -105,9 +106,12 @@ discoverDataUrlsAuth mToken (Just branch) src = do
       let urls = conventionUrlsAt rawBranch
       reachable <- tryFetchUrl mToken urls.configUrl
       if reachable then pure (Right urls)
-      else pure (Left
-        ("No graph data found on branch '" <> branch
-          <> "'. Add data/ directory or .graph-browser.json to that branch"))
+      else pure
+        ( Left
+            ( "No graph data found on branch '" <> branch
+                <> "'. Add data/ directory or .graph-browser.json to that branch"
+            )
+        )
 discoverDataUrlsAuth mToken Nothing src = do
   let rawMain = src.rawBaseUrl <> "/main/"
   let rawMaster = src.rawBaseUrl <> "/master/"
@@ -124,8 +128,10 @@ discoverDataUrlsAuth mToken Nothing src = do
           let urls = conventionUrls src
           reachable <- tryFetchUrl mToken urls.configUrl
           if reachable then pure (Right urls)
-          else pure (Left
-            "No graph data found. Add data/ directory or .graph-browser.json to your repo")
+          else pure
+            ( Left
+                "No graph data found. Add data/ directory or .graph-browser.json to your repo"
+            )
 
 tryFetchManifest
   :: Maybe String
@@ -203,28 +209,29 @@ tryFetchUrl mToken url = do
 
 stripPrefix :: String -> String -> Maybe String
 stripPrefix prefix str =
-  if String.take (String.length prefix) str == prefix
-    then Just (String.drop (String.length prefix) str)
-    else Nothing
+  if String.take (String.length prefix) str == prefix then Just (String.drop (String.length prefix) str)
+  else Nothing
 
 stripSuffix :: String -> String -> String
 stripSuffix suffix str =
-  let sLen = String.length suffix
-      strLen = String.length str
+  let
+    sLen = String.length suffix
+    strLen = String.length str
   in
-    if strLen >= sLen
-      && String.drop (strLen - sLen) str == suffix
-      then String.take (strLen - sLen) str
-      else str
+    if
+      strLen >= sLen
+        && String.drop (strLen - sLen) str == suffix then String.take (strLen - sLen) str
+    else str
 
 stripTrailingSlash :: String -> String
 stripTrailingSlash str =
-  let len = String.length str
+  let
+    len = String.length str
   in
-    if len > 0
-      && String.drop (len - 1) str == "/"
-      then String.take (len - 1) str
-      else str
+    if
+      len > 0
+        && String.drop (len - 1) str == "/" then String.take (len - 1) str
+    else str
 
 takeUntil :: String -> String -> String
 takeUntil sep str =
@@ -241,6 +248,7 @@ splitFirst sep str =
     Just idx -> Just
       { before: String.take idx str
       , after: String.drop
-          (idx + String.length sep) str
+          (idx + String.length sep)
+          str
       }
     Nothing -> Nothing

@@ -115,8 +115,8 @@ renderRepoItem activeId entry =
   HH.div
     [ cls
         ( "repo-item"
-            <> if activeId == Just entry.id
-              then " active"
+            <>
+              if activeId == Just entry.id then " active"
               else ""
         )
     , HE.onClick \_ -> Select entry
