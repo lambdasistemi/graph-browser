@@ -49,6 +49,7 @@ export const parseQuads = (format) => (baseIri) => (input) => () =>
           ? quad.object.language
           : "",
     },
+    graph: quad.graph && quad.graph.termType === "NamedNode" ? quad.graph.value : "",
   }));
 
 // --- SPARQL Store API ---
