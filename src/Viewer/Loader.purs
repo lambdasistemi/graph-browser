@@ -41,11 +41,22 @@ resolveUrl base path =
   if String.take 4 path == "http" then path
   else base <> path
 
+-- | URN prefix for per-source named graphs. The full source IRI is
+-- | `urn:gb:source:` followed by the source path as configured.
+sourceIriPrefix :: String
+sourceIriPrefix = "urn:gb:source:"
+
+-- | Build the source IRI for a configured graphSource path.
+-- | Empty path yields empty — a signal to load into the default graph.
+sourceIriForPath :: String -> String
+sourceIriForPath "" = ""
+sourceIriForPath path = sourceIriPrefix <> path
+
 graphSourceLocations
   :: forall r
    . { baseUrl :: String, graphUrl :: String | r }
   -> Config
-  -> Array { format :: String, url :: String }
+  -> Array { format :: String, url :: String, sourceIri :: String }
 graphSourceLocations urls cfg =
   case cfg.graphSources of
     sources | not (Array.null sources) ->
@@ -53,6 +64,7 @@ graphSourceLocations urls cfg =
         ( \source ->
             { format: source.format
             , url: resolveUrl urls.baseUrl source.path
+            , sourceIri: sourceIriForPath source.path
             }
         )
         sources
@@ -61,11 +73,13 @@ graphSourceLocations urls cfg =
         Just source ->
           [ { format: source.format
             , url: resolveUrl urls.baseUrl source.path
+            , sourceIri: sourceIriForPath source.path
             }
           ]
         Nothing ->
           [ { format: "application/json"
             , url: urls.graphUrl
+            , sourceIri: ""
             }
           ]
 
@@ -87,7 +101,7 @@ loadConfig url = do
     Right json -> decodeConfig json
 
 loadGraphData
-  :: Array { format :: String, url :: String }
+  :: Array { format :: String, url :: String, sourceIri :: String }
   -> Aff (Either String { graph :: Graph, ontologyKinds :: Map.Map KindId KindDef })
 loadGraphData locations =
   case Array.uncons locations of
@@ -118,16 +132,24 @@ loadGraphData locations =
         Right result -> result
 
 fetchAndParseRdf
-  :: { format :: String, url :: String }
+  :: { format :: String, url :: String, sourceIri :: String }
   -> Aff (Array Oxigraph.ImportedRdfQuad)
 fetchAndParseRdf location = do
   resp <- fetch location.url { method: GET }
   body <- resp.text
   absUrl <- liftEffect (absoluteUrl location.url)
-  liftEffect $ Oxigraph.parseQuads location.format absUrl body
+  quads <- liftEffect $ Oxigraph.parseQuads location.format absUrl body
+  -- Parsed quads come in with an empty `graph` field (they were read out
+  -- of a flat Turtle source). Stamp the configured source IRI so the
+  -- import pipeline can track which source each quad came from.
+  pure (map (tagSource location.sourceIri) quads)
+  where
+  tagSource :: String -> Oxigraph.ImportedRdfQuad -> Oxigraph.ImportedRdfQuad
+  tagSource "" q = q
+  tagSource iri q = q { graph = iri }
 
 loadSparqlStore
-  :: Array { format :: String, url :: String }
+  :: Array { format :: String, url :: String, sourceIri :: String }
   -> Aff (Either String Oxigraph.OxigraphStore)
 loadSparqlStore locations = do
   parsed <- try do
@@ -136,7 +158,9 @@ loadSparqlStore locations = do
       resp <- fetch location.url { method: GET }
       body <- resp.text
       absUrl <- liftEffect (absoluteUrl location.url)
-      liftEffect $ Oxigraph.loadRdf store location.format absUrl "" body
+      liftEffect $ Oxigraph.loadRdf store location.format absUrl
+        location.sourceIri
+        body
     pure store
   pure case parsed of
     Left err -> Left (show err)
