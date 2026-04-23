@@ -57,6 +57,11 @@
         "items": { "type": "string" },
         "default": [],
         "description": "Tags for categorization (e.g. 'view', 'tour:guide-name')."
+      },
+      "layout": {
+        "type": "string",
+        "enum": ["fcose", "elk", "cola", "dagre", "concentric"],
+        "description": "Optional default layout when this query is used as a view."
       }
     },
     "additionalProperties": false

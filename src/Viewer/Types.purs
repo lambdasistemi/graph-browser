@@ -8,6 +8,7 @@ import Graph.Query as Query
 import Graph.Views as Views
 import FFI.Oxigraph as Oxigraph
 import Graph.Search (SearchResult)
+import Layout (LayoutId, LayoutSource)
 import Tutorial (Tutorial)
 
 -- | Data URLs that the viewer fetches on init.
@@ -80,6 +81,8 @@ type State =
   , paramOptions :: Map.Map String (Array String)
   , loadedTutorials :: Array Tutorial
   , panelTab :: PanelTab
+  , activeLayout :: LayoutId
+  , layoutSource :: LayoutSource
   -- | IRIs of source graphs the user has hidden. Nodes/edges whose
   -- | sources is a non-empty subset of this set are filtered from the
   -- | view. Nodes/edges with empty sources are always visible.
@@ -119,6 +122,7 @@ data Action
   | ClearQuery
   | ToggleQueryCatalog
   | SetParamValue String String
+  | SetLayout LayoutId
   | SetPanelTab PanelTab
   | ToggleSource String
   | ToggleSourcesPanel
