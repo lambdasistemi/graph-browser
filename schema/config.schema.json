@@ -72,6 +72,10 @@
         "path": {
           "type": "string",
           "description": "Path to the RDF asset relative to the site or raw repository root (for example 'data/rdf/graph.nq')."
+        },
+        "label": {
+          "type": "string",
+          "description": "Optional human-readable label shown in the Sources sidebar. Defaults to the path."
         }
       }
     }
