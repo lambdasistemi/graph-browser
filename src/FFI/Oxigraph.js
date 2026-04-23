@@ -75,8 +75,15 @@ const bindingToRecord = (bindings) => {
   return result;
 };
 
+// All SPARQL queries run with `use_default_graph_as_union: true` so that
+// patterns like `{ ?s ?p ?o }` match statements in every named graph as
+// well as the default graph. This lets data loaded into per-source named
+// graphs stay queryable by existing SPARQL views while preserving graph
+// membership for `GRAPH ?g { ... }` patterns.
+const QUERY_OPTIONS = { use_default_graph_as_union: true };
+
 export const querySparql = (store) => (sparql) => () => {
-  const results = store.query(sparql);
+  const results = store.query(sparql, QUERY_OPTIONS);
   if (typeof results === "boolean") {
     return [];
   }
@@ -88,7 +95,7 @@ export const querySparql = (store) => (sparql) => () => {
 };
 
 export const querySparqlStrings = (store) => (sparql) => () => {
-  const results = store.query(sparql);
+  const results = store.query(sparql, QUERY_OPTIONS);
   if (typeof results === "boolean") {
     return [];
   }
@@ -103,7 +110,7 @@ export const querySparqlStrings = (store) => (sparql) => () => {
 };
 
 export const querySparqlNodeIds = (store) => (sparql) => () => {
-  const results = store.query(sparql);
+  const results = store.query(sparql, QUERY_OPTIONS);
   if (typeof results === "boolean") {
     return [];
   }
