@@ -95,6 +95,7 @@ decodeNode json = do
     , description
     , links
     , ontologyRef: Nothing
+    , sources: []
     }
 
 decodeLink :: Json -> Either String Link
@@ -118,6 +119,7 @@ decodeEdge json = do
     , label
     , description
     , predicateRef: Nothing
+    , sources: []
     }
 
 decodeGraphSource :: Json -> Either String GraphSource

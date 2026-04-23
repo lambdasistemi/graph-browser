@@ -55,6 +55,10 @@ type Node =
   , description :: String
   , links :: Array Link
   , ontologyRef :: Maybe OntologyReference
+  -- | IRIs of the source graphs that contributed at least one statement
+  -- | about this node. Empty for nodes without provenance (e.g. loaded
+  -- | from a legacy JSON graph).
+  , sources :: Array String
   }
 
 -- | A directed edge in the knowledge graph.
@@ -64,6 +68,10 @@ type Edge =
   , label :: String
   , description :: String
   , predicateRef :: Maybe OntologyReference
+  -- | IRIs of the source graphs that contributed the triple underlying
+  -- | this edge. Typically a singleton, but can be larger when the same
+  -- | triple is defined in more than one source.
+  , sources :: Array String
   }
 
 -- | The full graph: nodes, edges, and adjacency.

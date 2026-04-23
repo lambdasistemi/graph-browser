@@ -611,6 +611,7 @@ handleAction = case _ of
                 , label: edge.label
                 , description: edge.description
                 , predicateRef: edge.predicateRef
+                , sources: []
                 }
             in
               case srcNode, tgtNode of
@@ -632,6 +633,7 @@ handleAction = case _ of
                     , description: ""
                     , links: []
                     , ontologyRef: Nothing
+                    , sources: []
                     }
                     { id: edge.targetId
                     , label: edge.targetLabel
@@ -640,6 +642,7 @@ handleAction = case _ of
                     , description: ""
                     , links: []
                     , ontologyRef: Nothing
+                    , sources: []
                     }
                     state.promptInput
           Nothing -> ""
