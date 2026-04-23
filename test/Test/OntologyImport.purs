@@ -51,7 +51,7 @@ spec = describe "Ontology import" do
     quads <- liftEffect $ Oxigraph.parseQuads "text/turtle" fixtureBase turtle
     store <- liftEffect do
       s <- Oxigraph.createStore
-      Oxigraph.loadRdf s "text/turtle" fixtureBase turtle
+      Oxigraph.loadRdf s "text/turtle" fixtureBase "" turtle
       pure s
     catalogBody <- liftEffect $ readTextFile UTF8 "data/queries.json"
     case jsonParser catalogBody >>= decodeQueryCatalog, Rdf.Import.importGraph quads of
