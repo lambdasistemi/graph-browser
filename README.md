@@ -189,8 +189,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: lambdasistemi/graph-browser/validate-action@main
-      - uses: lambdasistemi/graph-browser/build-action@main
+      - uses: lambdasistemi/graph-browser/validate-action@v0.4.1
+        with:
+          version: v0.4.1
+      - uses: lambdasistemi/graph-browser/build-action@v0.4.1
+        with:
+          version: v0.4.1
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
@@ -198,7 +202,9 @@ jobs:
         uses: actions/deploy-pages@v5
 ```
 
-No build tools needed — the actions download the app and assemble the site.
+No build tools needed — the actions download the pinned `lib-bundle.tar.gz` and `schemas.tar.gz` from the release and assemble the site.
+
+> **Pin both the action ref and the `version:` input to the same release tag.** Replace `v0.4.1` with whatever release you want; check [Releases](https://github.com/lambdasistemi/graph-browser/releases) for the latest. Upstream changes to graph-browser only reach your deployed site when you bump these pins.
 
 ### Option 2: Use the hosted universal viewer
 
@@ -307,13 +313,15 @@ Validate your data against the schemas in [`schema/`](schema/):
 
 ### CI Validation for Data Repos
 
-Graph-browser publishes a reusable GitHub Action that validates your data against all schemas, checks edge integrity, kind references, duplicate IDs, and tutorial node references. Add it as a step in your workflow:
+Graph-browser publishes a reusable GitHub Action that validates your data against all schemas, checks edge integrity, kind references, duplicate IDs, and tutorial node references. Pin both the action ref and the `version:` input to the same release tag:
 
 ```yaml
-- uses: lambdasistemi/graph-browser/validate-action@main
+- uses: lambdasistemi/graph-browser/validate-action@v0.4.1
   with:
+    version: v0.4.1         # required — picks the schemas.tar.gz from this release
     data-dir: data          # optional, default: data
-    schema-ref: main        # optional, pin to tag/sha
+    # Or, for hermetic builds, point at a local schema directory and skip the download:
+    # schema-dir: schema
 ```
 
 ## Generating Data with an LLM
