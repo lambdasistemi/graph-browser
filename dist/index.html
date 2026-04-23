@@ -259,7 +259,7 @@
   }
   .param-select:focus { border-color: var(--accent); }
 
-  .query-panel {
+  .left-column {
     width: 300px;
     min-width: 240px;
     background: var(--bg-base);
@@ -268,9 +268,80 @@
     flex-direction: column;
     flex-shrink: 0;
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .query-panel {
+    min-width: 0;
+    background: var(--bg-base);
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    overflow-y: auto;
     direction: rtl;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
+  }
+  .sources-panel {
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-base);
+    flex: 0 0 auto;
+  }
+  .sources-header {
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background 0.15s ease;
+  }
+  .sources-header:hover { background: var(--bg-surface); }
+  .sources-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .sources-count {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--bg-surface);
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+  .sources-chevron {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .sources-list {
+    display: flex;
+    flex-direction: column;
+    padding: 4px 0;
+  }
+  .sources-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-primary);
+    transition: background 0.15s ease;
+  }
+  .sources-row:hover { background: var(--bg-surface); }
+  .sources-row input[type="checkbox"] {
+    accent-color: var(--accent);
+    cursor: pointer;
+    margin: 0;
+  }
+  .sources-row-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .query-panel > * {
     direction: ltr;
