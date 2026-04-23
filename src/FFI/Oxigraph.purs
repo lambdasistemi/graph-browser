@@ -29,6 +29,7 @@ type ImportedRdfQuad =
   { subject :: String
   , predicate :: String
   , object :: ImportedRdfObject
+  , graph :: String
   }
 
 type RdfObject =
