@@ -45,3 +45,19 @@ export const setBranchParam = (branch) => () => {
   }
   history.replaceState(null, "", url);
 };
+
+export const getThemeParam = () => {
+  var params = new URLSearchParams(window.location.search);
+  var theme = params.get("theme");
+  return theme || "";
+};
+
+export const setThemeParam = (theme) => () => {
+  var url = new URL(window.location);
+  if (theme === "") {
+    url.searchParams.delete("theme");
+  } else {
+    url.searchParams.set("theme", theme);
+  }
+  history.replaceState(null, "", url);
+};

@@ -17,6 +17,8 @@ import Effect.Aff (Aff, try)
 import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
 import FFI.Cytoscape as Cy
+import FFI.Theme as Theme
+import FFI.Url as Url
 import Fetch (Method(..), fetch)
 import Graph.Cytoscape as GCy
 import Graph.Operations (filterBySources, neighborhood, subgraph)
@@ -90,6 +92,7 @@ viewer = H.mkComponent
       , graph: emptyGraph
       , fullGraph: emptyGraph
       , dataUrls: urls
+      , theme: "dark"
       , selected: Nothing
       , hoveredNode: Nothing
       , hoveredEdge: Nothing
@@ -219,6 +222,16 @@ handleAction
   -> H.HalogenM State Action () o Aff Unit
 handleAction = case _ of
   Initialize -> do
+    urlTheme <- liftEffect Url.getThemeParam
+    storedTheme <- liftEffect Persist.loadThemePreference
+    systemTheme <- liftEffect Theme.getSystemTheme
+    let
+      requestedTheme =
+        resolveThemePreference urlTheme storedTheme
+      currentTheme =
+        resolveTheme requestedTheme systemTheme
+    liftEffect $ Theme.applyTheme currentTheme
+    H.modify_ _ { theme = currentTheme }
     state0 <- H.get
     let urls = state0.dataUrls
     cfgResult <- liftAff (loadConfig urls.configUrl)
@@ -493,6 +506,14 @@ handleAction = case _ of
 
   FitAll ->
     liftEffect Cy.fitAll
+
+  ToggleTheme -> do
+    currentTheme <- H.gets _.theme
+    let nextTheme = toggleTheme currentTheme
+    liftEffect $ Theme.applyTheme nextTheme
+    liftEffect $ Persist.saveThemePreference nextTheme
+    liftEffect $ Url.setThemeParam nextTheme
+    H.modify_ _ { theme = nextTheme }
 
   ToggleTutorialMenu ->
     H.modify_ \s -> s
@@ -997,3 +1018,35 @@ mergeKinds base extra =
     (\acc (Tuple kindId kindDef) -> Map.insert kindId kindDef acc)
     base
     (Map.toUnfoldable extra :: Array (Tuple KindId KindDef))
+
+normalizeTheme :: String -> String
+normalizeTheme theme =
+  if theme == "light" then "light"
+  else "dark"
+
+normalizeThemePreference :: String -> Maybe String
+normalizeThemePreference theme
+  | theme == "light" = Just "light"
+  | theme == "dark" = Just "dark"
+  | theme == "auto" = Just "auto"
+  | otherwise = Nothing
+
+resolveThemePreference :: String -> Maybe String -> String
+resolveThemePreference urlTheme storedTheme =
+  case normalizeThemePreference urlTheme of
+    Just theme -> theme
+    Nothing -> case storedTheme >>= normalizeThemePreference of
+      Just theme -> theme
+      Nothing -> "auto"
+
+resolveTheme :: String -> String -> String
+resolveTheme requested systemTheme =
+  case requested of
+    "light" -> "light"
+    "dark" -> "dark"
+    _ -> normalizeTheme systemTheme
+
+toggleTheme :: String -> String
+toggleTheme theme =
+  if normalizeTheme theme == "light" then "dark"
+  else "light"

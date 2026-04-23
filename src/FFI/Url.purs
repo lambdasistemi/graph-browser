@@ -5,6 +5,8 @@ module FFI.Url
   , setViewParam
   , getBranchParam
   , setBranchParam
+  , getThemeParam
+  , setThemeParam
   ) where
 
 import Prelude
@@ -22,3 +24,7 @@ foreign import setViewParam :: String -> Effect Unit
 foreign import getBranchParam :: Effect String
 
 foreign import setBranchParam :: String -> Effect Unit
+
+foreign import getThemeParam :: Effect String
+
+foreign import setThemeParam :: String -> Effect Unit
