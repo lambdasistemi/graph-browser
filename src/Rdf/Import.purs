@@ -116,6 +116,7 @@ importNode quads iri = do
     description = fromMaybe "" (literalValue quads iri dctermsDescription)
     links = fallbackLinks quads iri
     ontologyRef = semanticTypeReference quads iri
+    sources = subjectSources quads iri
   pure
     { iri
     , node:
@@ -126,8 +127,22 @@ importNode quads iri = do
         , description
         , links
         , ontologyRef
+        , sources
         }
     }
+
+-- | Distinct, non-empty graph IRIs that contributed at least one
+-- | statement with `iri` as subject.
+subjectSources :: Array ImportedRdfQuad -> String -> Array String
+subjectSources quads iri =
+  Array.nub
+    ( Array.mapMaybe
+        ( \quad ->
+            if quad.subject == iri && quad.graph /= "" then Just quad.graph
+            else Nothing
+        )
+        quads
+    )
 
 fallbackLinks :: Array ImportedRdfQuad -> String -> Array Link
 fallbackLinks quads subject =
@@ -166,6 +181,9 @@ importRelationEdges quads nodeIdByIri reifiedDescriptions =
               fromMaybe ""
                 (Map.lookup (edgeKey quad.subject quad.predicate quad.object.value) reifiedDescriptions)
           , predicateRef: predicateReference quads quad.predicate
+          , sources:
+              if quad.graph == "" then []
+              else [ quad.graph ]
           }
     )
     quads
@@ -191,6 +209,7 @@ mergeEdges edges =
         if edge.description /= "" then edge.description
         else existing.description
     , predicateRef: choosePredicateRef existing.predicateRef edge.predicateRef
+    , sources: Array.nub (existing.sources <> edge.sources)
     }
 
   preferNew edge existing =

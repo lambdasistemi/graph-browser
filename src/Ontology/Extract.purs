@@ -202,6 +202,7 @@ classesToNodes classes depths =
               { label: cls.label
               , iri: cls.iri
               }
+          , sources: []
           }
     )
     classes
@@ -247,6 +248,7 @@ extractSubclassEdges quads nodeIdByIri =
               { label: "subClassOf"
               , iri: rdfsSubclassOf
               }
+          , sources: []
           }
     )
     (extractSubclassLinks quads)
@@ -282,6 +284,7 @@ extractPropertyEdges quads nodeIdByIri =
                                 { label
                                 , iri: propertyIri
                                 }
+                            , sources: []
                             }
                       )
                       ranges
@@ -316,6 +319,7 @@ extractAlignmentEdges quads nodeIdByIri =
                   { label: "equivalentClass"
                   , iri: owlEquivalentClass
                   }
+              , sources: []
               }
           else
             Nothing
@@ -362,6 +366,7 @@ extractAlignmentEdges quads nodeIdByIri =
                       { label: "equivalentProperty"
                       , iri: owlEquivalentProperty
                       }
+                  , sources: []
                   }
             )
             rights
