@@ -27,7 +27,7 @@ loadStore
 loadStore baseIri path = liftEffect do
   turtle <- readTextFile UTF8 path
   s <- Oxigraph.createStore
-  Oxigraph.loadRdf s "text/turtle" baseIri turtle
+  Oxigraph.loadRdf s "text/turtle" baseIri "" turtle
   pure s
 
 graphBase :: String

@@ -56,11 +56,15 @@ export const parseQuads = (format) => (baseIri) => (input) => () =>
 
 export const createStore = () => new oxigraph.Store();
 
-export const loadRdf = (store) => (format) => (baseIri) => (content) => () => {
-  store.load(content, {
+export const loadRdf = (store) => (format) => (baseIri) => (toGraphName) => (content) => () => {
+  const options = {
     format,
     base_iri: baseIri,
-  });
+  };
+  if (toGraphName) {
+    options.to_graph_name = namedNode(toGraphName);
+  }
+  store.load(content, options);
 };
 
 const bindingToRecord = (bindings) => {

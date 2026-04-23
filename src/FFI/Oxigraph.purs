@@ -65,8 +65,16 @@ type SparqlBinding = Foreign
 
 foreign import createStore :: Effect OxigraphStore
 
+-- | loadRdf store format baseIri toGraphName content
+-- | Pass "" as toGraphName to load into the default graph.
+-- | Pass a non-empty IRI to load into that named graph.
 foreign import loadRdf
-  :: OxigraphStore -> String -> String -> String -> Effect Unit
+  :: OxigraphStore
+  -> String
+  -> String
+  -> String
+  -> String
+  -> Effect Unit
 
 foreign import querySparql
   :: OxigraphStore -> String -> Effect (Array SparqlBinding)

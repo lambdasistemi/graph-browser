@@ -136,7 +136,7 @@ loadSparqlStore locations = do
       resp <- fetch location.url { method: GET }
       body <- resp.text
       absUrl <- liftEffect (absoluteUrl location.url)
-      liftEffect $ Oxigraph.loadRdf store location.format absUrl body
+      liftEffect $ Oxigraph.loadRdf store location.format absUrl "" body
     pure store
   pure case parsed of
     Left err -> Left (show err)
