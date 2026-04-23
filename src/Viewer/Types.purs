@@ -2,6 +2,7 @@ module Viewer.Types where
 
 import Data.Map as Map
 import Data.Maybe (Maybe)
+import Data.Set (Set)
 import Graph.Types (Config, Node, Graph)
 import Graph.Query as Query
 import Graph.Views as Views
@@ -78,6 +79,11 @@ type State =
   , paramOptions :: Map.Map String (Array String)
   , loadedTutorials :: Array Tutorial
   , panelTab :: PanelTab
+  -- | IRIs of source graphs the user has hidden. Nodes/edges whose
+  -- | sources is a non-empty subset of this set are filtered from the
+  -- | view. Nodes/edges with empty sources are always visible.
+  , hiddenSources :: Set String
+  , showSourcesPanel :: Boolean
   }
 
 -- | Actions the component can handle.
@@ -112,6 +118,8 @@ data Action
   | ToggleQueryCatalog
   | SetParamValue String String
   | SetPanelTab PanelTab
+  | ToggleSource String
+  | ToggleSourcesPanel
 
 data PanelTab = QueriesTab | ToursTab
 

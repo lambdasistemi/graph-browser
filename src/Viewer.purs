@@ -19,7 +19,7 @@ import Effect.Class (liftEffect)
 import FFI.Cytoscape as Cy
 import Fetch (Method(..), fetch)
 import Graph.Cytoscape as GCy
-import Graph.Operations (neighborhood, subgraph)
+import Graph.Operations (filterBySources, neighborhood, subgraph)
 import Foreign (Foreign, unsafeToForeign)
 import Foreign.Object as FO
 import Graph.Search (SearchResult(..), search)
@@ -64,6 +64,7 @@ import Viewer.Controls (renderControls, renderLegend, renderGraphContext)
 import Viewer.Tutorial (currentStop)
 import Viewer.QueryPanel (renderQueryPanel)
 import Viewer.Sidebar (renderSidebar)
+import Viewer.SourcesPanel (renderSourcesPanel)
 import Viewer.Loader
   ( loadConfig
   , loadGraphData
@@ -118,6 +119,8 @@ viewer = H.mkComponent
       , paramOptions: Map.empty
       , loadedTutorials: []
       , panelTab: QueriesTab
+      , hiddenSources: Set.empty
+      , showSourcesPanel: false
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -130,7 +133,12 @@ render :: forall m. State -> H.ComponentHTML Action () m
 render state =
   HH.div [ cls "app" ]
     ( ( if Array.null state.queryCatalog then []
-        else [ renderQueryPanel state ]
+        else
+          [ HH.div [ cls "left-column" ]
+              [ renderSourcesPanel state
+              , renderQueryPanel state
+              ]
+          ]
       )
         <>
           [ HH.div [ cls "graph-container" ]
@@ -763,6 +771,20 @@ handleAction = case _ of
       , promptCopied = false
       }
 
+  ToggleSource iri -> do
+    state <- H.get
+    let
+      nextHidden =
+        if Set.member iri state.hiddenSources then
+          Set.delete iri state.hiddenSources
+        else
+          Set.insert iri state.hiddenSources
+    H.modify_ _ { hiddenSources = nextHidden }
+    renderGraph
+
+  ToggleSourcesPanel ->
+    H.modify_ \s -> s { showSourcesPanel = not s.showSourcesPanel }
+
   SetParamValue name value -> do
     state <- H.get
     let values = Map.insert name value state.paramValues
@@ -836,7 +858,7 @@ renderGraph
 renderGraph = do
   state <- H.get
   let
-    visible = case state.selected of
+    base = case state.selected of
       Just node ->
         let
           hood = neighborhood state.depth
@@ -845,6 +867,7 @@ renderGraph = do
         in
           subgraph hood state.graph
       Nothing -> state.graph
+    visible = filterBySources state.hiddenSources base
 
   liftEffect $ Cy.setFocusElements
     (GCy.toElements visible)
