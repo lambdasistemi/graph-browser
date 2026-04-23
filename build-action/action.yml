@@ -1,7 +1,14 @@
 name: 'Build Graph Browser Site'
-description: 'Assemble a deployable graph-browser site from a data/ directory — no build tools required'
+description: 'Assemble a deployable graph-browser site from a data/ directory — pinned to a graph-browser release'
 
 inputs:
+  version:
+    description: |
+      graph-browser release tag to install (for example "v0.4.1"). REQUIRED —
+      pin explicitly so upstream changes never reach your deployed site
+      without you opting in. Each release uploads a 'lib-bundle.tar.gz'
+      asset that this action downloads and unpacks.
+    required: true
   data-dir:
     description: 'Path to the data directory'
     required: false
@@ -14,14 +21,20 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Download graph-browser app
+    - name: Download pinned graph-browser lib bundle
       shell: bash
       run: |
         OUT="${{ inputs.output-dir }}"
-        BASE="https://lambdasistemi.github.io/graph-browser/lib"
+        VERSION="${{ inputs.version }}"
+        if [ -z "$VERSION" ]; then
+          echo "::error::build-action requires a 'version:' input (e.g. v0.4.1)." >&2
+          echo "See https://github.com/lambdasistemi/graph-browser/releases for available versions." >&2
+          exit 1
+        fi
+        URL="https://github.com/lambdasistemi/graph-browser/releases/download/${VERSION}/lib-bundle.tar.gz"
         mkdir -p "$OUT"
-        curl -sfL "$BASE/index.html" -o "$OUT/index.html"
-        curl -sfL "$BASE/index.js" -o "$OUT/index.js"
+        echo "Fetching $URL"
+        curl -sfL "$URL" | tar -xz -C "$OUT"
 
     - name: Copy data
       shell: bash
