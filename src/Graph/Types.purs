@@ -86,6 +86,9 @@ type Graph =
 type GraphSource =
   { format :: String
   , path :: String
+  -- | Optional human-readable label. Empty string means "no label
+  -- | configured"; UI code falls back to the path in that case.
+  , label :: String
   }
 
 -- | Application configuration loaded from config.json.
