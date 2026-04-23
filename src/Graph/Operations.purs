@@ -3,6 +3,7 @@
 module Graph.Operations
   ( neighborhood
   , subgraph
+  , filterBySources
   ) where
 
 import Prelude
@@ -58,3 +59,39 @@ subgraph keep graph =
           && Set.member e.target keep
     )
     graph.edges
+
+-- | Hide nodes and edges whose `sources` is a non-empty subset of the
+-- | user-hidden sources. Elements with an empty `sources` list have no
+-- | provenance to filter against and are always visible. Edges whose
+-- | source or target node is hidden are also dropped, to keep the
+-- | output well-formed.
+filterBySources :: Set String -> Graph -> Graph
+filterBySources hidden graph
+  | Set.isEmpty hidden = graph
+  | otherwise = buildGraph keptNodes keptEdges
+      where
+      nodeVisible n =
+        Array.null n.sources
+          || Array.any
+            (\src -> not (Set.member src hidden))
+            n.sources
+
+      edgeVisible e =
+        Array.null e.sources
+          || Array.any
+            (\src -> not (Set.member src hidden))
+            e.sources
+
+      keptNodes = Array.filter
+        nodeVisible
+        (Array.fromFoldable (Map.values graph.nodes))
+
+      keptNodeIds = Set.fromFoldable (map _.id keptNodes)
+
+      keptEdges = Array.filter
+        ( \e ->
+            edgeVisible e
+              && Set.member e.source keptNodeIds
+              && Set.member e.target keptNodeIds
+        )
+        graph.edges
