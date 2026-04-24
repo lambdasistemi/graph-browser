@@ -5,10 +5,23 @@ import Data.Maybe (Maybe)
 import Data.Set (Set)
 import Graph.Types (Config, Node, Graph)
 import Graph.Query as Query
+import Graph.Shaping (ShapingState)
 import Graph.Views as Views
 import FFI.Oxigraph as Oxigraph
 import Graph.Search (SearchResult)
 import Tutorial (Tutorial)
+
+-- | Pending-expand dialog payload.
+type PendingExpand =
+  { anchor :: String
+  , count :: Int
+  , neighbors :: Array String
+  }
+
+-- | Transient toast. `Nothing` when no toast is showing.
+type Toast =
+  { message :: String
+  }
 
 -- | Data URLs that the viewer fetches on init.
 type DataUrls =
@@ -84,6 +97,12 @@ type State =
   -- | view. Nodes/edges with empty sources are always visible.
   , hiddenSources :: Set String
   , showSourcesPanel :: Boolean
+  -- Interactive shaping (expand/collapse)
+  , shaping :: ShapingState
+  , shapingEnabled :: Boolean
+  , pendingExpand :: Maybe PendingExpand
+  , toast :: Maybe Toast
+  , contextMenu :: Maybe { nodeId :: String, x :: Number, y :: Number }
   }
 
 -- | Actions the component can handle.
@@ -120,6 +139,14 @@ data Action
   | SetPanelTab PanelTab
   | ToggleSource String
   | ToggleSourcesPanel
+  | ExpandNode String
+  | CollapseNode String
+  | ResetShaping
+  | ConfirmLargeExpand
+  | DismissLargeExpand
+  | DismissToast
+  | OpenNodeContextMenu String Number Number
+  | CloseNodeContextMenu
 
 data PanelTab = QueriesTab | ToursTab
 

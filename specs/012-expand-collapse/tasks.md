@@ -19,7 +19,7 @@
 
 **Purpose**: None beyond what's already in the repo. No new dependencies, no new tooling.
 
-- [ ] T001 Confirm `nix develop` shell launches cleanly and `just build` is green on the current HEAD before any changes; record baseline screenshot of Cardano Knowledge Maps default view for later comparison (save under `/tmp/` — not committed)
+- [X] T001 Confirm `nix develop` shell launches cleanly and `just build` is green on the current HEAD before any changes; record baseline screenshot of Cardano Knowledge Maps default view for later comparison (save under `/tmp/` — not committed)
 
 ---
 
@@ -29,11 +29,11 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T002 [P] Create `src/Graph/Shaping.purs` with the full module surface from `specs/012-expand-collapse/contracts/Graph.Shaping.md` — types (`Reason`, `Position`, `ShapingState`), constants (`largeExpandThreshold = 20`), and unimplemented stubs for every exported function (return the zero-state; mark with `-- TODO US1/US2/etc.`). Make it compile.
-- [ ] T003 [P] Add `test/Graph/ShapingSpec.purs` scaffolding (uses existing `spago test` setup if present, else create a minimal `test/Main.purs`) with one sanity test that imports `Graph.Shaping` and asserts `largeExpandThreshold == 20`. Wire into `spago.yaml`/`test` target so `spago test` runs it.
-- [ ] T004 Add FFI primitives `addElementsAt`, `removeElementsById`, `readPositions`, `setHasHidden` to `src/FFI/Cytoscape.purs` (foreign import signatures) and `src/FFI/Cytoscape.js` (JS implementations per `contracts/FFI.Cytoscape.md`). Do NOT call `cy.layout()` or `cy.fit()` inside any of them. Add a CSS rule for `.has-hidden` in the same file's `baseStyle` that renders a small `+` decoration.
-- [ ] T005 Extend `src/Viewer/Types.purs`: add `shaping :: ShapingState` to `State`; add actions `ExpandNode NodeId`, `CollapseNode NodeId`, `ResetShaping`, `ConfirmLargeExpand NodeId (Set NodeId)`, `DismissLargeExpand`, `ExpandCancelled`. Update the `Action` sum. No handler logic yet — leave `handleAction` branches as `pure unit` placeholders to keep the build green.
-- [ ] T006 Update `src/Viewer.purs` initial state to construct `shaping = initFromSeed seed` using the same seed selection logic used for `selected` (most-connected node's closed 1-hop neighborhood — extract into a local helper). On scope change (query/view/tour select, reset, or initial load), also reset `shaping`.
+- [X] T002 [P] Create `src/Graph/Shaping.purs` with the full module surface from `specs/012-expand-collapse/contracts/Graph.Shaping.md` — types (`Reason`, `Position`, `ShapingState`), constants (`largeExpandThreshold = 20`), and unimplemented stubs for every exported function (return the zero-state; mark with `-- TODO US1/US2/etc.`). Make it compile.
+- [X] T003 [P] Add `test/Graph/ShapingSpec.purs` scaffolding (uses existing `spago test` setup if present, else create a minimal `test/Main.purs`) with one sanity test that imports `Graph.Shaping` and asserts `largeExpandThreshold == 20`. Wire into `spago.yaml`/`test` target so `spago test` runs it.
+- [X] T004 Add FFI primitives `addElementsAt`, `removeElementsById`, `readPositions`, `setHasHidden` to `src/FFI/Cytoscape.purs` (foreign import signatures) and `src/FFI/Cytoscape.js` (JS implementations per `contracts/FFI.Cytoscape.md`). Do NOT call `cy.layout()` or `cy.fit()` inside any of them. Add a CSS rule for `.has-hidden` in the same file's `baseStyle` that renders a small `+` decoration.
+- [X] T005 Extend `src/Viewer/Types.purs`: add `shaping :: ShapingState` to `State`; add actions `ExpandNode NodeId`, `CollapseNode NodeId`, `ResetShaping`, `ConfirmLargeExpand NodeId (Set NodeId)`, `DismissLargeExpand`, `ExpandCancelled`. Update the `Action` sum. No handler logic yet — leave `handleAction` branches as `pure unit` placeholders to keep the build green.
+- [X] T006 Update `src/Viewer.purs` initial state to construct `shaping = initFromSeed seed` using the same seed selection logic used for `selected` (most-connected node's closed 1-hop neighborhood — extract into a local helper). On scope change (query/view/tour select, reset, or initial load), also reset `shaping`.
 
 **Checkpoint**: The repo builds, `spago test` runs, the viewer renders the default seed set exactly as before. No behavior change yet.
 
@@ -49,21 +49,21 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation.**
 
-- [ ] T007 [P] [US1] Add tests to `test/Graph/ShapingSpec.purs` for `expand`: reveal N neighbors, idempotence (expand twice ⇒ same state), no-op on fully-expanded node. Use a hand-built `Graph` fixture (3 nodes, 2 edges) and a 5-node fixture with a shared neighbor. These tests MUST fail against the T002 stubs.
+- [X] T007 [P] [US1] Add tests to `test/Graph/ShapingSpec.purs` for `expand`: reveal N neighbors, idempotence (expand twice ⇒ same state), no-op on fully-expanded node. Use a hand-built `Graph` fixture (3 nodes, 2 edges) and a 5-node fixture with a shared neighbor. These tests MUST fail against the T002 stubs.
 
 ### Implementation for User Story 1
 
-- [ ] T008 [US1] Implement `initFromSeed` and `isVisible` / `visibleNodes` in `src/Graph/Shaping.purs` so subsequent tasks have a working baseline.
-- [ ] T009 [US1] Implement `expand` in `src/Graph/Shaping.purs` per `data-model.md` (compute `newNeighbors`, union `ExpandedFrom n` into each, return `{ next, added }`). Make the T007 tests pass.
-- [ ] T010 [US1] Implement `recordPosition` and `dropPositions` in `src/Graph/Shaping.purs`.
-- [ ] T011 [US1] In `src/Viewer.purs`, implement the `ExpandNode nid` handler:
+- [X] T008 [US1] Implement `initFromSeed` and `isVisible` / `visibleNodes` in `src/Graph/Shaping.purs` so subsequent tasks have a working baseline.
+- [X] T009 [US1] Implement `expand` in `src/Graph/Shaping.purs` per `data-model.md` (compute `newNeighbors`, union `ExpandedFrom n` into each, return `{ next, added }`). Make the T007 tests pass.
+- [X] T010 [US1] Implement `recordPosition` and `dropPositions` in `src/Graph/Shaping.purs`.
+- [X] T011 [US1] In `src/Viewer.purs`, implement the `ExpandNode nid` handler:
   1. Compute `newNeighbors` via `Graph.Operations.neighborhood 1 nid state.graph` minus `visibleNodes state.shaping`.
   2. If empty: fire a transient toast action (`NoOpToast "nothing to expand"`; define this action in T005 if not already there) and return.
   3. If `|newNeighbors| > largeExpandThreshold`: open confirm dialog by setting `state.pendingExpand = Just { anchor, neighbors }`; return.
   4. Otherwise: apply `expand nid state.graph state.shaping`, assign positions for the `added` nodes radially around the anchor (helper `placeRadial :: Position -> Int -> Array Position`), call `Cy.addElementsAt`, call `Cy.setHasHidden` for the anchor (and for each added node based on `hasHiddenNeighbors`), persist.
-- [ ] T012 [US1] Add the confirmation dialog in `src/Viewer.purs` + `src/Viewer/Controls.purs`: when `state.pendingExpand` is `Just`, render a modal overlay with the count and Continue / Cancel buttons dispatching `ConfirmLargeExpand` / `DismissLargeExpand`.
-- [ ] T013 [US1] Add a node context-menu (right-click) control. Simplest path: extend existing `onNodeTap` FFI with a new `onNodeContextMenu` that calls back on `cxttap`, and add a small Halogen-rendered menu next to the cursor with an *Expand* item. Implement in `src/FFI/Cytoscape.purs` / `.js` and `src/Viewer/Controls.purs` (new helper `renderNodeContextMenu`).
-- [ ] T014 [US1] Persist shaping state: extend `src/Persist.purs` record with the `shaping` field from `data-model.md`; save on every `ExpandNode` commit; restore in `Viewer.purs` `Initialize`, silently dropping dangling node references.
+- [X] T012 [US1] Add the confirmation dialog in `src/Viewer.purs` + `src/Viewer/Controls.purs`: when `state.pendingExpand` is `Just`, render a modal overlay with the count and Continue / Cancel buttons dispatching `ConfirmLargeExpand` / `DismissLargeExpand`.
+- [X] T013 [US1] Add a node context-menu (right-click) control. Simplest path: extend existing `onNodeTap` FFI with a new `onNodeContextMenu` that calls back on `cxttap`, and add a small Halogen-rendered menu next to the cursor with an *Expand* item. Implement in `src/FFI/Cytoscape.purs` / `.js` and `src/Viewer/Controls.purs` (new helper `renderNodeContextMenu`).
+- [X] T014 [US1] Persist shaping state: extend `src/Persist.purs` record with the `shaping` field from `data-model.md`; save on every `ExpandNode` commit; restore in `Viewer.purs` `Initialize`, silently dropping dangling node references.
 - [ ] T015 [US1] Manual verification: run `just build && just serve`, load Cardano Knowledge Maps, walk through steps 1–3 and 7 of `quickstart.md`. Capture a before/after screenshot pair showing positions preserved (save to `/tmp/`; not committed).
 
 **Checkpoint**: US1 is fully functional. Users can expand; shapes persist across reload; hub confirmation works. This is the shippable MVP increment.
@@ -78,13 +78,13 @@
 
 ### Tests for User Story 2
 
-- [ ] T016 [P] [US2] Extend `test/Graph/ShapingSpec.purs` with collapse tests: (a) collapse removes anchor-exclusive neighbors, (b) collapse keeps shared neighbors, (c) collapse never removes the anchor itself, (d) idempotence (collapse twice ⇒ same state), (e) collapsing a seed node only removes its expanded neighbors. Tests MUST fail until T017 lands.
+- [X] T016 [P] [US2] Extend `test/Graph/ShapingSpec.purs` with collapse tests: (a) collapse removes anchor-exclusive neighbors, (b) collapse keeps shared neighbors, (c) collapse never removes the anchor itself, (d) idempotence (collapse twice ⇒ same state), (e) collapsing a seed node only removes its expanded neighbors. Tests MUST fail until T017 lands.
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Implement `collapse` in `src/Graph/Shaping.purs` per `data-model.md` (remove `ExpandedFrom n` from every reasons-set; drop keys whose reasons became empty; return `{ next, removed }`). Make T016 pass.
-- [ ] T018 [US2] In `src/Viewer.purs`, implement the `CollapseNode nid` handler: apply `collapse`, call `Cy.removeElementsById` for `removed`, refresh `Cy.setHasHidden` for the anchor and its surviving neighbors, persist.
-- [ ] T019 [US2] Extend the node context menu (T013) with a *Collapse* item; disable it (or hide) when the node has no `ExpandedFrom nid` entries anywhere in `state.shaping.reasons`.
+- [X] T017 [US2] Implement `collapse` in `src/Graph/Shaping.purs` per `data-model.md` (remove `ExpandedFrom n` from every reasons-set; drop keys whose reasons became empty; return `{ next, removed }`). Make T016 pass.
+- [X] T018 [US2] In `src/Viewer.purs`, implement the `CollapseNode nid` handler: apply `collapse`, call `Cy.removeElementsById` for `removed`, refresh `Cy.setHasHidden` for the anchor and its surviving neighbors, persist.
+- [X] T019 [US2] Extend the node context menu (T013) with a *Collapse* item; disable it (or hide) when the node has no `ExpandedFrom nid` entries anywhere in `state.shaping.reasons`.
 - [ ] T020 [US2] Manual verification: walk through steps 3–6 of `quickstart.md`; confirm the shared-neighbor invariant against a hand-crafted seed in Cardano Knowledge Maps.
 
 **Checkpoint**: US1 + US2 both functional. The P1 slice of the spec is delivered.
@@ -99,12 +99,12 @@
 
 ### Tests for User Story 3
 
-- [ ] T021 [P] [US3] Add a pure unit test for `hasHiddenNeighbors` in `test/Graph/ShapingSpec.purs`: true iff `neighborhood 1 n g \ visibleNodes ≠ ∅`.
+- [X] T021 [P] [US3] Add a pure unit test for `hasHiddenNeighbors` in `test/Graph/ShapingSpec.purs`: true iff `neighborhood 1 n g \ visibleNodes ≠ ∅`.
 
 ### Implementation for User Story 3
 
-- [ ] T022 [US3] Implement `hasHiddenNeighbors` in `src/Graph/Shaping.purs`.
-- [ ] T023 [US3] In `src/Viewer.purs`, after every mutation of `shaping` (initial seed, expand, collapse, scope change, reset, persist-restore), walk `visibleNodes state.shaping` and call `Cy.setHasHidden id (hasHiddenNeighbors state.graph id state.shaping)` for each. Factor into a helper `refreshHasHidden :: H.HalogenM ...`.
+- [X] T022 [US3] Implement `hasHiddenNeighbors` in `src/Graph/Shaping.purs`.
+- [X] T023 [US3] In `src/Viewer.purs`, after every mutation of `shaping` (initial seed, expand, collapse, scope change, reset, persist-restore), walk `visibleNodes state.shaping` and call `Cy.setHasHidden id (hasHiddenNeighbors state.graph id state.shaping)` for each. Factor into a helper `refreshHasHidden :: H.HalogenM ...`.
 - [ ] T024 [US3] Manual verification: step 6 of `quickstart.md` — confirm markers update correctly as you expand/collapse.
 
 **Checkpoint**: Expandable affordance is live and kept consistent.
@@ -119,11 +119,11 @@
 
 ### Tests for User Story 4
 
-- [ ] T025 [P] [US4] Add a test for `reset` in `test/Graph/ShapingSpec.purs`: `reset seed` produces a state with `reasons = seed ↦ {InitialSeed}` and empty `positions`.
+- [X] T025 [P] [US4] Add a test for `reset` in `test/Graph/ShapingSpec.purs`: `reset seed` produces a state with `reasons = seed ↦ {InitialSeed}` and empty `positions`.
 
 ### Implementation for User Story 4
 
-- [ ] T026 [US4] Implement `reset` in `src/Graph/Shaping.purs` (delegate to `initFromSeed` with the given seed).
+- [X] T026 [US4] Implement `reset` in `src/Graph/Shaping.purs` (delegate to `initFromSeed` with the given seed).
 - [ ] T027 [US4] Add a *Reset Shaping* control to `src/Viewer/Controls.purs` (next to existing controls, not in a modal). On click dispatch `ResetShaping`.
 - [ ] T028 [US4] In `src/Viewer.purs`, implement `ResetShaping`: compute the default seed for the current scope (reuse the helper extracted in T006), apply `reset`, call the existing `setFocusElements` path (fCoSE re-layout is explicitly allowed here by `research.md` §6), refresh `has-hidden` markers, persist.
 - [ ] T029 [US4] Manual verification: step 8 of `quickstart.md` — confirm the post-reset view matches a fresh load pixel-for-pixel (up to fCoSE randomness acceptable at reset time).

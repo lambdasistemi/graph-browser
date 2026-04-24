@@ -3,6 +3,9 @@
 -- | Repo list stored at "graph-browser:repos"
 module Persist
   ( PersistedState
+  , PersistedShaping
+  , PersistedAnchor
+  , PersistedPosition
   , save
   , restore
   , RepoListEntry
@@ -29,11 +32,28 @@ import Web.HTML as Web.HTML
 import Web.HTML.Window as Window
 import Web.Storage.Storage as Storage
 
+type PersistedAnchor =
+  { node :: String
+  , reasons :: Array String
+  }
+
+type PersistedPosition =
+  { id :: String
+  , x :: Number
+  , y :: Number
+  }
+
+type PersistedShaping =
+  { anchors :: Array PersistedAnchor
+  , positions :: Array PersistedPosition
+  }
+
 type PersistedState =
   { selectedNodeId :: Maybe String
   , depth :: Int
   , tutorialId :: Maybe String
   , tutorialStep :: Maybe Int
+  , shaping :: Maybe PersistedShaping
   }
 
 type RepoListEntry =
@@ -58,6 +78,7 @@ save title st = do
       , depth: st.depth
       , tutorialId: st.tutorialId
       , tutorialStep: st.tutorialStep
+      , shaping: st.shaping
       }
   Storage.setItem (storageKey title) (stringify json)
     storage
@@ -75,7 +96,8 @@ restore title = do
     depth <- hush (obj .: "depth")
     tutorialId <- hush (obj .:? "tutorialId")
     tutorialStep <- hush (obj .:? "tutorialStep")
-    pure { selectedNodeId, depth, tutorialId, tutorialStep }
+    shaping <- hush (obj .:? "shaping")
+    pure { selectedNodeId, depth, tutorialId, tutorialStep, shaping }
 
 saveRepoList :: Array RepoListEntry -> Effect Unit
 saveRepoList repos = do

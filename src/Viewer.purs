@@ -20,6 +20,12 @@ import FFI.Cytoscape as Cy
 import Fetch (Method(..), fetch)
 import Graph.Cytoscape as GCy
 import Graph.Operations (filterBySources, neighborhood, subgraph)
+import Graph.Shaping (ShapingState)
+import Graph.Shaping as Shaping
+import Data.Int (toNumber)
+import Data.Number (cos, sin)
+import Data.String as String
+import Data.String.Pattern as String
 import Foreign (Foreign, unsafeToForeign)
 import Foreign.Object as FO
 import Graph.Search (SearchResult(..), search)
@@ -51,6 +57,8 @@ import Viewer.Types
   , State
   , Action(..)
   , PanelTab(..)
+  , PendingExpand
+  , Toast
   )
 import Viewer.Helpers
   ( cls
@@ -121,6 +129,11 @@ viewer = H.mkComponent
       , panelTab: QueriesTab
       , hiddenSources: Set.empty
       , showSourcesPanel: false
+      , shaping: Shaping.emptyShaping
+      , shapingEnabled: false
+      , pendingExpand: Nothing
+      , toast: Nothing
+      , contextMenu: Nothing
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -147,10 +160,108 @@ render state =
               , renderHoverTooltip state
               , renderControls state
               , renderLegend state.config
+              , renderNodeContextMenu state
+              , renderPendingExpand state
+              , renderToast state
               ]
           , renderSidebar state
           ]
     )
+
+renderNodeContextMenu :: forall m. State -> H.ComponentHTML Action () m
+renderNodeContextMenu state = case state.contextMenu of
+  Nothing -> HH.text ""
+  Just cm ->
+    let
+      canCollapse = Shaping.hasAnyAnchor cm.nodeId state.shaping
+      styleFor = "position:absolute;left:"
+        <> show cm.x
+        <> "px;top:"
+        <> show cm.y
+        <> "px;z-index:200;background:var(--bg-secondary,#161b22);border:1px solid var(--border,#30363d);border-radius:4px;padding:4px 0;box-shadow:0 4px 12px rgba(0,0,0,0.4);min-width:140px;"
+    in
+      HH.div
+        [ cls "node-context-menu"
+        , HP.attr (HH.AttrName "style") styleFor
+        ]
+        [ HH.button
+            [ cls "context-menu-item"
+            , HP.attr (HH.AttrName "style")
+                "display:block;width:100%;text-align:left;padding:6px 12px;background:transparent;color:inherit;border:0;cursor:pointer;"
+            , HE.onClick \_ -> ExpandNode cm.nodeId
+            ]
+            [ HH.text "Expand" ]
+        , HH.button
+            [ cls "context-menu-item"
+            , HP.attr (HH.AttrName "style")
+                ( "display:block;width:100%;text-align:left;padding:6px 12px;background:transparent;color:inherit;border:0;cursor:"
+                    <> (if canCollapse then "pointer;" else "not-allowed;opacity:0.5;")
+                )
+            , HP.disabled (not canCollapse)
+            , HE.onClick \_ -> CollapseNode cm.nodeId
+            ]
+            [ HH.text "Collapse" ]
+        , HH.button
+            [ cls "context-menu-item"
+            , HP.attr (HH.AttrName "style")
+                "display:block;width:100%;text-align:left;padding:6px 12px;background:transparent;color:inherit;border:0;cursor:pointer;border-top:1px solid var(--border,#30363d);"
+            , HE.onClick \_ -> CloseNodeContextMenu
+            ]
+            [ HH.text "Close" ]
+        ]
+
+renderPendingExpand :: forall m. State -> H.ComponentHTML Action () m
+renderPendingExpand state = case state.pendingExpand of
+  Nothing -> HH.text ""
+  Just pe ->
+    HH.div
+      [ cls "modal-backdrop"
+      , HP.attr (HH.AttrName "style")
+          "position:absolute;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:300;"
+      ]
+      [ HH.div
+          [ HP.attr (HH.AttrName "style")
+              "background:var(--bg-secondary,#161b22);border:1px solid var(--border,#30363d);border-radius:6px;padding:20px 24px;max-width:420px;color:var(--text-primary,#f0f6fc);"
+          ]
+          [ HH.div
+              [ HP.attr (HH.AttrName "style") "font-weight:600;margin-bottom:8px;" ]
+              [ HH.text "Large expansion" ]
+          , HH.div
+              [ HP.attr (HH.AttrName "style") "margin-bottom:16px;" ]
+              [ HH.text
+                  ( "Expanding this node will add "
+                      <> show pe.count
+                      <> " nodes to the view. Continue?"
+                  )
+              ]
+          , HH.div
+              [ HP.attr (HH.AttrName "style") "display:flex;gap:8px;justify-content:flex-end;" ]
+              [ HH.button
+                  [ HE.onClick \_ -> DismissLargeExpand
+                  , HP.attr (HH.AttrName "style")
+                      "padding:6px 14px;background:transparent;color:inherit;border:1px solid var(--border,#30363d);border-radius:4px;cursor:pointer;"
+                  ]
+                  [ HH.text "Cancel" ]
+              , HH.button
+                  [ HE.onClick \_ -> ConfirmLargeExpand
+                  , HP.attr (HH.AttrName "style")
+                      "padding:6px 14px;background:#1f6feb;color:#fff;border:0;border-radius:4px;cursor:pointer;"
+                  ]
+                  [ HH.text "Continue" ]
+              ]
+          ]
+      ]
+
+renderToast :: forall m. State -> H.ComponentHTML Action () m
+renderToast state = case state.toast of
+  Nothing -> HH.text ""
+  Just t ->
+    HH.div
+      [ HP.attr (HH.AttrName "style")
+          "position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg-secondary,#161b22);color:var(--text-primary,#f0f6fc);border:1px solid var(--border,#30363d);border-radius:4px;padding:8px 16px;z-index:250;cursor:pointer;"
+      , HE.onClick \_ -> DismissToast
+      ]
+      [ HH.text t.message ]
 
 renderSearchBox
   :: forall m. State -> H.ComponentHTML Action () m
@@ -296,6 +407,11 @@ handleAction = case _ of
     liftEffect $ Cy.onEdgeHoverOut
       (HS.notify edgeHoverOutSub.listener EdgeHoverOut)
     void $ H.subscribe edgeHoverOutSub.emitter
+    cxtSub <- liftEffect HS.create
+    liftEffect $ Cy.onNodeContextMenu \nodeId x y ->
+      HS.notify cxtSub.listener
+        (OpenNodeContextMenu nodeId x y)
+    void $ H.subscribe cxtSub.emitter
     -- Load legacy view index only when no query catalog views
     state1 <- H.get
     let
@@ -324,9 +440,15 @@ handleAction = case _ of
         let
           node = ps.selectedNodeId >>=
             \nid -> Map.lookup nid state2.graph.nodes
-        H.modify_ _
+          restoredShaping = map
+            (\sh -> decodePersistedShaping sh state2.graph)
+            ps.shaping
+        H.modify_ \s -> s
           { selected = node
           , depth = ps.depth
+          , shaping = case restoredShaping of
+              Just shap | not (Map.isEmpty shap.reasons) -> shap
+              _ -> s.shaping
           }
         case ps.tutorialId of
           Nothing -> pure unit
@@ -836,6 +958,66 @@ handleAction = case _ of
               }
             renderGraph
 
+  ExpandNode nid -> do
+    state <- H.get
+    let
+      visible = Shaping.visibleNodes state.shaping
+      oneHop = Set.delete nid (neighborhood 1 nid state.graph)
+      newNeighbors = Set.difference oneHop visible
+      n = Set.size newNeighbors
+    if n == 0 then
+      H.modify_ _
+        { toast = Just { message: "Nothing to expand" }
+        , contextMenu = Nothing
+        }
+    else if n > Shaping.largeExpandThreshold then
+      H.modify_ _
+        { pendingExpand = Just
+            { anchor: nid
+            , count: n
+            , neighbors: Array.fromFoldable newNeighbors
+            }
+        , contextMenu = Nothing
+        }
+    else
+      commitExpand nid newNeighbors
+
+  CollapseNode nid -> do
+    state <- H.get
+    let
+      r = Shaping.collapse nid state.shaping
+    liftEffect $ Cy.removeElementsById
+      (Array.fromFoldable r.removed)
+    H.modify_ _
+      { shaping = r.next
+      , contextMenu = Nothing
+      }
+    refreshHasHidden
+    persistState
+
+  ResetShaping -> do
+    H.modify_ _
+      { pendingExpand = Nothing
+      , contextMenu = Nothing
+      , toast = Nothing
+      }
+    rebuildShapingFromScope
+    renderGraph
+
+  ConfirmLargeExpand -> do
+    state <- H.get
+    case state.pendingExpand of
+      Nothing -> pure unit
+      Just pe -> do
+        H.modify_ _ { pendingExpand = Nothing }
+        commitExpand pe.anchor (Set.fromFoldable pe.neighbors)
+  DismissLargeExpand -> H.modify_ _ { pendingExpand = Nothing }
+  DismissToast -> H.modify_ _ { toast = Nothing }
+  OpenNodeContextMenu nid x y ->
+    H.modify_ _ { contextMenu = Just { nodeId: nid, x, y } }
+  CloseNodeContextMenu ->
+    H.modify_ _ { contextMenu = Nothing }
+
   ClearQuery -> do
     state <- H.get
     let start = mostConnectedNode state.fullGraph
@@ -868,12 +1050,150 @@ renderGraph = do
           subgraph hood state.graph
       Nothing -> state.graph
     visible = filterBySources state.hiddenSources base
+    seed = Map.keys visible.nodes # Set.fromFoldable
 
   liftEffect $ Cy.setFocusElements
     (GCy.toElements visible)
   for_ state.selected \node ->
     liftEffect $ Cy.markRoot node.id
+  H.modify_ _
+    { shaping = Shaping.initFromSeed seed
+    , shapingEnabled = true
+    , pendingExpand = Nothing
+    , contextMenu = Nothing
+    }
+  refreshHasHidden
   persistState
+
+-- | Recompute the default seed from the current scope (graph/selected/hiddenSources)
+-- | and store it as the shaping's initial state. Used by ResetShaping.
+rebuildShapingFromScope
+  :: forall o
+   . H.HalogenM State Action () o Aff Unit
+rebuildShapingFromScope = do
+  state <- H.get
+  let
+    base = case state.selected of
+      Just node -> subgraph (neighborhood state.depth node.id state.graph) state.graph
+      Nothing -> state.graph
+    visible = filterBySources state.hiddenSources base
+    seed = Map.keys visible.nodes # Set.fromFoldable
+  H.modify_ _ { shaping = Shaping.initFromSeed seed }
+
+-- | After any expand/collapse/reset, update the `has-hidden` marker class on
+-- | every currently-visible node based on whether it still has hidden
+-- | direct neighbors.
+refreshHasHidden
+  :: forall o
+   . H.HalogenM State Action () o Aff Unit
+refreshHasHidden = do
+  state <- H.get
+  let
+    vis = Set.toUnfoldable (Shaping.visibleNodes state.shaping) :: Array String
+  for_ vis \nid -> do
+    let has = Shaping.hasHiddenNeighbors state.graph nid state.shaping
+    liftEffect $ Cy.setHasHidden nid has
+
+-- | Commit a vetted expand (i.e. `newNeighbors` already computed and under
+-- | threshold, or user already confirmed). Adds elements to Cytoscape with
+-- | radial positions around the anchor, updates shaping, refreshes markers.
+commitExpand
+  :: forall o
+   . String
+  -> Set.Set String
+  -> H.HalogenM State Action () o Aff Unit
+commitExpand anchor newNeighbors = do
+  state <- H.get
+  let
+    r = Shaping.expand anchor state.graph state.shaping
+    added = Set.toUnfoldable r.added :: Array String
+  anchorPos <- liftEffect $ Cy.readPosition anchor
+  let
+    placements = radialPlacements anchorPos (Array.length added)
+    addedNodes = Array.mapMaybe
+      (\(Tuple nid p) -> map (\n -> Tuple n p) (Map.lookup nid state.graph.nodes))
+      (Array.zip added placements)
+    anchorEdges = Array.filter
+      ( \e ->
+          ( e.source == anchor
+              && Set.member e.target (Set.fromFoldable added)
+          )
+            ||
+              ( e.target == anchor
+                  && Set.member e.source (Set.fromFoldable added)
+              )
+            ||
+              ( Set.member e.source (Set.fromFoldable added)
+                  || Set.member e.target (Set.fromFoldable added)
+              )
+      )
+      state.graph.edges
+    -- edges restricted so both endpoints are already visible or newly added
+    visibleAfter = Set.union (Shaping.visibleNodes state.shaping) r.added
+    keptEdges = Array.filter
+      ( \e ->
+          Set.member e.source visibleAfter
+            && Set.member e.target visibleAfter
+            && (Set.member e.source r.added || Set.member e.target r.added)
+      )
+      anchorEdges
+    elements = unsafeToForeign
+      ( map nodeElem addedNodes
+          <> Array.mapWithIndex edgeElem keptEdges
+      )
+  liftEffect $ Cy.addElementsAt elements
+  H.modify_ _ { shaping = r.next }
+  refreshHasHidden
+  persistState
+  where
+  nodeElem (Tuple node p) = unsafeToForeign
+    { group: "nodes"
+    , data:
+        { id: node.id
+        , label: node.label
+        , kind: node.kind
+        , nodeGroup: node.group
+        }
+    , position: { x: p.x, y: p.y }
+    , classes: node.kind
+    }
+  edgeElem i e = unsafeToForeign
+    { group: "edges"
+    , data:
+        { id: "e-x-" <> show i <> "-" <> e.source <> "-" <> e.target
+        , source: e.source
+        , target: e.target
+        , label: e.label
+        , description: e.description
+        , predicateIri: case e.predicateRef of
+            Just ref -> ref.iri
+            Nothing -> ""
+        }
+    }
+
+-- | Evenly distribute `count` points on a circle of radius ~180 around `centre`.
+radialPlacements
+  :: { x :: Number, y :: Number } -> Int -> Array { x :: Number, y :: Number }
+radialPlacements centre count =
+  if count <= 0 then []
+  else
+    let
+      radius = 200.0
+      n = toNumber count
+      step = (2.0 * pi) / n
+    in
+      Array.mapWithIndex
+        ( \i _ ->
+            let
+              theta = step * toNumber i
+            in
+              { x: centre.x + radius * cos theta
+              , y: centre.y + radius * sin theta
+              }
+        )
+        (Array.replicate count unit)
+  where
+  pi = 3.141592653589793
 
 mostConnectedNode :: Graph -> Maybe Node
 mostConnectedNode graph =
@@ -957,6 +1277,9 @@ persistState
    . H.HalogenM State Action () o Aff Unit
 persistState = do
   state <- H.get
+  positions <- liftEffect Cy.readPositions
+  let
+    shaping = encodeShaping state.shaping positions
   liftEffect $ Persist.save state.config.title
     { selectedNodeId: map _.id state.selected
     , depth: state.depth
@@ -966,7 +1289,69 @@ persistState = do
     , tutorialStep:
         if state.tutorialActive then Just state.tutorialStep
         else Nothing
+    , shaping: Just shaping
     }
+
+-- | Encode ShapingState + live positions into the persistence schema.
+encodeShaping
+  :: ShapingState
+  -> Array { id :: String, x :: Number, y :: Number }
+  -> Persist.PersistedShaping
+encodeShaping s positions =
+  { anchors:
+      map
+        ( \(Tuple nid rs) ->
+            { node: nid
+            , reasons:
+                map reasonToString (Set.toUnfoldable rs :: Array Shaping.Reason)
+            }
+        )
+        (Map.toUnfoldable s.reasons :: Array (Tuple String (Set.Set Shaping.Reason)))
+  , positions: positions
+  }
+
+reasonToString :: Shaping.Reason -> String
+reasonToString Shaping.InitialSeed = "seed"
+reasonToString (Shaping.ExpandedFrom n) = "anchor:" <> n
+
+-- | Rebuild ShapingState from persisted anchors, dropping any references
+-- | that no longer resolve against the current graph data.
+decodePersistedShaping
+  :: Persist.PersistedShaping
+  -> Graph
+  -> ShapingState
+decodePersistedShaping p g =
+  let
+    isKnown nid = Map.member nid g.nodes
+
+    reasons = foldl
+      ( \acc entry ->
+          if not (isKnown entry.node) then acc
+          else
+            let
+              rs = Set.fromFoldable $ Array.mapMaybe
+                (stringToReason isKnown)
+                entry.reasons
+            in
+              if Set.isEmpty rs then acc
+              else Map.insert entry.node rs acc
+      )
+      Map.empty
+      p.anchors
+
+    positions = foldl
+      (\acc po -> if isKnown po.id then Map.insert po.id { x: po.x, y: po.y } acc else acc)
+      Map.empty
+      p.positions
+  in
+    { reasons, positions }
+
+stringToReason :: (String -> Boolean) -> String -> Maybe Shaping.Reason
+stringToReason known s
+  | s == "seed" = Just Shaping.InitialSeed
+  | otherwise = case String.stripPrefix (String.Pattern "anchor:") s of
+      Just n | known n -> Just (Shaping.ExpandedFrom n)
+      _ -> Nothing
 
 -- Helpers
 

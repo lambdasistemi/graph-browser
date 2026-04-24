@@ -131,6 +131,14 @@ function baseStyle(kinds) {
         opacity: 1,
       },
     },
+    {
+      // Marker for "this visible node still has hidden direct neighbors"
+      selector: "node.has-hidden",
+      style: {
+        "border-style": "dashed",
+        "border-width": 3,
+      },
+    },
   ];
 }
 
@@ -329,4 +337,52 @@ export const resize = () => {
   if (!_cy) return;
   _cy.resize();
   _cy.fit(undefined, 60);
+};
+
+// Incremental add: positions are honored from the payload. No layout, no fit.
+export const addElementsAt = (elements) => () => {
+  if (!_cy) return;
+  _cy.add(elements);
+};
+
+export const removeElementsById = (ids) => () => {
+  if (!_cy) return;
+  ids.forEach(function (id) {
+    var el = _cy.getElementById(id);
+    if (el.nonempty()) el.remove();
+  });
+};
+
+export const readPositions = () => {
+  if (!_cy) return [];
+  var out = [];
+  _cy.nodes().forEach(function (n) {
+    var p = n.position();
+    out.push({ id: n.id(), x: p.x, y: p.y });
+  });
+  return out;
+};
+
+export const readPosition = (id) => () => {
+  if (!_cy) return { x: 0, y: 0 };
+  var el = _cy.getElementById(id);
+  if (!el.nonempty()) return { x: 0, y: 0 };
+  var p = el.position();
+  return { x: p.x, y: p.y };
+};
+
+export const setHasHidden = (id) => (flag) => () => {
+  if (!_cy) return;
+  var el = _cy.getElementById(id);
+  if (!el.nonempty()) return;
+  if (flag) el.addClass("has-hidden");
+  else el.removeClass("has-hidden");
+};
+
+export const onNodeContextMenu = (callback) => () => {
+  if (!_cy) return;
+  _cy.on("cxttap", "node", function (evt) {
+    var pos = evt.renderedPosition || evt.position;
+    callback(evt.target.id())(pos.x)(pos.y)();
+  });
 };
