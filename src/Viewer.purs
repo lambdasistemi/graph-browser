@@ -160,7 +160,6 @@ render state =
               , renderHoverTooltip state
               , renderControls state
               , renderLegend state.config
-              , renderNodeContextMenu state
               , renderPendingExpand state
               , renderToast state
               ]
@@ -486,9 +485,18 @@ handleAction = case _ of
   NodeTapped nodeId -> do
     state <- H.get
     let node = Map.lookup nodeId state.graph.nodes
-    H.modify_ _ { selected = node, selectedEdge = Nothing }
+    H.modify_ _ { selected = node, selectedEdge = Nothing, hoveredEdge = Nothing }
     liftEffect $ Cy.clearEdge
     liftEffect $ Cy.markRoot nodeId
+    -- Click-to-shape: if the node has hidden direct neighbors, expand;
+    -- else if it is an active anchor (collapsing would remove something),
+    -- collapse; else it's just a selection.
+    state' <- H.get
+    if Shaping.hasHiddenNeighbors state'.graph nodeId state'.shaping then
+      handleAction (ExpandNode nodeId)
+    else if Shaping.hasAnyAnchor nodeId state'.shaping then
+      handleAction (CollapseNode nodeId)
+    else pure unit
     when state.tutorialActive persistState
 
   NodeHovered nodeId x y -> do
