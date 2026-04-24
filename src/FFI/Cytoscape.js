@@ -84,11 +84,11 @@ function baseStyle(kinds) {
     {
       selector: "edge",
       style: {
-        width: 2.5,
-        "line-color": border,
-        "target-arrow-color": border,
+        width: 3,
+        "line-color": textMuted,
+        "target-arrow-color": textMuted,
         "target-arrow-shape": "triangle",
-        "arrow-scale": 0.8,
+        "arrow-scale": 1,
         "curve-style": "bezier",
         label: "data(label)",
         "font-size": "11px",
@@ -99,7 +99,7 @@ function baseStyle(kinds) {
         "text-outline-color": bgBase,
         "text-outline-width": 2,
         "text-opacity": 0,
-        opacity: 0.85,
+        opacity: 1,
       },
     },
     {
@@ -332,6 +332,14 @@ export const markRoot = (nodeId) => () => {
     node.addClass("root");
     node.connectedEdges().addClass("neighbor");
   }
+  // Keep every edge fully visible — markRoot previously relied on the
+  // .neighbor class to un-dim connected edges while non-connected edges
+  // stayed visible at default opacity. The old default was 0.6, which
+  // looked "invisible" on thin lines. We now render every edge the same.
+  _cy.edges().style({
+    opacity: 1,
+    width: 3,
+  });
 };
 
 export const clearRoot = () => {
@@ -352,16 +360,17 @@ export const resize = () => {
 };
 
 // Incremental add: positions are honored from the payload. No layout, no fit.
-// Matches the visibility boost that setFocusElements applies to all edges
-// (opacity/text-opacity) so newly-revealed edges render at the same level
-// as already-visible ones.
+// Defensively reapply visibility inline to ALL edges (not just new ones).
+// Cytoscape style classes can override inline style in unpredictable ways
+// when elements are added piecemeal, so we anchor a consistent look here.
 export const addElementsAt = (elements) => () => {
   if (!_cy) return;
-  var added = _cy.add(elements);
-  if (added && typeof added.edges === "function") {
-    added.edges().style("opacity", 1);
-    added.edges().style("text-opacity", 1);
-  }
+  _cy.add(elements);
+  _cy.edges().style({
+    opacity: 1,
+    "text-opacity": 0,
+    width: 3,
+  });
 };
 
 export const removeElementsById = (ids) => () => {
@@ -369,6 +378,11 @@ export const removeElementsById = (ids) => () => {
   ids.forEach(function (id) {
     var el = _cy.getElementById(id);
     if (el.nonempty()) el.remove();
+  });
+  _cy.edges().style({
+    opacity: 1,
+    "text-opacity": 0,
+    width: 3,
   });
 };
 

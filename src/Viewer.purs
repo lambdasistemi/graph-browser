@@ -1016,8 +1016,17 @@ handleAction = case _ of
         commitExpand pe.anchor (Set.fromFoldable pe.neighbors)
   DismissLargeExpand -> H.modify_ _ { pendingExpand = Nothing }
   DismissToast -> H.modify_ _ { toast = Nothing }
-  OpenNodeContextMenu nid x y ->
-    H.modify_ _ { contextMenu = Just { nodeId: nid, x, y } }
+  OpenNodeContextMenu nid x y -> do
+    state <- H.get
+    let node = Map.lookup nid state.graph.nodes
+    H.modify_ _
+      { contextMenu = Just { nodeId: nid, x, y }
+      , selected = node
+      , selectedEdge = Nothing
+      , hoveredEdge = Nothing
+      }
+    liftEffect $ Cy.clearEdge
+    liftEffect $ Cy.markRoot nid
   CloseNodeContextMenu ->
     H.modify_ _ { contextMenu = Nothing }
 

@@ -7,6 +7,7 @@ test("diagnose edges after expand on a real node", async ({ page }) => {
   await page.goto(PREVIEW_URL);
   await page.waitForSelector("#cy canvas", { timeout: 30000 });
   await page.waitForTimeout(2500);
+  await page.screenshot({ path: "/tmp/before-expand.png", fullPage: false });
 
   // Pick a node that has hidden neighbors (class has-hidden is applied
   // after Initialize's renderGraph). Get its rendered position.
@@ -40,9 +41,6 @@ test("diagnose edges after expand on a real node", async ({ page }) => {
   await expandBtn.click();
   await page.waitForTimeout(1500);
 
-  await page.screenshot({ path: "/tmp/before-expand.png", fullPage: false });
-
-  // ... actually we already expanded above, so screenshot is "after"
   await page.screenshot({ path: "/tmp/after-expand.png", fullPage: false });
 
   const after = await page.evaluate(() => {
