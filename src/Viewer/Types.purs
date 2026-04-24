@@ -141,6 +141,7 @@ data Action
   | ToggleSourcesPanel
   | ExpandNode String
   | CollapseNode String
+  | HideNode String
   | ResetShaping
   | ConfirmLargeExpand
   | DismissLargeExpand

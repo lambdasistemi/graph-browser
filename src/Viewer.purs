@@ -488,15 +488,16 @@ handleAction = case _ of
     H.modify_ _ { selected = node, selectedEdge = Nothing, hoveredEdge = Nothing }
     liftEffect $ Cy.clearEdge
     liftEffect $ Cy.markRoot nodeId
-    -- Click-to-shape: if the node has hidden direct neighbors, expand;
-    -- else if it is an active anchor (collapsing would remove something),
-    -- collapse; else it's just a selection.
+    -- Click-to-shape cycle: expand if there are hidden neighbors; else
+    -- collapse if anchored dependents exist; else hide the node itself.
+    -- Every click on a visible node therefore does something user-visible.
     state' <- H.get
     if Shaping.hasHiddenNeighbors state'.graph nodeId state'.shaping then
       handleAction (ExpandNode nodeId)
     else if Shaping.hasAnyAnchor nodeId state'.shaping then
       handleAction (CollapseNode nodeId)
-    else pure unit
+    else
+      handleAction (HideNode nodeId)
     when state.tutorialActive persistState
 
   NodeHovered nodeId x y -> do
@@ -1004,6 +1005,20 @@ handleAction = case _ of
       , contextMenu = Nothing
       }
     liftEffect $ Cy.relayoutAround nid
+    refreshHasHidden
+    persistState
+
+  HideNode nid -> do
+    state <- H.get
+    let
+      r = Shaping.shrink nid state.shaping
+    liftEffect $ Cy.removeElementsById
+      (Array.fromFoldable r.removed)
+    H.modify_ _
+      { shaping = r.next
+      , contextMenu = Nothing
+      , selected = Nothing
+      }
     refreshHasHidden
     persistState
 

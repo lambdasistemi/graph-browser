@@ -9,6 +9,7 @@ module Graph.Shaping
   , initFromSeed
   , expand
   , collapse
+  , shrink
   , reset
   , isVisible
   , visibleNodes
@@ -148,6 +149,23 @@ collapse anchor s =
         , positions: nextPositions
         }
     , removed: folded.removed
+    }
+
+-- | Remove the node and any neighbors that were only anchored by it. This
+-- | is the "fallback collapse" for nodes that have nothing to expand (all
+-- | 1-hop neighbors already visible) and nothing to collapse in the
+-- | anchor sense (no dependents). InitialSeed protection is overridden:
+-- | an explicit click is an explicit hide request.
+shrink :: NodeId -> ShapingState -> { next :: ShapingState, removed :: Set NodeId }
+shrink n s =
+  let
+    r = collapse n s
+    reasons' = Map.delete n r.next.reasons
+    positions' = Map.delete n r.next.positions
+    removed = Set.insert n r.removed
+  in
+    { next: { reasons: reasons', positions: positions' }
+    , removed
     }
 
 -- | True iff `n` has at least one direct neighbor (in `g`) that is not
