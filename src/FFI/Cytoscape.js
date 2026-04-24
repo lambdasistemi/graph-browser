@@ -84,7 +84,7 @@ function baseStyle(kinds) {
     {
       selector: "edge",
       style: {
-        width: 1.5,
+        width: 2.5,
         "line-color": border,
         "target-arrow-color": border,
         "target-arrow-shape": "triangle",
@@ -99,7 +99,7 @@ function baseStyle(kinds) {
         "text-outline-color": bgBase,
         "text-outline-width": 2,
         "text-opacity": 0,
-        opacity: 0.6,
+        opacity: 0.85,
       },
     },
     {
@@ -181,6 +181,15 @@ function runLayout(callback) {
       stop: function () {
         // Restore console.warn
         console.warn = origWarn;
+        // fCoSE fit-to-padding can zoom the viewport very far out on
+        // small graphs (e.g. the initial focused seed), leaving edges
+        // too thin to see. Cap the zoom so edges render at a reasonable
+        // thickness; keep the centre where fit placed it.
+        try {
+          if (_cy.zoom() > 1.2) _cy.zoom({ level: 1.2, renderedPosition: { x: _cy.width() / 2, y: _cy.height() / 2 } });
+          if (_cy.zoom() < 0.7) _cy.zoom({ level: 0.7, renderedPosition: { x: _cy.width() / 2, y: _cy.height() / 2 } });
+          _cy.center();
+        } catch (e) { /* no-op */ }
         if (callback) callback();
       },
     })
@@ -343,9 +352,16 @@ export const resize = () => {
 };
 
 // Incremental add: positions are honored from the payload. No layout, no fit.
+// Matches the visibility boost that setFocusElements applies to all edges
+// (opacity/text-opacity) so newly-revealed edges render at the same level
+// as already-visible ones.
 export const addElementsAt = (elements) => () => {
   if (!_cy) return;
-  _cy.add(elements);
+  var added = _cy.add(elements);
+  if (added && typeof added.edges === "function") {
+    added.edges().style("opacity", 1);
+    added.edges().style("text-opacity", 1);
+  }
 };
 
 export const removeElementsById = (ids) => () => {
