@@ -103,7 +103,7 @@ viewer = H.mkComponent
       , hoveredEdge: Nothing
       , selectedEdge: Nothing
       , hoverPos: { x: 0.0, y: 0.0 }
-      , depth: 99
+      , depth: 1
       , searchQuery: ""
       , searchResults: []
       , tutorialIndex: []

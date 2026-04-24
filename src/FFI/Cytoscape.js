@@ -211,6 +211,9 @@ export const initCytoscape = (containerId) => (kinds) => () => {
     minZoom: 0.15,
     maxZoom: 3,
   });
+  // Expose the Cytoscape instance to the browser window for e2e testing
+  // and ad-hoc debugging. Not used by the PureScript code.
+  try { window.cy = _cy; } catch (e) { /* no-op */ }
   if (!initCytoscape._themeBound) {
     initCytoscape._themeBound = true;
     var media = window.matchMedia

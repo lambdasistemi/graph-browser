@@ -6,3 +6,5 @@ dist/data/
 .spago/
 node_modules/
 result
+test-results/
+playwright-report/
