@@ -183,7 +183,10 @@ queryCatalogSchemaBlock =
     <> "- `parameters`: optional `[{name, label, type, default}]`"
     <> " — type: `string` | `node` | `kind`\n"
     <> "- `tags`: optional — `\"view\"` for views,"
-    <> " `\"tour:tour-id\"` for tour stops\n\n"
+    <> " `\"tour:tour-id\"` for tour stops\n"
+    <> "- `layout`: optional — one of `fcose`, `elk`, `cola`,"
+    <> " `dagre`, `concentric`; use it to set a default layout"
+    <> " for `\"view\"` queries\n\n"
     <> "Schema: "
     <> schemaBase
     <> "query-catalog.schema.json"
@@ -451,6 +454,7 @@ filePathsBlock config =
             <>
               [ "- Config: `data/config.json`"
               , "- Query catalog: `data/queries.json`"
+              , "- Views: `data/views/`"
               , "- Tutorials: `data/tutorials/`"
               ]
         )
@@ -470,7 +474,9 @@ prSection config
   | isRdf config = section "How to Submit Changes"
       ( "Fork " <> config.sourceUrl
           <> ". For graph data, edit the RDF source file(s) listed above. "
-          <> "For queries, edit `data/queries.json`. "
+          <> "For queries, edit `data/queries.json`"
+          <> " and set optional `layout` defaults on view queries when useful. "
+          <> "For view JSON files, edit `data/views/`. "
           <> "For tours, add/edit in `data/tutorials/`. "
           <> "Validate against schemas and open a PR."
       )

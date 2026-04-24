@@ -24,6 +24,7 @@ import Data.Set as Set
 import Data.Traversable (traverse)
 import Graph.Build (buildGraph)
 import Graph.Types (Edge, Graph, Node)
+import Layout (LayoutId, parseLayoutId)
 import Tutorial (Tutorial, decodeTutorial)
 
 -- | An edge reference: source, target, label.
@@ -37,6 +38,7 @@ type EdgeTriple =
 type View =
   { name :: String
   , description :: String
+  , layout :: Maybe LayoutId
   , edges :: Array EdgeTriple
   , tours :: Array Tutorial
   }
@@ -85,11 +87,13 @@ decodeView json = do
   obj <- lmap' $ decodeJson json
   name <- lmap' $ obj .: "name"
   description <- lmap' $ obj .: "description"
+  rawLayout <- lmap' $ obj .:? "layout"
   rawEdges <- lmap' $ obj .: "edges"
   edges <- traverse decodeTriple rawEdges
   rawTours <- lmap' $ fromMaybe [] <$> obj .:? "tours"
   tours <- traverse decodeTutorial rawTours
-  pure { name, description, edges, tours }
+  let layout = rawLayout >>= parseLayoutId
+  pure { name, description, layout, edges, tours }
 
 decodeTriple :: Json -> Either String EdgeTriple
 decodeTriple json = do

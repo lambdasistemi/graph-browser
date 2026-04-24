@@ -4,6 +4,7 @@ module FFI.Cytoscape
   ( initCytoscape
   , setElements
   , setFocusElements
+  , setLayout
   , onNodeTap
   , onNodeHover
   , onEdgeHover
@@ -39,12 +40,16 @@ foreign import initCytoscape
 
 -- | Replace all elements and re-run layout.
 foreign import setElements
-  :: Foreign -> Effect Unit
+  :: String -> Foreign -> Effect Unit
 
 -- | Replace elements for focus mode.
 -- | All edge labels visible.
 foreign import setFocusElements
-  :: Foreign -> Effect Unit
+  :: String -> Foreign -> Effect Unit
+
+-- | Re-run layout on the existing elements.
+foreign import setLayout
+  :: String -> Effect Unit
 
 -- | Register a tap callback on nodes.
 foreign import onNodeTap
@@ -119,9 +124,9 @@ foreign import setHasHidden
 foreign import onNodeContextMenu
   :: (String -> Number -> Number -> Effect Unit) -> Effect Unit
 
--- | Run fCoSE on all currently visible elements, pinning the given node
--- | at its current position so existing layout does not drift and the new
--- | neighbors arrange themselves around it. Then pan the viewport to
--- | centre the anchor on screen.
+-- | Run the given layout on all currently visible elements, then shift
+-- | every node so the anchor ends up at model (0, 0) and pan the
+-- | viewport to place the anchor at screen centre. Layout-agnostic.
+-- | First argument is the layout name (same strings setLayout accepts).
 foreign import relayoutAround
-  :: String -> Effect Unit
+  :: String -> String -> Effect Unit

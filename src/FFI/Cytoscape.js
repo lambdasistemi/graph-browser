@@ -2,6 +2,7 @@
 // script (dist/bootstrap.js) before this module runs.
 // They register themselves as globals.
 var _cy = null;
+var _activeLayout = "fcose";
 
 function hexToRgba(hex, alpha) {
   var r = parseInt(hex.slice(1, 3), 16);
@@ -142,27 +143,108 @@ function baseStyle(kinds) {
   ];
 }
 
-function runLayout(callback) {
-  if (!_cy) return;
+function normaliseLayoutName(name) {
+  switch ((name || "").toLowerCase()) {
+    case "elk":
+      return "elk";
+    case "cola":
+      return "cola";
+    case "dagre":
+      return "dagre";
+    case "concentric":
+      return "concentric";
+    case "fcose":
+    default:
+      return "fcose";
+  }
+}
+
+function hashString(input) {
+  var s = String(input || "");
+  var h = 0;
+  for (var i = 0; i < s.length; i++) {
+    h = (h * 31 + s.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+function layoutOptions(name, stop) {
   // Suppress edge warnings during layout by temporarily muting console.warn
-  var origWarn = console.warn;
-  console.warn = function (msg) {
-    if (typeof msg === "string" && msg.indexOf("invalid endpoints") !== -1)
-      return;
-    if (
-      typeof msg === "string" &&
-      msg.indexOf("custom wheel sensitivity") !== -1
-    )
-      return;
-    origWarn.apply(console, arguments);
-  };
   var n = _cy.nodes().length;
   var edgeLen = n <= 8 ? 400 : n <= 20 ? 300 : n <= 40 ? 220 : 160;
   var repulsion = n <= 8 ? 80000 : n <= 20 ? 40000 : n <= 40 ? 15000 : 8000;
   var sep = n <= 8 ? 300 : n <= 20 ? 220 : n <= 40 ? 150 : 100;
   var grav = n <= 20 ? 0.04 : n <= 40 ? 0.06 : 0.1;
-  _cy
-    .layout({
+  switch (normaliseLayoutName(name)) {
+    case "elk":
+      return {
+        name: "elk",
+        animate: true,
+        animationDuration: 500,
+        fit: true,
+        padding: 60,
+        nodeDimensionsIncludeLabels: true,
+        elk: {
+          algorithm: "layered",
+          "elk.direction": "RIGHT",
+          "elk.spacing.nodeNode": String(sep),
+          "elk.layered.spacing.nodeNodeBetweenLayers": String(
+            Math.max(80, Math.round(edgeLen * 0.7)),
+          ),
+        },
+        stop: stop,
+      };
+    case "cola":
+      return {
+        name: "cola",
+        animate: true,
+        maxSimulationTime: 1500,
+        fit: true,
+        padding: 60,
+        nodeDimensionsIncludeLabels: true,
+        randomize: true,
+        avoidOverlap: true,
+        handleDisconnected: true,
+        edgeLength: edgeLen,
+        nodeSpacing: function () {
+          return Math.max(20, Math.round(sep * 0.25));
+        },
+        stop: stop,
+      };
+    case "dagre":
+      return {
+        name: "dagre",
+        animate: true,
+        animationDuration: 500,
+        fit: true,
+        padding: 60,
+        nodeDimensionsIncludeLabels: true,
+        rankDir: "LR",
+        rankSep: Math.max(80, sep),
+        nodeSep: Math.max(30, Math.round(sep * 0.35)),
+        edgeSep: Math.max(20, Math.round(sep * 0.2)),
+        stop: stop,
+      };
+    case "concentric":
+      return {
+        name: "concentric",
+        animate: true,
+        animationDuration: 500,
+        fit: true,
+        padding: 60,
+        avoidOverlap: true,
+        minNodeSpacing: Math.max(20, Math.round(sep * 0.2)),
+        concentric: function (node) {
+          return hashString(node.data("nodeGroup") || node.data("kind") || "");
+        },
+        levelWidth: function () {
+          return 1;
+        },
+        stop: stop,
+      };
+    case "fcose":
+    default:
+      return {
       name: "fcose",
       quality: "proof",
       randomize: true,
@@ -178,8 +260,27 @@ function runLayout(callback) {
       gravityRange: 1.5,
       numIter: 20000,
       nodeDimensionsIncludeLabels: true,
-      stop: function () {
-        // Restore console.warn
+      stop: stop,
+    };
+  }
+}
+
+function runLayout(callback) {
+  if (!_cy) return;
+  var origWarn = console.warn;
+  console.warn = function (msg) {
+    if (typeof msg === "string" && msg.indexOf("invalid endpoints") !== -1)
+      return;
+    if (
+      typeof msg === "string" &&
+      msg.indexOf("custom wheel sensitivity") !== -1
+    )
+      return;
+    origWarn.apply(console, arguments);
+  };
+  _cy
+    .layout(
+      layoutOptions(_activeLayout, function () {
         console.warn = origWarn;
         // fCoSE fit-to-padding can zoom the viewport very far out on
         // small graphs (e.g. the initial focused seed), leaving edges
@@ -191,8 +292,8 @@ function runLayout(callback) {
           _cy.center();
         } catch (e) { /* no-op */ }
         if (callback) callback();
-      },
-    })
+      }),
+    )
     .run();
 }
 
@@ -241,20 +342,28 @@ export const initCytoscape = (containerId) => (kinds) => () => {
   }
 };
 
-export const setElements = (elements) => () => {
+export const setElements = (layoutName) => (elements) => () => {
   if (!_cy) return;
+  _activeLayout = normaliseLayoutName(layoutName);
   _cy.elements().remove();
   _cy.add(elements);
   runLayout();
 };
 
-export const setFocusElements = (elements) => () => {
+export const setFocusElements = (layoutName) => (elements) => () => {
   if (!_cy) return;
+  _activeLayout = normaliseLayoutName(layoutName);
   _cy.elements().remove();
   _cy.add(elements);
   runLayout();
   _cy.edges().style("text-opacity", 1);
   _cy.edges().style("opacity", 1);
+};
+
+export const setLayout = (layoutName) => () => {
+  if (!_cy) return;
+  _activeLayout = normaliseLayoutName(layoutName);
+  runLayout();
 };
 
 export const onNodeTap = (callback) => () => {
@@ -420,63 +529,57 @@ export const onNodeContextMenu = (callback) => () => {
   });
 };
 
-// Re-run the same fCoSE layout used by setFocusElements (the "1/2/3/4/
-// All" buttons) but with the clicked node fixed at model origin, then
-// pan the viewport so that node sits at screen centre. This produces
-// the same high-quality layout users already expect from those buttons,
-// now with the selected node as the visual centre.
-export const relayoutAround = (anchorId) => () => {
+// Layout-agnostic "centre the clicked node" re-layout. Run whichever
+// layout the user has selected (via setLayout / activeLayout) over all
+// visible elements, then translate every node by the inverse of the
+// anchor's resulting position so the anchor ends up at model (0, 0).
+// Finally pan the viewport to the anchor so it sits at screen centre.
+//
+// This works for every layout main supports (fCoSE, ELK, Cola, Dagre,
+// Concentric) because we are only shifting positions after the layout
+// ran, not asking the layout to honour a constraint it may not support.
+export const relayoutAround = (layoutName) => (anchorId) => () => {
   if (!_cy) return;
   var anchor = _cy.getElementById(anchorId);
   if (!anchor.nonempty()) return;
-  var n = _cy.nodes().length;
-  var edgeLen = n <= 8 ? 400 : n <= 20 ? 300 : n <= 40 ? 220 : 160;
-  var repulsion = n <= 8 ? 80000 : n <= 20 ? 40000 : n <= 40 ? 15000 : 8000;
-  var sep = n <= 8 ? 300 : n <= 20 ? 220 : n <= 40 ? 150 : 100;
-  var grav = n <= 20 ? 0.04 : n <= 40 ? 0.06 : 0.1;
   var origWarn = console.warn;
   console.warn = function (msg) {
     if (typeof msg === "string" && msg.indexOf("invalid endpoints") !== -1) return;
     if (typeof msg === "string" && msg.indexOf("custom wheel sensitivity") !== -1) return;
     origWarn.apply(console, arguments);
   };
-  _cy
-    .layout({
-      name: "fcose",
-      quality: "proof",
-      randomize: true,
-      animate: true,
-      animationDuration: 500,
-      fit: true,
-      padding: 60,
-      nodeSeparation: sep,
-      idealEdgeLength: edgeLen,
-      edgeElasticity: 0.02,
-      nodeRepulsion: repulsion,
-      gravity: grav,
-      gravityRange: 1.5,
-      numIter: 20000,
-      nodeDimensionsIncludeLabels: true,
-      fixedNodeConstraint: [
-        { nodeId: anchor.id(), position: { x: 0, y: 0 } },
-      ],
-      stop: function () {
-        console.warn = origWarn;
-        _cy.edges().style({ opacity: 1, "text-opacity": 0, width: 3 });
-        if (_cy.zoom() > 1.2) {
-          _cy.zoom({
-            level: 1.2,
-            renderedPosition: { x: _cy.width() / 2, y: _cy.height() / 2 },
-          });
-        }
-        if (_cy.zoom() < 0.7) {
-          _cy.zoom({
-            level: 0.7,
-            renderedPosition: { x: _cy.width() / 2, y: _cy.height() / 2 },
-          });
-        }
-        _cy.center(anchor);
-      },
-    })
-    .run();
+  var opts = layoutOptions(layoutName, function () {
+    console.warn = origWarn;
+    // Shift everything so the anchor lands at model (0, 0).
+    var p = anchor.position();
+    var dx = -p.x;
+    var dy = -p.y;
+    if (dx !== 0 || dy !== 0) {
+      _cy.batch(function () {
+        _cy.nodes().forEach(function (n) {
+          var np = n.position();
+          n.position({ x: np.x + dx, y: np.y + dy });
+        });
+      });
+    }
+    _cy.edges().style({ opacity: 1, "text-opacity": 0, width: 3 });
+    // Keep zoom within a reasonable range so edges render visibly.
+    if (_cy.zoom() > 1.2) {
+      _cy.zoom({
+        level: 1.2,
+        renderedPosition: { x: _cy.width() / 2, y: _cy.height() / 2 },
+      });
+    }
+    if (_cy.zoom() < 0.7) {
+      _cy.zoom({
+        level: 0.7,
+        renderedPosition: { x: _cy.width() / 2, y: _cy.height() / 2 },
+      });
+    }
+    _cy.center(anchor);
+  });
+  // Most layouts do their own viewport fit; we override to false because
+  // we'll centre on the anchor ourselves after translation.
+  opts.fit = false;
+  _cy.layout(opts).run();
 };

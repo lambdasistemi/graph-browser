@@ -15,6 +15,11 @@
       "type": "string",
       "description": "Short description shown in the view picker."
     },
+    "layout": {
+      "type": "string",
+      "enum": ["fcose", "elk", "cola", "dagre", "concentric"],
+      "description": "Optional default layout for this view."
+    },
     "edges": {
       "type": "array",
       "description": "Edge references as [source, target, label] triples.",

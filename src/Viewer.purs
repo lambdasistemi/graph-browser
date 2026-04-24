@@ -8,6 +8,7 @@ import Data.Foldable (foldl, for_)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
+import Data.String as String
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Web.HTML as Web.HTML
@@ -17,7 +18,8 @@ import Effect.Aff (Aff, try)
 import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
 import FFI.Cytoscape as Cy
-import Fetch (Method(..), fetch)
+import FFI.Theme as Theme
+import FFI.Url as Url
 import Graph.Cytoscape as GCy
 import Graph.Operations (filterBySources, neighborhood, subgraph)
 import Graph.Shaping (ShapingState)
@@ -29,8 +31,13 @@ import Data.String.Pattern as String
 import Foreign (Foreign, unsafeToForeign)
 import Foreign.Object as FO
 import Graph.Search (SearchResult(..), search)
+import Layout
+  ( LayoutId
+  , LayoutSource(..)
+  , defaultLayout
+  , layoutIdToString
+  )
 import Persist as Persist
-import Tutorial (Tutorial)
 import Graph.Types
   ( Config
   , Graph
@@ -51,8 +58,6 @@ import PromptBuilder as PB
 import FFI.Oxigraph as Oxigraph
 import Viewer.Types
   ( DataUrls
-  , EdgeInfo
-  , TutorialEntry
   , PromptMode(..)
   , State
   , Action(..)
@@ -66,7 +71,6 @@ import Viewer.Helpers
   , kindColor
   , shouldRenderOntologyReference
   )
-import Viewer.Detail (renderEdgeDetail, renderNodeDetail)
 import Viewer.Tooltip (renderHoverTooltip)
 import Viewer.Controls (renderControls, renderLegend, renderGraphContext)
 import Viewer.Tutorial (currentStop)
@@ -98,6 +102,7 @@ viewer = H.mkComponent
       , graph: emptyGraph
       , fullGraph: emptyGraph
       , dataUrls: urls
+      , theme: "dark"
       , selected: Nothing
       , hoveredNode: Nothing
       , hoveredEdge: Nothing
@@ -127,6 +132,8 @@ viewer = H.mkComponent
       , paramOptions: Map.empty
       , loadedTutorials: []
       , panelTab: QueriesTab
+      , activeLayout: defaultLayout
+      , layoutSource: Fallback
       , hiddenSources: Set.empty
       , showSourcesPanel: false
       , shaping: Shaping.emptyShaping
@@ -329,6 +336,16 @@ handleAction
   -> H.HalogenM State Action () o Aff Unit
 handleAction = case _ of
   Initialize -> do
+    urlTheme <- liftEffect Url.getThemeParam
+    storedTheme <- liftEffect Persist.loadThemePreference
+    systemTheme <- liftEffect Theme.getSystemTheme
+    let
+      requestedTheme =
+        resolveThemePreference urlTheme storedTheme
+      currentTheme =
+        resolveTheme requestedTheme systemTheme
+    liftEffect $ Theme.applyTheme currentTheme
+    H.modify_ _ { theme = currentTheme }
     state0 <- H.get
     let urls = state0.dataUrls
     cfgResult <- liftAff (loadConfig urls.configUrl)
@@ -337,6 +354,16 @@ handleAction = case _ of
       Right cfg -> do
         H.modify_ _ { config = cfg }
         liftEffect $ setDocTitle cfg.title
+    stateWithConfig <- H.get
+    savedLayout <- liftEffect $ Persist.loadLayoutPreference
+      (viewerIdentity stateWithConfig)
+    case savedLayout of
+      Just layout ->
+        H.modify_ _
+          { activeLayout = layout
+          , layoutSource = SavedExplicit
+          }
+      Nothing -> pure unit
     state <- H.get
     let
       graphLocations = graphSourceLocations urls state.config
@@ -627,16 +654,46 @@ handleAction = case _ of
   FitAll ->
     liftEffect Cy.fitAll
 
+  ToggleTheme -> do
+    currentTheme <- H.gets _.theme
+    let nextTheme = toggleTheme currentTheme
+    liftEffect $ Theme.applyTheme nextTheme
+    liftEffect $ Persist.saveThemePreference nextTheme
+    liftEffect $ Url.setThemeParam nextTheme
+    H.modify_ _ { theme = nextTheme }
+
+  SetLayout layout -> do
+    state <- H.get
+    H.modify_ _
+      { activeLayout = layout
+      , layoutSource = SavedExplicit
+      }
+    liftEffect $ Persist.saveLayoutPreference
+      (viewerIdentity state)
+      layout
+    liftEffect $ Cy.setLayout
+      (layoutIdToString layout)
+
   ToggleTutorialMenu ->
     H.modify_ \s -> s
       { showTutorialMenu = not s.showTutorialMenu }
 
   StartTutorial file -> do
     state <- H.get
+    let
+      nextLayoutState = case state.activeView of
+        Just view ->
+          derivedLayoutState state view.layout
+        Nothing ->
+          derivedLayoutState state Nothing
     -- Restore full graph when exiting a query to start a tour
     H.modify_ _
       { graph = state.fullGraph
       , activeQuery = Nothing
+      , activeLayout =
+          nextLayoutState.activeLayout
+      , layoutSource =
+          nextLayoutState.layoutSource
       }
     case state.activeView of
       Just view -> do
@@ -811,6 +868,9 @@ handleAction = case _ of
           filtered = Views.filterByView view
             state.fullGraph
           start = mostConnectedNode filtered
+          nextLayoutState = derivedLayoutState
+            state
+            view.layout
           tours = map
             ( \t ->
                 { id: t.id
@@ -831,6 +891,10 @@ handleAction = case _ of
           , showViewPicker = false
           , hoveredEdge = Nothing
           , hoveredNode = Nothing
+          , activeLayout =
+              nextLayoutState.activeLayout
+          , layoutSource =
+              nextLayoutState.layoutSource
           }
         renderGraph
 
@@ -846,6 +910,9 @@ handleAction = case _ of
       globalTours = case idxResult of
         Left _ -> []
         Right idx -> idx
+      nextLayoutState = derivedLayoutState
+        state
+        Nothing
     H.modify_ _
       { graph = state.fullGraph
       , activeView = Nothing
@@ -857,6 +924,10 @@ handleAction = case _ of
       , showViewPicker = false
       , hoveredEdge = Nothing
       , hoveredNode = Nothing
+      , activeLayout =
+          nextLayoutState.activeLayout
+      , layoutSource =
+          nextLayoutState.layoutSource
       }
     renderGraph
 
@@ -951,6 +1022,13 @@ handleAction = case _ of
             let
               filtered = subgraph nodeIds state.fullGraph
               start = mostConnectedNode filtered
+              nextLayoutState =
+                if Array.elem "view" query.tags then
+                  derivedLayoutState state query.layout
+                else
+                  { activeLayout: state.activeLayout
+                  , layoutSource: state.layoutSource
+                  }
             -- Keep the original template in activeQuery
             -- (SelectQuery sets it); only set it for
             -- non-parameterized direct executions.
@@ -966,6 +1044,10 @@ handleAction = case _ of
               , showViewPicker = false
               , hoveredEdge = Nothing
               , hoveredNode = Nothing
+              , activeLayout =
+                  nextLayoutState.activeLayout
+              , layoutSource =
+                  nextLayoutState.layoutSource
               }
             renderGraph
 
@@ -1003,7 +1085,7 @@ handleAction = case _ of
       { shaping = r.next
       , contextMenu = Nothing
       }
-    liftEffect $ Cy.relayoutAround nid
+    liftEffect $ Cy.relayoutAround (layoutIdToString state.activeLayout) nid
     refreshHasHidden
     persistState
 
@@ -1055,7 +1137,11 @@ handleAction = case _ of
 
   ClearQuery -> do
     state <- H.get
-    let start = mostConnectedNode state.fullGraph
+    let
+      start = mostConnectedNode state.fullGraph
+      nextLayoutState = derivedLayoutState
+        state
+        Nothing
     H.modify_ _
       { graph = state.fullGraph
       , activeQuery = Nothing
@@ -1066,6 +1152,10 @@ handleAction = case _ of
       , hoveredNode = Nothing
       , tutorialActive = false
       , tutorial = Nothing
+      , activeLayout =
+          nextLayoutState.activeLayout
+      , layoutSource =
+          nextLayoutState.layoutSource
       }
     renderGraph
 
@@ -1088,9 +1178,9 @@ renderGraph = do
     seed = Map.keys visible.nodes # Set.fromFoldable
 
   liftEffect $ Cy.setFocusElements
+    (layoutIdToString state.activeLayout)
     (GCy.toElements visible)
-  for_ state.selected \node ->
-    liftEffect $ Cy.markRoot node.id
+  liftEffect $ replaySelectionState state
   H.modify_ _
     { shaping = Shaping.initFromSeed seed
     , shapingEnabled = true
@@ -1178,7 +1268,7 @@ commitExpand anchor newNeighbors = do
       )
   liftEffect $ Cy.addElementsAt elements
   H.modify_ _ { shaping = r.next }
-  liftEffect $ Cy.relayoutAround anchor
+  liftEffect $ Cy.relayoutAround (layoutIdToString state.activeLayout) anchor
   refreshHasHidden
   persistState
   where
@@ -1291,11 +1381,22 @@ applyTutorialStop = do
                       filtered = subgraph nodeIds
                         state.fullGraph
                       start = mostConnectedNode filtered
+                      nextLayoutState =
+                        if Array.elem "view" query.tags then
+                          derivedLayoutState state query.layout
+                        else
+                          { activeLayout: state.activeLayout
+                          , layoutSource: state.layoutSource
+                          }
                     H.modify_ _
                       { graph = filtered
                       , activeQuery = Just query
                       , selected = start
                       , hoveredEdge = Nothing
+                      , activeLayout =
+                          nextLayoutState.activeLayout
+                      , layoutSource =
+                          nextLayoutState.layoutSource
                       }
                     renderGraph
       Nothing -> do
@@ -1418,3 +1519,85 @@ mergeKinds base extra =
     (\acc (Tuple kindId kindDef) -> Map.insert kindId kindDef acc)
     base
     (Map.toUnfoldable extra :: Array (Tuple KindId KindDef))
+
+normalizeTheme :: String -> String
+normalizeTheme theme =
+  if theme == "light" then "light"
+  else "dark"
+
+normalizeThemePreference :: String -> Maybe String
+normalizeThemePreference theme
+  | theme == "light" = Just "light"
+  | theme == "dark" = Just "dark"
+  | theme == "auto" = Just "auto"
+  | otherwise = Nothing
+
+resolveThemePreference :: String -> Maybe String -> String
+resolveThemePreference urlTheme storedTheme =
+  case normalizeThemePreference urlTheme of
+    Just theme -> theme
+    Nothing -> case storedTheme >>= normalizeThemePreference of
+      Just theme -> theme
+      Nothing -> "auto"
+
+resolveTheme :: String -> String -> String
+resolveTheme requested systemTheme =
+  case requested of
+    "light" -> "light"
+    "dark" -> "dark"
+    _ -> normalizeTheme systemTheme
+
+toggleTheme :: String -> String
+toggleTheme theme =
+  if normalizeTheme theme == "light" then "dark"
+  else "light"
+
+replaySelectionState :: State -> Effect Unit
+replaySelectionState state = do
+  for_ state.selected \node ->
+    Cy.markRoot node.id
+  for_ state.selectedEdge \edge ->
+    Cy.markEdge edge.sourceId edge.targetId
+
+derivedLayoutState
+  :: State
+  -> Maybe LayoutId
+  -> { activeLayout :: LayoutId, layoutSource :: LayoutSource }
+derivedLayoutState state mLayout
+  | state.layoutSource == SavedExplicit =
+      { activeLayout: state.activeLayout
+      , layoutSource: SavedExplicit
+      }
+  | otherwise = case mLayout of
+      Just layout ->
+        { activeLayout: layout
+        , layoutSource: ViewDefault
+        }
+      Nothing ->
+        { activeLayout: defaultLayout
+        , layoutSource: Fallback
+        }
+
+viewerIdentity :: State -> String
+viewerIdentity state =
+  case repoIdentityFromBaseUrl state.dataUrls.baseUrl of
+    Just repoId -> repoId
+    Nothing | state.config.sourceUrl /= "" ->
+      state.config.sourceUrl
+    Nothing ->
+      state.config.title
+
+repoIdentityFromBaseUrl :: String -> Maybe String
+repoIdentityFromBaseUrl url = do
+  let prefix = "https://raw.githubusercontent.com/"
+  if String.take (String.length prefix) url /= prefix then
+    Nothing
+  else do
+    let
+      parts = Array.filter (_ /= "")
+        ( String.split (String.Pattern "/")
+            (String.drop (String.length prefix) url)
+        )
+    owner <- Array.index parts 0
+    repo <- Array.index parts 1
+    pure (owner <> "/" <> repo)

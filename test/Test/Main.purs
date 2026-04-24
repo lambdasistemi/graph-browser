@@ -13,6 +13,7 @@ import Test.Spec.Runner (runSpec)
 import Test.QueryCatalog as QueryCatalog
 import Test.Sparql as Sparql
 import Test.SelfGraph as SelfGraph
+import Test.ViewDecode as ViewDecode
 
 main :: Effect Unit
 main = launchAff_ $ runSpec [ consoleReporter ] do
@@ -23,3 +24,4 @@ main = launchAff_ $ runSpec [ consoleReporter ] do
   Sparql.spec
   SelfGraph.spec
   Shaping.spec
+  ViewDecode.spec

@@ -6,7 +6,7 @@ An interactive knowledge graph browser with guided tours. Graph data is declared
 
 ## Features
 
-- Force-directed graph layout (fCoSE) with adaptive spacing
+- Selectable graph layouts: fCoSE, ELK, Cola, Dagre, Concentric
 - Click to focus, depth controls (1/2/3/All) for neighborhood size
 - Hover nodes and edges for descriptions
 - Full-text search across all labels and descriptions
@@ -14,7 +14,7 @@ An interactive knowledge graph browser with guided tours. Graph data is declared
 - Fully data-driven: title, kinds, colors, shapes all from config
 - **Universal viewer**: browse any repo's graph via `?repo=owner/repo`
 - **Repo management**: add, switch, and delete repos from a left panel
-- **Per-repo state**: each repo remembers selected node, depth, tutorial progress
+- **Per-repo state**: each repo remembers selected node, depth, tutorial progress, and explicit layout choice
 - **Dual output**: `lib` (embeddable viewer) and `app` (hosted universal viewer)
 - **Deep-linking**: share `?repo=owner/repo` URLs that auto-load
 - **Token support**: encrypted storage for private repo access
@@ -126,6 +126,25 @@ In this mode:
 }
 ```
 
+### `data/queries.json` (optional)
+
+Query catalog entries can drive the left-hand query panel. Queries tagged with `"view"` act as named graph views, and can declare an optional default layout.
+
+```json
+[
+  {
+    "id": "build-validation",
+    "name": "Build & Validation",
+    "description": "CI and validation flow.",
+    "sparql": "SELECT ?node WHERE { ?node ?p ?o }",
+    "tags": ["view"],
+    "layout": "dagre"
+  }
+]
+```
+
+Supported layout IDs are `fcose`, `elk`, `cola`, `dagre`, and `concentric`. An authored `layout` is the default for that view until the user explicitly picks a different layout for the repo.
+
 ### `data/views/<name>.json` (optional)
 
 Views filter the graph into topic-specific subgraphs. Each view selects edges by triple and includes its own tours.
@@ -134,6 +153,7 @@ Views filter the graph into topic-specific subgraphs. Each view selects edges by
 {
   "name": "My Topic",
   "description": "A focused lens on this topic.",
+  "layout": "concentric",
   "edges": [
     ["node-a", "node-b", "relates to"],
     ["node-c", "node-d", "depends on"]
@@ -150,6 +170,8 @@ Views filter the graph into topic-specific subgraphs. Each view selects edges by
   ]
 }
 ```
+
+Legacy view files also support the same optional `layout` field and layout IDs as `data/queries.json`.
 
 A `data/views/index.json` listing available views must also be committed:
 
@@ -306,6 +328,7 @@ That gives downstream applications an explicit contract: they are free to define
 Validate your data against the schemas in [`schema/`](schema/):
 
 - [`config.schema.json`](schema/config.schema.json) — configuration
+- [`query-catalog.schema.json`](schema/query-catalog.schema.json) — query catalog and query-backed views
 - [`tutorial.schema.json`](schema/tutorial.schema.json) — guided tour
 - [`tutorial-index.schema.json`](schema/tutorial-index.schema.json) — tour list
 - [`view.schema.json`](schema/view.schema.json) — view (subgraph lens with tours)
