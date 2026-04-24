@@ -85,11 +85,11 @@ function baseStyle(kinds) {
     {
       selector: "edge",
       style: {
-        width: 1.5,
-        "line-color": border,
-        "target-arrow-color": border,
+        width: 3,
+        "line-color": textMuted,
+        "target-arrow-color": textMuted,
         "target-arrow-shape": "triangle",
-        "arrow-scale": 0.8,
+        "arrow-scale": 1,
         "curve-style": "bezier",
         label: "data(label)",
         "font-size": "11px",
@@ -100,7 +100,7 @@ function baseStyle(kinds) {
         "text-outline-color": bgBase,
         "text-outline-width": 2,
         "text-opacity": 0,
-        opacity: 0.6,
+        opacity: 1,
       },
     },
     {
@@ -130,6 +130,14 @@ function baseStyle(kinds) {
         "target-arrow-color": textMuted,
         width: 2,
         opacity: 1,
+      },
+    },
+    {
+      // Marker for "this visible node still has hidden direct neighbors"
+      selector: "node.has-hidden",
+      style: {
+        "border-style": "dashed",
+        "border-width": 3,
       },
     },
   ];
@@ -274,6 +282,15 @@ function runLayout(callback) {
     .layout(
       layoutOptions(_activeLayout, function () {
         console.warn = origWarn;
+        // fCoSE fit-to-padding can zoom the viewport very far out on
+        // small graphs (e.g. the initial focused seed), leaving edges
+        // too thin to see. Cap the zoom so edges render at a reasonable
+        // thickness; keep the centre where fit placed it.
+        try {
+          if (_cy.zoom() > 1.2) _cy.zoom({ level: 1.2, renderedPosition: { x: _cy.width() / 2, y: _cy.height() / 2 } });
+          if (_cy.zoom() < 0.7) _cy.zoom({ level: 0.7, renderedPosition: { x: _cy.width() / 2, y: _cy.height() / 2 } });
+          _cy.center();
+        } catch (e) { /* no-op */ }
         if (callback) callback();
       }),
     )
@@ -304,6 +321,9 @@ export const initCytoscape = (containerId) => (kinds) => () => {
     minZoom: 0.15,
     maxZoom: 3,
   });
+  // Expose the Cytoscape instance to the browser window for e2e testing
+  // and ad-hoc debugging. Not used by the PureScript code.
+  try { window.cy = _cy; } catch (e) { /* no-op */ }
   if (!initCytoscape._themeBound) {
     initCytoscape._themeBound = true;
     var media = window.matchMedia
@@ -421,6 +441,14 @@ export const markRoot = (nodeId) => () => {
     node.addClass("root");
     node.connectedEdges().addClass("neighbor");
   }
+  // Keep every edge fully visible — markRoot previously relied on the
+  // .neighbor class to un-dim connected edges while non-connected edges
+  // stayed visible at default opacity. The old default was 0.6, which
+  // looked "invisible" on thin lines. We now render every edge the same.
+  _cy.edges().style({
+    opacity: 1,
+    width: 3,
+  });
 };
 
 export const clearRoot = () => {
@@ -438,4 +466,120 @@ export const resize = () => {
   if (!_cy) return;
   _cy.resize();
   _cy.fit(undefined, 60);
+};
+
+// Incremental add: positions are honored from the payload. No layout, no fit.
+// Defensively reapply visibility inline to ALL edges (not just new ones).
+// Cytoscape style classes can override inline style in unpredictable ways
+// when elements are added piecemeal, so we anchor a consistent look here.
+export const addElementsAt = (elements) => () => {
+  if (!_cy) return;
+  _cy.add(elements);
+  _cy.edges().style({
+    opacity: 1,
+    "text-opacity": 0,
+    width: 3,
+  });
+};
+
+export const removeElementsById = (ids) => () => {
+  if (!_cy) return;
+  ids.forEach(function (id) {
+    var el = _cy.getElementById(id);
+    if (el.nonempty()) el.remove();
+  });
+  _cy.edges().style({
+    opacity: 1,
+    "text-opacity": 0,
+    width: 3,
+  });
+};
+
+export const readPositions = () => {
+  if (!_cy) return [];
+  var out = [];
+  _cy.nodes().forEach(function (n) {
+    var p = n.position();
+    out.push({ id: n.id(), x: p.x, y: p.y });
+  });
+  return out;
+};
+
+export const readPosition = (id) => () => {
+  if (!_cy) return { x: 0, y: 0 };
+  var el = _cy.getElementById(id);
+  if (!el.nonempty()) return { x: 0, y: 0 };
+  var p = el.position();
+  return { x: p.x, y: p.y };
+};
+
+export const setHasHidden = (id) => (flag) => () => {
+  if (!_cy) return;
+  var el = _cy.getElementById(id);
+  if (!el.nonempty()) return;
+  if (flag) el.addClass("has-hidden");
+  else el.removeClass("has-hidden");
+};
+
+export const onNodeContextMenu = (callback) => () => {
+  if (!_cy) return;
+  _cy.on("cxttap", "node", function (evt) {
+    var pos = evt.renderedPosition || evt.position;
+    callback(evt.target.id())(pos.x)(pos.y)();
+  });
+};
+
+// Layout-agnostic "centre the clicked node" re-layout. Run whichever
+// layout the user has selected (via setLayout / activeLayout) over all
+// visible elements, then translate every node by the inverse of the
+// anchor's resulting position so the anchor ends up at model (0, 0).
+// Finally pan the viewport to the anchor so it sits at screen centre.
+//
+// This works for every layout main supports (fCoSE, ELK, Cola, Dagre,
+// Concentric) because we are only shifting positions after the layout
+// ran, not asking the layout to honour a constraint it may not support.
+export const relayoutAround = (layoutName) => (anchorId) => () => {
+  if (!_cy) return;
+  var anchor = _cy.getElementById(anchorId);
+  if (!anchor.nonempty()) return;
+  var origWarn = console.warn;
+  console.warn = function (msg) {
+    if (typeof msg === "string" && msg.indexOf("invalid endpoints") !== -1) return;
+    if (typeof msg === "string" && msg.indexOf("custom wheel sensitivity") !== -1) return;
+    origWarn.apply(console, arguments);
+  };
+  var opts = layoutOptions(layoutName, function () {
+    console.warn = origWarn;
+    // Shift everything so the anchor lands at model (0, 0).
+    var p = anchor.position();
+    var dx = -p.x;
+    var dy = -p.y;
+    if (dx !== 0 || dy !== 0) {
+      _cy.batch(function () {
+        _cy.nodes().forEach(function (n) {
+          var np = n.position();
+          n.position({ x: np.x + dx, y: np.y + dy });
+        });
+      });
+    }
+    _cy.edges().style({ opacity: 1, "text-opacity": 0, width: 3 });
+    // Keep zoom within a reasonable range so edges render visibly.
+    if (_cy.zoom() > 1.2) {
+      _cy.zoom({
+        level: 1.2,
+        renderedPosition: { x: _cy.width() / 2, y: _cy.height() / 2 },
+      });
+    }
+    if (_cy.zoom() < 0.7) {
+      _cy.zoom({
+        level: 0.7,
+        renderedPosition: { x: _cy.width() / 2, y: _cy.height() / 2 },
+      });
+    }
+    _cy.center(anchor);
+  });
+  // Most layouts do their own viewport fit; we override to false because
+  // we'll centre on the anchor ourselves after translation.
+  opts.fit = false;
+  _cy.layout(opts).run();
 };

@@ -17,6 +17,13 @@ module FFI.Cytoscape
   , clearRoot
   , fitAll
   , resize
+  , addElementsAt
+  , removeElementsById
+  , readPositions
+  , readPosition
+  , setHasHidden
+  , onNodeContextMenu
+  , relayoutAround
   ) where
 
 import Prelude
@@ -89,3 +96,37 @@ foreign import fitAll :: Effect Unit
 
 -- | Recalculate dimensions after layout changes.
 foreign import resize :: Effect Unit
+
+-- | Add elements at caller-supplied positions. MUST NOT trigger layout or fit.
+-- | Nodes must include { group: "nodes", data: { id, label, kind, ... }, position: { x, y } }.
+foreign import addElementsAt
+  :: Foreign -> Effect Unit
+
+-- | Remove nodes and all their incident edges by id. No layout, no fit.
+foreign import removeElementsById
+  :: Array String -> Effect Unit
+
+-- | Read current positions of every visible node back from Cytoscape.
+foreign import readPositions
+  :: Effect (Array { id :: String, x :: Number, y :: Number })
+
+-- | Read the current rendered position of a single node. Returns
+-- | { x: 0, y: 0 } if the node is absent.
+foreign import readPosition
+  :: String -> Effect { x :: Number, y :: Number }
+
+-- | Toggle the "has-hidden" marker class on a node.
+foreign import setHasHidden
+  :: String -> Boolean -> Effect Unit
+
+-- | Register a context-menu (right-click, long-press) callback on nodes.
+-- | Passes: nodeId, renderX, renderY
+foreign import onNodeContextMenu
+  :: (String -> Number -> Number -> Effect Unit) -> Effect Unit
+
+-- | Run the given layout on all currently visible elements, then shift
+-- | every node so the anchor ends up at model (0, 0) and pan the
+-- | viewport to place the anchor at screen centre. Layout-agnostic.
+-- | First argument is the layout name (same strings setLayout accepts).
+foreign import relayoutAround
+  :: String -> String -> Effect Unit
