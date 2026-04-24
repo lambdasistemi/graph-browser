@@ -420,48 +420,62 @@ export const onNodeContextMenu = (callback) => () => {
   });
 };
 
-// "Outbound explosion" from the anchor: BFS concentric rings around it.
-// After the layout, translate every node by the same (dx, dy) so the
-// anchor ends up at exactly the model position it had before the click.
-// The viewport is not panned — the clicked node stays put on screen.
+// Re-run the same fCoSE layout used by setFocusElements (the "1/2/3/4/
+// All" buttons) but with the clicked node fixed at model origin, then
+// pan the viewport so that node sits at screen centre. This produces
+// the same high-quality layout users already expect from those buttons,
+// now with the selected node as the visual centre.
 export const relayoutAround = (anchorId) => () => {
   if (!_cy) return;
   var anchor = _cy.getElementById(anchorId);
   if (!anchor.nonempty()) return;
-  var origPos = { x: anchor.position("x"), y: anchor.position("y") };
+  var n = _cy.nodes().length;
+  var edgeLen = n <= 8 ? 400 : n <= 20 ? 300 : n <= 40 ? 220 : 160;
+  var repulsion = n <= 8 ? 80000 : n <= 20 ? 40000 : n <= 40 ? 15000 : 8000;
+  var sep = n <= 8 ? 300 : n <= 20 ? 220 : n <= 40 ? 150 : 100;
+  var grav = n <= 20 ? 0.04 : n <= 40 ? 0.06 : 0.1;
   var origWarn = console.warn;
   console.warn = function (msg) {
     if (typeof msg === "string" && msg.indexOf("invalid endpoints") !== -1) return;
+    if (typeof msg === "string" && msg.indexOf("custom wheel sensitivity") !== -1) return;
     origWarn.apply(console, arguments);
   };
   _cy
     .layout({
-      name: "breadthfirst",
-      roots: anchor,
-      circle: true,
-      directed: false,
-      spacingFactor: 1.4,
-      avoidOverlap: true,
-      nodeDimensionsIncludeLabels: true,
-      animate: false, // we translate synchronously after placement
-      fit: false,
+      name: "fcose",
+      quality: "proof",
+      randomize: true,
+      animate: true,
+      animationDuration: 500,
+      fit: true,
       padding: 60,
+      nodeSeparation: sep,
+      idealEdgeLength: edgeLen,
+      edgeElasticity: 0.02,
+      nodeRepulsion: repulsion,
+      gravity: grav,
+      gravityRange: 1.5,
+      numIter: 20000,
+      nodeDimensionsIncludeLabels: true,
+      fixedNodeConstraint: [
+        { nodeId: anchor.id(), position: { x: 0, y: 0 } },
+      ],
       stop: function () {
         console.warn = origWarn;
-        var newPos = anchor.position();
-        var dx = origPos.x - newPos.x;
-        var dy = origPos.y - newPos.y;
-        if (dx !== 0 || dy !== 0) {
-          _cy.batch(function () {
-            _cy.nodes().forEach(function (n) {
-              var p = n.position();
-              n.position({ x: p.x + dx, y: p.y + dy });
-            });
+        _cy.edges().style({ opacity: 1, "text-opacity": 0, width: 3 });
+        if (_cy.zoom() > 1.2) {
+          _cy.zoom({
+            level: 1.2,
+            renderedPosition: { x: _cy.width() / 2, y: _cy.height() / 2 },
           });
         }
-        _cy.edges().style({ opacity: 1, "text-opacity": 0, width: 3 });
-        // Viewport is intentionally untouched: the anchor stays exactly
-        // where the user clicked it.
+        if (_cy.zoom() < 0.7) {
+          _cy.zoom({
+            level: 0.7,
+            renderedPosition: { x: _cy.width() / 2, y: _cy.height() / 2 },
+          });
+        }
+        _cy.center(anchor);
       },
     })
     .run();

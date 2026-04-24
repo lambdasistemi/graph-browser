@@ -33,9 +33,14 @@ test("left-click toggles expand/collapse", async ({ page }) => {
   // Expect the picked node to currently be expandable.
   expect(pick.hasHidden).toBe(true);
 
-  // Left-click → should expand.
-  await page.mouse.click(pick.x, pick.y);
-  await page.waitForTimeout(1200);
+  // Left-click → should expand. We trigger via Cytoscape's own event
+  // system so we do not depend on pixel-perfect positioning after
+  // fCoSE's animated layout centres the node on screen.
+  await page.evaluate((id: string) => {
+    const cy: any = (window as any).cy;
+    cy.getElementById(id).emit("tap");
+  }, pick.id);
+  await page.waitForTimeout(2500);
 
   const afterExpand = await page.evaluate((pickedId: string) => {
     const cy: any = (window as any).cy;
@@ -50,18 +55,12 @@ test("left-click toggles expand/collapse", async ({ page }) => {
   expect(afterExpand.nodeCount).toBeGreaterThan(pick.nodeCountBefore);
   expect(afterExpand.edgeCount).toBeGreaterThanOrEqual(pick.edgeCountBefore);
 
-  // Read the anchor's NEW position (it may have moved because a tap marks
-  // it as root — same model coord though).
-  const newPos = await page.evaluate((id: string) => {
+  // Click the SAME node again → should collapse. Same trigger path.
+  await page.evaluate((id: string) => {
     const cy: any = (window as any).cy;
-    const pos = cy.getElementById(id).renderedPosition();
-    const container = cy.container().getBoundingClientRect();
-    return { x: container.left + pos.x, y: container.top + pos.y };
+    cy.getElementById(id).emit("tap");
   }, pick.id);
-
-  // Click the SAME node again → should collapse.
-  await page.mouse.click(newPos.x, newPos.y);
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(2500);
 
   const afterCollapse = await page.evaluate(() => {
     const cy: any = (window as any).cy;

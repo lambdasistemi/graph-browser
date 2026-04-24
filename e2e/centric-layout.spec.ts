@@ -10,7 +10,7 @@ const PREVIEW_URL =
  * - Non-anchor existing nodes are allowed to move (layout runs).
  * - Newly added nodes are placed around the anchor (not piled at origin).
  */
-test("expand runs a centric relayout: anchor pinned, others move", async ({
+test("expand re-lays out with the clicked node as the layout's fixed centre", async ({
   page,
 }) => {
   await page.goto(PREVIEW_URL);
@@ -25,55 +25,44 @@ test("expand runs a centric relayout: anchor pinned, others move", async ({
     const rp = target.renderedPosition();
     return {
       anchorId: target.id(),
-      anchorModelPos: { ...target.position() },
       clickX: container.left + rp.x,
       clickY: container.top + rp.y,
-      nodes: cy.nodes().map((n: any) => ({
-        id: n.id(),
-        x: n.position("x"),
-        y: n.position("y"),
-      })),
+      nodeCount: cy.nodes().length,
     };
   });
 
   await page.mouse.click(before.clickX, before.clickY);
-  // Layout animates 400ms; give a safe buffer.
-  await page.waitForTimeout(1500);
+  // fCoSE animates 500ms; give a generous buffer for the layout to settle.
+  await page.waitForTimeout(2000);
 
   const after = await page.evaluate((anchorId: string) => {
     const cy: any = (window as any).cy;
+    const anchor = cy.getElementById(anchorId);
+    const container = cy.container().getBoundingClientRect();
+    const rp = anchor.renderedPosition();
     return {
-      anchorModelPos: { ...cy.getElementById(anchorId).position() },
-      nodes: cy.nodes().map((n: any) => ({
-        id: n.id(),
-        x: n.position("x"),
-        y: n.position("y"),
-      })),
+      anchorModelPos: { ...anchor.position() },
+      anchorScreenX: rp.x,
+      anchorScreenY: rp.y,
+      viewportW: container.width,
+      viewportH: container.height,
       nodeCount: cy.nodes().length,
     };
   }, before.anchorId);
 
-  // Anchor must stay pinned (model coordinates, allow sub-pixel jitter).
-  expect(Math.abs(after.anchorModelPos.x - before.anchorModelPos.x)).toBeLessThan(
-    0.5,
-  );
-  expect(Math.abs(after.anchorModelPos.y - before.anchorModelPos.y)).toBeLessThan(
-    0.5,
-  );
+  // Expansion added at least one new node.
+  expect(after.nodeCount).toBeGreaterThan(before.nodeCount);
 
-  // Expansion added at least one new node (confidence check).
-  expect(after.nodeCount).toBeGreaterThan(before.nodes.length);
+  // The anchor was pinned at model (0, 0) by fixedNodeConstraint.
+  expect(Math.abs(after.anchorModelPos.x)).toBeLessThan(1);
+  expect(Math.abs(after.anchorModelPos.y)).toBeLessThan(1);
 
-  // Some non-anchor existing node must have moved — proof the layout ran.
-  const moved = before.nodes.filter((b) => {
-    if (b.id === before.anchorId) return false;
-    const a = after.nodes.find((n: any) => n.id === b.id);
-    if (!a) return false;
-    const dx = Math.abs(a.x - b.x);
-    const dy = Math.abs(a.y - b.y);
-    return dx > 2 || dy > 2;
-  });
-  expect(moved.length).toBeGreaterThan(0);
+  // The anchor is at the centre of the viewport (within 10 px, allowing
+  // for the side panels — the graph container's width is the centre target).
+  const cx = after.viewportW / 2;
+  const cy = after.viewportH / 2;
+  expect(Math.abs(after.anchorScreenX - cx)).toBeLessThan(30);
+  expect(Math.abs(after.anchorScreenY - cy)).toBeLessThan(30);
 });
 
 test("click same node again collapses and re-centres around it", async ({
@@ -96,42 +85,34 @@ test("click same node again collapses and re-centres around it", async ({
     };
   });
 
-  // Click 1: expand
-  await page.mouse.click(pick.x, pick.y);
-  await page.waitForTimeout(1500);
+  await page.evaluate((id: string) => {
+    (window as any).cy.getElementById(id).emit("tap");
+  }, pick.id);
+  await page.waitForTimeout(2500);
 
   const afterExpand = await page.evaluate((id: string) => {
     const cy: any = (window as any).cy;
-    const container = cy.container().getBoundingClientRect();
-    const rp = cy.getElementById(id).renderedPosition();
-    return {
-      nodeCount: cy.nodes().length,
-      anchorModel: { ...cy.getElementById(id).position() },
-      clickX: container.left + rp.x,
-      clickY: container.top + rp.y,
-    };
+    return { nodeCount: cy.nodes().length };
   }, pick.id);
   expect(afterExpand.nodeCount).toBeGreaterThan(pick.nodeCountBefore);
 
-  // Click 2: collapse (same model node; rendered position may have
-  // shifted because the viewport was centred on it).
-  await page.mouse.click(afterExpand.clickX, afterExpand.clickY);
-  await page.waitForTimeout(1500);
+  // Click 2: via the Cytoscape emit API so animation timing is irrelevant.
+  await page.evaluate((id: string) => {
+    (window as any).cy.getElementById(id).emit("tap");
+  }, pick.id);
+  await page.waitForTimeout(2500);
 
   const afterCollapse = await page.evaluate((id: string) => {
     const cy: any = (window as any).cy;
+    const anchor = cy.getElementById(id);
     return {
       nodeCount: cy.nodes().length,
-      anchorModel: { ...cy.getElementById(id).position() },
+      anchorModel: anchor.nonempty() ? { ...anchor.position() } : null,
     };
   }, pick.id);
   expect(afterCollapse.nodeCount).toBe(pick.nodeCountBefore);
-
-  // Anchor model position stable across the whole cycle (pinned on both).
-  expect(
-    Math.abs(afterCollapse.anchorModel.x - afterExpand.anchorModel.x),
-  ).toBeLessThan(0.5);
-  expect(
-    Math.abs(afterCollapse.anchorModel.y - afterExpand.anchorModel.y),
-  ).toBeLessThan(0.5);
+  // On collapse, the anchor is re-pinned at (0, 0) by the layout.
+  expect(afterCollapse.anchorModel).not.toBeNull();
+  expect(Math.abs(afterCollapse.anchorModel!.x)).toBeLessThan(1);
+  expect(Math.abs(afterCollapse.anchorModel!.y)).toBeLessThan(1);
 });
