@@ -22,6 +22,7 @@ module FFI.Cytoscape
   , readPosition
   , setHasHidden
   , onNodeContextMenu
+  , relayoutAround
   ) where
 
 import Prelude
@@ -117,3 +118,10 @@ foreign import setHasHidden
 -- | Passes: nodeId, renderX, renderY
 foreign import onNodeContextMenu
   :: (String -> Number -> Number -> Effect Unit) -> Effect Unit
+
+-- | Run fCoSE on all currently visible elements, pinning the given node
+-- | at its current position so existing layout does not drift and the new
+-- | neighbors arrange themselves around it. Then pan the viewport to
+-- | centre the anchor on screen.
+foreign import relayoutAround
+  :: String -> Effect Unit

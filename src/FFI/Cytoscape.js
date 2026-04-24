@@ -419,3 +419,50 @@ export const onNodeContextMenu = (callback) => () => {
     callback(evt.target.id())(pos.x)(pos.y)();
   });
 };
+
+// Pin the anchor, run fCoSE on all visible elements, then centre the
+// viewport on the anchor. Used after expand/collapse to give the newly
+// visible set a sensible radial shape around the anchor without moving
+// the node the user just clicked.
+export const relayoutAround = (anchorId) => () => {
+  if (!_cy) return;
+  var anchor = _cy.getElementById(anchorId);
+  if (!anchor.nonempty()) return;
+  anchor.lock();
+  var n = _cy.nodes().length;
+  var edgeLen = n <= 8 ? 300 : n <= 20 ? 220 : n <= 40 ? 180 : 140;
+  var repulsion = n <= 8 ? 60000 : n <= 20 ? 30000 : n <= 40 ? 15000 : 8000;
+  // Suppress edge warnings during layout.
+  var origWarn = console.warn;
+  console.warn = function (msg) {
+    if (typeof msg === "string" && msg.indexOf("invalid endpoints") !== -1) return;
+    origWarn.apply(console, arguments);
+  };
+  _cy
+    .layout({
+      name: "fcose",
+      quality: "default",
+      randomize: false, // keep existing positions as the starting point
+      animate: true,
+      animationDuration: 400,
+      fit: false, // we'll pan manually to keep the anchor in place
+      padding: 60,
+      nodeSeparation: n <= 20 ? 180 : 120,
+      idealEdgeLength: edgeLen,
+      edgeElasticity: 0.02,
+      nodeRepulsion: repulsion,
+      gravity: 0.05,
+      gravityRange: 1.5,
+      numIter: 2000,
+      nodeDimensionsIncludeLabels: true,
+      stop: function () {
+        console.warn = origWarn;
+        anchor.unlock();
+        // Re-assert edge visibility after layout.
+        _cy.edges().style({ opacity: 1, "text-opacity": 0, width: 3 });
+        // Pan (without zoom change) so the anchor is centred on screen.
+        _cy.center(anchor);
+      },
+    })
+    .run();
+};

@@ -1003,6 +1003,7 @@ handleAction = case _ of
       { shaping = r.next
       , contextMenu = Nothing
       }
+    liftEffect $ Cy.relayoutAround nid
     refreshHasHidden
     persistState
 
@@ -1163,6 +1164,7 @@ commitExpand anchor newNeighbors = do
       )
   liftEffect $ Cy.addElementsAt elements
   H.modify_ _ { shaping = r.next }
+  liftEffect $ Cy.relayoutAround anchor
   refreshHasHidden
   persistState
   where
