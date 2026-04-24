@@ -489,15 +489,14 @@ handleAction = case _ of
     liftEffect $ Cy.clearEdge
     liftEffect $ Cy.markRoot nodeId
     -- Click-to-shape cycle: expand if there are hidden neighbors; else
-    -- collapse if anchored dependents exist; else hide the node itself.
-    -- Every click on a visible node therefore does something user-visible.
+    -- collapse if anchored dependents exist; else it's purely a
+    -- selection (sidebar details) with no shaping change.
     state' <- H.get
     if Shaping.hasHiddenNeighbors state'.graph nodeId state'.shaping then
       handleAction (ExpandNode nodeId)
     else if Shaping.hasAnyAnchor nodeId state'.shaping then
       handleAction (CollapseNode nodeId)
-    else
-      handleAction (HideNode nodeId)
+    else pure unit
     when state.tutorialActive persistState
 
   NodeHovered nodeId x y -> do
