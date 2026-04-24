@@ -445,7 +445,10 @@ handleAction = case _ of
             ps.shaping
         H.modify_ \s -> s
           { selected = node
-          , depth = ps.depth
+          -- NOTE: depth intentionally not restored. It used to drive the
+          -- old "depth-based neighborhood" rendering; with interactive
+          -- shaping we always start focused (depth=1) and grow via
+          -- expand/collapse clicks.
           , shaping = case restoredShaping of
               Just shap | not (Map.isEmpty shap.reasons) -> shap
               _ -> s.shaping
