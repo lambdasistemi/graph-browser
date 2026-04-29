@@ -59,6 +59,7 @@ import FFI.Oxigraph as Oxigraph
 import Viewer.Types
   ( DataUrls
   , PromptMode(..)
+  , SourceSelectionMode(..)
   , State
   , Action(..)
   , PanelTab(..)
@@ -76,7 +77,11 @@ import Viewer.Controls (renderControls, renderLegend, renderGraphContext)
 import Viewer.Tutorial (currentStop)
 import Viewer.QueryPanel (renderQueryPanel)
 import Viewer.Sidebar (renderSidebar)
-import Viewer.SourcesPanel (renderSourcesPanel)
+import Viewer.SourcesPanel
+  ( renderSourcesPanel
+  , configuredSources
+  , sourceIriForPath
+  )
 import Viewer.Loader
   ( loadConfig
   , loadGraphData
@@ -136,6 +141,7 @@ viewer = H.mkComponent
       , layoutSource: Fallback
       , hiddenSources: Set.empty
       , showSourcesPanel: false
+      , sourceSelectionMode: Multi
       , shaping: Shaping.emptyShaping
       , shapingEnabled: false
       , pendingExpand: Nothing
@@ -985,6 +991,44 @@ handleAction = case _ of
           Set.insert iri state.hiddenSources
     H.modify_ _ { hiddenSources = nextHidden }
     renderGraph
+
+  SoloSource iri -> do
+    state <- H.get
+    let
+      allIris =
+        Set.fromFoldable
+          (map (\s -> sourceIriForPath s.path) (configuredSources state.config))
+      nextHidden = Set.delete iri allIris
+    H.modify_ _
+      { hiddenSources = nextHidden
+      , sourceSelectionMode = Solo
+      }
+    renderGraph
+
+  SetSourceSelectionMode mode -> do
+    state <- H.get
+    case mode of
+      Multi ->
+        H.modify_ _ { sourceSelectionMode = Multi }
+      Solo -> do
+        let
+          allSourceIris =
+            map (\s -> sourceIriForPath s.path)
+              (configuredSources state.config)
+          firstVisible =
+            Array.find
+              (\iri -> not (Set.member iri state.hiddenSources))
+              allSourceIris
+        case firstVisible of
+          Just iri -> do
+            let nextHidden = Set.delete iri (Set.fromFoldable allSourceIris)
+            H.modify_ _
+              { hiddenSources = nextHidden
+              , sourceSelectionMode = Solo
+              }
+            renderGraph
+          Nothing ->
+            H.modify_ _ { sourceSelectionMode = Solo }
 
   ToggleSourcesPanel ->
     H.modify_ \s -> s { showSourcesPanel = not s.showSourcesPanel }

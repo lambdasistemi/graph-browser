@@ -12,7 +12,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Viewer.Helpers (cls)
-import Viewer.Types (Action(..), State)
+import Viewer.Types (Action(..), SourceSelectionMode(..), State)
 
 -- | URN prefix used for per-source named graphs (mirror of
 -- | `Viewer.Loader.sourceIriPrefix`). Kept as a local constant so this
@@ -26,9 +26,9 @@ sourceIriForPath "" = ""
 sourceIriForPath path = sourceIriPrefix <> path
 
 -- | Render a collapsible "Sources" panel listing every configured
--- | graphSource with a checkbox. Hiding a source removes any
--- | node/edge whose `sources` is a non-empty subset of hidden sources;
--- | nodes/edges with empty sources remain visible.
+-- | graphSource with a checkbox (Multi mode) or radio (Solo mode).
+-- | The Solo-mode segmented control switches between modes; in Solo
+-- | mode picking a source hides every other source in a single click.
 renderSourcesPanel
   :: forall m. State -> H.ComponentHTML Action () m
 renderSourcesPanel state =
@@ -53,9 +53,38 @@ renderSourcesPanel state =
             ]
         , if state.showSourcesPanel then
             HH.div [ cls "sources-list" ]
-              (map (renderRow state) sources)
+              ( [ renderModeToggle state.sourceSelectionMode ]
+                  <> map (renderRow state) sources
+              )
           else HH.text ""
         ]
+
+-- | Two-button segmented control selecting the source-selection mode.
+renderModeToggle
+  :: forall m
+   . SourceSelectionMode
+  -> H.ComponentHTML Action () m
+renderModeToggle mode =
+  HH.div [ cls "sources-mode-toggle" ]
+    [ HH.button
+        [ cls
+            ( if mode == Multi then "sources-mode-button active"
+              else "sources-mode-button"
+            )
+        , HP.title "Multi-select: each source has an independent checkbox"
+        , HE.onClick \_ -> SetSourceSelectionMode Multi
+        ]
+        [ HH.text "All" ]
+    , HH.button
+        [ cls
+            ( if mode == Solo then "sources-mode-button active"
+              else "sources-mode-button"
+            )
+        , HP.title "Single-select: clicking a source hides every other source"
+        , HE.onClick \_ -> SetSourceSelectionMode Solo
+        ]
+        [ HH.text "Single" ]
+    ]
 
 renderRow
   :: forall m
@@ -69,12 +98,19 @@ renderRow state source =
     display =
       if source.label /= "" then source.label
       else sourceDisplayName source.path
+    inputType = case state.sourceSelectionMode of
+      Multi -> HP.InputCheckbox
+      Solo -> HP.InputRadio
+    onChangeAction _ = case state.sourceSelectionMode of
+      Multi -> ToggleSource iri
+      Solo -> SoloSource iri
   in
     HH.label [ cls "sources-row" ]
       [ HH.input
-          [ HP.type_ HP.InputCheckbox
+          [ HP.type_ inputType
+          , HP.name "gb-source"
           , HP.checked (not hidden)
-          , HE.onChange \_ -> ToggleSource iri
+          , HE.onChange onChangeAction
           ]
       , HH.span [ cls "sources-row-label" ]
           [ HH.text display ]

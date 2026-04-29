@@ -1,5 +1,7 @@
 module Viewer.Types where
 
+import Prelude
+
 import Data.Map as Map
 import Data.Maybe (Maybe)
 import Data.Set (Set)
@@ -58,6 +60,15 @@ data PromptMode
   | PromptQuery
   | PromptTour
 
+-- | How the Sources panel binds toggling: free multi-select, or
+-- | radio-style single-select (clicking a source hides every other
+-- | source in the same step).
+data SourceSelectionMode
+  = Multi
+  | Solo
+
+derive instance eqSourceSelectionMode :: Eq SourceSelectionMode
+
 -- | Application state.
 type State =
   { config :: Config
@@ -101,6 +112,10 @@ type State =
   -- | view. Nodes/edges with empty sources are always visible.
   , hiddenSources :: Set String
   , showSourcesPanel :: Boolean
+  -- | How the Sources panel routes toggling. `Multi` is the default
+  -- | checkbox behaviour; `Solo` makes selection radio-style so picking
+  -- | one source hides every other in a single click.
+  , sourceSelectionMode :: SourceSelectionMode
   -- Interactive shaping (expand/collapse)
   , shaping :: ShapingState
   , shapingEnabled :: Boolean
@@ -144,6 +159,8 @@ data Action
   | SetLayout LayoutId
   | SetPanelTab PanelTab
   | ToggleSource String
+  | SoloSource String
+  | SetSourceSelectionMode SourceSelectionMode
   | ToggleSourcesPanel
   | ExpandNode String
   | CollapseNode String
