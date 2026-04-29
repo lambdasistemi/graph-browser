@@ -118,10 +118,12 @@ renderRow state source =
 
 -- | Configured sources across both 'graphSources' and the legacy
 -- | 'graphSource' singleton. Entries with an empty path are skipped so
--- | the panel never lists the default-graph placeholder.
+-- | the panel never lists the default-graph placeholder. Background
+-- | sources are also excluded — they are always loaded and not user-
+-- | toggleable.
 configuredSources :: Config -> Array GraphSource
 configuredSources cfg =
-  Array.filter (\s -> s.path /= "")
+  Array.filter (\s -> s.path /= "" && not s.background)
     ( cfg.graphSources
         <> case cfg.graphSource of
           Nothing -> []

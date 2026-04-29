@@ -89,6 +89,11 @@ type GraphSource =
   -- | Optional human-readable label. Empty string means "no label
   -- | configured"; UI code falls back to the path in that case.
   , label :: String
+  -- | Background sources are always loaded, never appear in the
+  -- | Sources toggle list, and are excluded from Solo mode's hide set.
+  -- | Use for foundational vocab / shared instance data that downstream
+  -- | per-source toggles assume.
+  , background :: Boolean
   }
 
 -- | Application configuration loaded from config.json.
