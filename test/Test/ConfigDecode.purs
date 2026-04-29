@@ -31,9 +31,9 @@ spec = describe "Graph.Decode.decodeConfig" do
       Left err -> fail err
       Right config -> do
         config.graphSource `shouldEqual`
-          Just { format: "text/turtle", path: "data/rdf/graph.ttl", label: "" }
+          Just { format: "text/turtle", path: "data/rdf/graph.ttl", label: "", background: false }
         config.graphSources `shouldEqual`
-          [ { format: "text/turtle", path: "data/rdf/graph.ttl", label: "" } ]
+          [ { format: "text/turtle", path: "data/rdf/graph.ttl", label: "", background: false } ]
 
   it "decodes ordered graphSources for merged RDF datasets" do
     let

@@ -128,7 +128,8 @@ decodeGraphSource json = do
   format <- lmap' $ obj .: "format"
   path <- lmap' $ obj .: "path"
   label <- lmap' $ fromMaybe "" <$> obj .:? "label"
-  pure { format, path, label }
+  background <- lmap' $ fromMaybe false <$> obj .:? "background"
+  pure { format, path, label, background }
 
 lmap'
   :: forall a
