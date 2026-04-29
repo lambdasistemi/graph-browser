@@ -76,6 +76,10 @@
         "label": {
           "type": "string",
           "description": "Optional human-readable label shown in the Sources sidebar. Defaults to the path."
+        },
+        "background": {
+          "type": "boolean",
+          "description": "When true, this source is always loaded but never appears in the user-facing Sources toggle list and is excluded from Solo mode's hide set. Use for foundational vocab / shared instance data that downstream per-source toggles assume is present. Defaults to false."
         }
       }
     }
