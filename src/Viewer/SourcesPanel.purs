@@ -98,32 +98,57 @@ renderRow state source =
     display =
       if source.label /= "" then source.label
       else sourceDisplayName source.path
-    inputType = case state.sourceSelectionMode of
-      Multi -> HP.InputCheckbox
-      Solo -> HP.InputRadio
-    onChangeAction _ = case state.sourceSelectionMode of
-      Multi -> ToggleSource iri
-      Solo -> SoloSource iri
   in
-    HH.label [ cls "sources-row" ]
-      [ HH.input
-          [ HP.type_ inputType
-          , HP.name "gb-source"
-          , HP.checked (not hidden)
-          , HE.onChange onChangeAction
+    if source.background then
+      -- Background sources are always loaded. Render them as a locked
+      -- row with no checkbox/radio so the user can see what's on but
+      -- cannot toggle them.
+      HH.div [ cls "sources-row sources-row-background" ]
+        [ HH.span [ cls "sources-row-lock" ]
+            [ HH.text "🔒" ]
+        , HH.span [ cls "sources-row-label sources-row-label-locked" ]
+            [ HH.text display ]
+        , HH.span [ cls "sources-row-tag" ]
+            [ HH.text "always loaded" ]
+        ]
+    else
+      let
+        inputType = case state.sourceSelectionMode of
+          Multi -> HP.InputCheckbox
+          Solo -> HP.InputRadio
+        onChangeAction _ = case state.sourceSelectionMode of
+          Multi -> ToggleSource iri
+          Solo -> SoloSource iri
+      in
+        HH.label [ cls "sources-row" ]
+          [ HH.input
+              [ HP.type_ inputType
+              , HP.name "gb-source"
+              , HP.checked (not hidden)
+              , HE.onChange onChangeAction
+              ]
+          , HH.span [ cls "sources-row-label" ]
+              [ HH.text display ]
           ]
-      , HH.span [ cls "sources-row-label" ]
-          [ HH.text display ]
-      ]
 
--- | Configured sources across both 'graphSources' and the legacy
--- | 'graphSource' singleton. Entries with an empty path are skipped so
--- | the panel never lists the default-graph placeholder. Background
--- | sources are also excluded — they are always loaded and not user-
--- | toggleable.
+-- | Foreground sources only — those that participate in user toggling.
+-- | Used by the reducer to compute Solo's hide set and to find the
+-- | first visible source when entering Solo mode.
+foregroundSources :: Config -> Array GraphSource
+foregroundSources cfg =
+  Array.filter (\s -> s.path /= "" && not s.background)
+    ( cfg.graphSources
+        <> case cfg.graphSource of
+          Nothing -> []
+          Just s -> [ s ]
+    )
+
+-- | All configured sources (foreground + background) the panel renders.
+-- | Entries with an empty path are skipped so the panel never lists the
+-- | default-graph placeholder.
 configuredSources :: Config -> Array GraphSource
 configuredSources cfg =
-  Array.filter (\s -> s.path /= "" && not s.background)
+  Array.filter (\s -> s.path /= "")
     ( cfg.graphSources
         <> case cfg.graphSource of
           Nothing -> []
