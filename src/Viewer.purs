@@ -79,7 +79,7 @@ import Viewer.QueryPanel (renderQueryPanel)
 import Viewer.Sidebar (renderSidebar)
 import Viewer.SourcesPanel
   ( renderSourcesPanel
-  , configuredSources
+  , foregroundSources
   , sourceIriForPath
   )
 import Viewer.Loader
@@ -997,13 +997,22 @@ handleAction = case _ of
     let
       allIris =
         Set.fromFoldable
-          (map (\s -> sourceIriForPath s.path) (configuredSources state.config))
+          (map (\s -> sourceIriForPath s.path) (foregroundSources state.config))
       nextHidden = Set.delete iri allIris
+    -- Drop the previously selected node — its source may now be hidden,
+    -- and it always feels wrong for the side panel to keep showing the
+    -- old proposal after the user has explicitly soloed a different one.
     H.modify_ _
       { hiddenSources = nextHidden
       , sourceSelectionMode = Solo
+      , selected = Nothing
+      , hoveredNode = Nothing
+      , hoveredEdge = Nothing
+      , selectedEdge = Nothing
       }
     renderGraph
+    -- Re-fit so the user lands on the soloed source's neighbourhood.
+    handleAction FitAll
 
   SetSourceSelectionMode mode -> do
     state <- H.get
@@ -1014,19 +1023,16 @@ handleAction = case _ of
         let
           allSourceIris =
             map (\s -> sourceIriForPath s.path)
-              (configuredSources state.config)
+              (foregroundSources state.config)
           firstVisible =
             Array.find
               (\iri -> not (Set.member iri state.hiddenSources))
               allSourceIris
         case firstVisible of
-          Just iri -> do
-            let nextHidden = Set.delete iri (Set.fromFoldable allSourceIris)
-            H.modify_ _
-              { hiddenSources = nextHidden
-              , sourceSelectionMode = Solo
-              }
-            renderGraph
+          Just iri ->
+            -- Reuse SoloSource so the panel and graph are consistent
+            -- (selected cleared, FitAll dispatched).
+            handleAction (SoloSource iri)
           Nothing ->
             H.modify_ _ { sourceSelectionMode = Solo }
 
