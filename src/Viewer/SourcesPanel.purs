@@ -169,16 +169,16 @@ renderRow state source =
       else sourceDisplayName source.path
   in
     if source.background then
-      -- Background sources are always loaded. Render them as a locked
-      -- row with no checkbox/radio so the user can see what's on but
-      -- cannot toggle them.
+      -- Background sources provide support data. Render them as a
+      -- locked row with no checkbox/radio so the user can see what can
+      -- contribute labels or endpoints but cannot toggle them directly.
       HH.div [ cls "sources-row sources-row-background" ]
         [ HH.span [ cls "sources-row-lock" ]
             [ HH.text "🔒" ]
         , HH.span [ cls "sources-row-label sources-row-label-locked" ]
             [ HH.text display ]
         , HH.span [ cls "sources-row-tag" ]
-            [ HH.text "always loaded" ]
+            [ HH.text "support data" ]
         ]
     else
       let
@@ -265,7 +265,7 @@ sourceStateText mode visibleCount selectableCount backgroundCount =
 
     locked =
       if backgroundCount > 0 then
-        " - " <> show backgroundCount <> " always on"
+        " - " <> show backgroundCount <> " support sources"
       else
         ""
   in

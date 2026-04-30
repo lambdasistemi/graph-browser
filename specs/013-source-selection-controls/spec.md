@@ -40,16 +40,17 @@ A graph reviewer needs labels that explain whether source checkboxes can be comb
 - **FR-008**: The active source-selection mode MUST be visually indicated.
 - **FR-009**: The source state summary MUST remain visible when the sources list is collapsed.
 - **FR-010**: The controls MUST remain usable on narrow screens.
-- **FR-011**: Background sources MUST remain visible as locked, always-on sources and MUST NOT be affected by bulk source controls.
+- **FR-011**: Background sources MUST remain visible as locked support-data sources in the panel and MUST NOT be directly affected by bulk source controls.
+- **FR-012**: When fewer than all selectable sources are visible, graph rendering MUST hide background-only and unselected-source-only graph structure while retaining endpoint nodes needed by selected-source edges.
 
 ## Edge Cases
 
 - A graph with no configured sources continues to hide the sources panel.
-- Clearing all selectable sources may still leave nodes or edges with no source metadata visible; the UI state still refers only to selectable sources.
-- Clearing all selectable sources may still leave nodes or edges from background sources or without source metadata visible.
+- Clearing all selectable sources renders an empty focused graph for source-aware datasets.
+- Background sources can still contribute labels, descriptions, or endpoint nodes when selected proposal edges refer to them.
 - If a single source is isolated, clearing all returns to no selectable source selected.
 - If every selectable source is manually checked, the state summary reads as all selectable sources visible.
-  Background sources are reported separately as always on when present.
+  Background sources are reported separately as support sources when present.
 
 ## Success Criteria
 

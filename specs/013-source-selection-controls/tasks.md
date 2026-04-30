@@ -9,6 +9,7 @@
 - [x] Add source bulk actions to `Viewer.Types.Action`.
 - [x] Implement select-all and clear-all handling in `Viewer.purs`.
 - [x] Ensure bulk actions reset stale selected/hovered detail state and rerender the graph.
+- [x] Render partial and isolated source selections with strict selected-source filtering.
 
 ## Phase 2: Source Panel UI
 
@@ -26,3 +27,4 @@
 - [x] Run `just test`.
 - [x] Build and serve the bundled app.
 - [x] Verify with Playwright that clear all, select all, source counts, and active mode state work.
+- [x] Verify with the Cardano Budget 2026 graph that clearing all empties the graph and selecting one proposal shows only that proposal's source scope.
