@@ -1,6 +1,6 @@
 {
   "name": "graph-browser",
-  "version": "1.1.0",
+  "version": "1.1.3",
   "private": true,
   "scripts": {
     "build": "spago bundle && esbuild dist/index.js --bundle --outfile=dist/index.js --allow-overwrite --format=iife --platform=browser"

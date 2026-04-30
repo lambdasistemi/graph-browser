@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3](https://github.com/lambdasistemi/graph-browser/compare/v1.1.2...v1.1.3) (2026-04-30)
+
+
+### Bug Fixes
+
+* derive useful RDF link labels ([#92](https://github.com/lambdasistemi/graph-browser/issues/92)) ([e39706a](https://github.com/lambdasistemi/graph-browser/commit/e39706a22f5b66a0f61b14e1408d97f5d727f61d))
+
 ## [1.1.0](https://github.com/lambdasistemi/graph-browser/compare/v1.0.0...v1.1.0) (2026-04-30)
 
 
