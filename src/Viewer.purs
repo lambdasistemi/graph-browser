@@ -21,7 +21,7 @@ import FFI.Cytoscape as Cy
 import FFI.Theme as Theme
 import FFI.Url as Url
 import Graph.Cytoscape as GCy
-import Graph.Operations (filterBySources, neighborhood, subgraph)
+import Graph.Operations (filterBySources, filterToSources, neighborhood, subgraph)
 import Graph.Shaping (ShapingState)
 import Graph.Shaping as Shaping
 import Data.Int (toNumber)
@@ -275,6 +275,21 @@ renderToast state = case state.toast of
       ]
       [ HH.text t.message ]
 
+foregroundSourceIris :: Config -> Array String
+foregroundSourceIris config =
+  map (\s -> sourceIriForPath s.path) (foregroundSources config)
+
+sourceFilteredGraph :: State -> Graph -> Graph
+sourceFilteredGraph state base =
+  let
+    foreground = Set.fromFoldable (foregroundSourceIris state.config)
+    visibleForeground = Set.difference foreground state.hiddenSources
+  in
+    if Set.isEmpty foreground || visibleForeground == foreground then
+      filterBySources state.hiddenSources base
+    else
+      filterToSources visibleForeground base
+
 renderSearchBox
   :: forall m. State -> H.ComponentHTML Action () m
 renderSearchBox state =
@@ -525,7 +540,9 @@ handleAction = case _ of
     -- collapse if anchored dependents exist; else it's purely a
     -- selection (sidebar details) with no shaping change.
     state' <- H.get
-    if Shaping.hasHiddenNeighbors state'.graph nodeId state'.shaping then
+    let
+      scopedGraph = sourceFilteredGraph state' state'.graph
+    if Shaping.hasHiddenNeighbors scopedGraph nodeId state'.shaping then
       handleAction (ExpandNode nodeId)
     else if Shaping.hasAnyAnchor nodeId state'.shaping then
       handleAction (CollapseNode nodeId)
@@ -992,6 +1009,44 @@ handleAction = case _ of
     H.modify_ _ { hiddenSources = nextHidden }
     renderGraph
 
+  SelectAllSources -> do
+    state <- H.get
+    let
+      nextHidden =
+        foldl
+          (\hidden iri -> Set.delete iri hidden)
+          state.hiddenSources
+          (foregroundSourceIris state.config)
+    H.modify_ _
+      { hiddenSources = nextHidden
+      , sourceSelectionMode = Multi
+      , selected = Nothing
+      , hoveredNode = Nothing
+      , hoveredEdge = Nothing
+      , selectedEdge = Nothing
+      }
+    renderGraph
+    handleAction FitAll
+
+  ClearAllSources -> do
+    state <- H.get
+    let
+      nextHidden =
+        foldl
+          (\hidden iri -> Set.insert iri hidden)
+          state.hiddenSources
+          (foregroundSourceIris state.config)
+    H.modify_ _
+      { hiddenSources = nextHidden
+      , sourceSelectionMode = Multi
+      , selected = Nothing
+      , hoveredNode = Nothing
+      , hoveredEdge = Nothing
+      , selectedEdge = Nothing
+      }
+    renderGraph
+    handleAction FitAll
+
   SoloSource iri -> do
     state <- H.get
     let
@@ -1104,8 +1159,9 @@ handleAction = case _ of
   ExpandNode nid -> do
     state <- H.get
     let
+      scopedGraph = sourceFilteredGraph state state.graph
       visible = Shaping.visibleNodes state.shaping
-      oneHop = Set.delete nid (neighborhood 1 nid state.graph)
+      oneHop = Set.delete nid (neighborhood 1 nid scopedGraph)
       newNeighbors = Set.difference oneHop visible
       n = Set.size newNeighbors
     if n == 0 then
@@ -1224,7 +1280,7 @@ renderGraph = do
         in
           subgraph hood state.graph
       Nothing -> state.graph
-    visible = filterBySources state.hiddenSources base
+    visible = sourceFilteredGraph state base
     seed = Map.keys visible.nodes # Set.fromFoldable
 
   liftEffect $ Cy.setFocusElements
@@ -1251,7 +1307,7 @@ rebuildShapingFromScope = do
     base = case state.selected of
       Just node -> subgraph (neighborhood state.depth node.id state.graph) state.graph
       Nothing -> state.graph
-    visible = filterBySources state.hiddenSources base
+    visible = sourceFilteredGraph state base
     seed = Map.keys visible.nodes # Set.fromFoldable
   H.modify_ _ { shaping = Shaping.initFromSeed seed }
 
@@ -1264,9 +1320,10 @@ refreshHasHidden
 refreshHasHidden = do
   state <- H.get
   let
+    scopedGraph = sourceFilteredGraph state state.graph
     vis = Set.toUnfoldable (Shaping.visibleNodes state.shaping) :: Array String
   for_ vis \nid -> do
-    let has = Shaping.hasHiddenNeighbors state.graph nid state.shaping
+    let has = Shaping.hasHiddenNeighbors scopedGraph nid state.shaping
     liftEffect $ Cy.setHasHidden nid has
 
 -- | Commit a vetted expand (i.e. `newNeighbors` already computed and under
@@ -1277,16 +1334,17 @@ commitExpand
    . String
   -> Set.Set String
   -> H.HalogenM State Action () o Aff Unit
-commitExpand anchor newNeighbors = do
+commitExpand anchor _newNeighbors = do
   state <- H.get
   let
-    r = Shaping.expand anchor state.graph state.shaping
+    scopedGraph = sourceFilteredGraph state state.graph
+    r = Shaping.expand anchor scopedGraph state.shaping
     added = Set.toUnfoldable r.added :: Array String
   anchorPos <- liftEffect $ Cy.readPosition anchor
   let
     placements = radialPlacements anchorPos (Array.length added)
     addedNodes = Array.mapMaybe
-      (\(Tuple nid p) -> map (\n -> Tuple n p) (Map.lookup nid state.graph.nodes))
+      (\(Tuple nid p) -> map (\n -> Tuple n p) (Map.lookup nid scopedGraph.nodes))
       (Array.zip added placements)
     anchorEdges = Array.filter
       ( \e ->
@@ -1302,7 +1360,7 @@ commitExpand anchor newNeighbors = do
                   || Set.member e.target (Set.fromFoldable added)
               )
       )
-      state.graph.edges
+      scopedGraph.edges
     -- edges restricted so both endpoints are already visible or newly added
     visibleAfter = Set.union (Shaping.visibleNodes state.shaping) r.added
     keptEdges = Array.filter

@@ -4,6 +4,7 @@ module Graph.Operations
   ( neighborhood
   , subgraph
   , filterBySources
+  , filterToSources
   ) where
 
 import Prelude
@@ -95,3 +96,27 @@ filterBySources hidden graph
               && Set.member e.target keptNodeIds
         )
         graph.edges
+
+-- | Keep only graph structure contributed by one of the explicitly
+-- | visible sources. Endpoint nodes of kept edges are retained even
+-- | when their own label/metadata triples came from support sources.
+filterToSources :: Set String -> Graph -> Graph
+filterToSources visible graph
+  | Set.isEmpty visible = buildGraph [] []
+  | otherwise = buildGraph keptNodes keptEdges
+      where
+      hasVisibleSource sources =
+        Array.any (\src -> Set.member src visible) sources
+
+      keptEdges = Array.filter
+        (\e -> hasVisibleSource e.sources)
+        graph.edges
+
+      endpointIds = foldl
+        (\ids edge -> Set.insert edge.source (Set.insert edge.target ids))
+        Set.empty
+        keptEdges
+
+      keptNodes = Array.filter
+        (\n -> hasVisibleSource n.sources || Set.member n.id endpointIds)
+        (Array.fromFoldable (Map.values graph.nodes))

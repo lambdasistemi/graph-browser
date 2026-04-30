@@ -5,6 +5,7 @@ import Prelude
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Test.ConfigDecode as ConfigDecode
+import Test.GraphOperations as GraphOperations
 import Test.OntologyImport as OntologyImport
 import Test.RdfImport as RdfImport
 import Test.Shaping as Shaping
@@ -18,6 +19,7 @@ import Test.ViewDecode as ViewDecode
 main :: Effect Unit
 main = launchAff_ $ runSpec [ consoleReporter ] do
   ConfigDecode.spec
+  GraphOperations.spec
   OntologyImport.spec
   QueryCatalog.spec
   RdfImport.spec
