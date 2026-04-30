@@ -6,8 +6,8 @@
 
 ## Status
 
-**Completed**: Issue created and added to Planning. Source panel scope identified.  
-**Current**: Add explicit source-selection state and bulk controls in the existing PureScript/Halogen sources panel.  
+**Completed**: Issue created and added to Planning. Source panel scope identified. Source-selection state, bulk controls, clearer mode labels, and browser verification are complete.
+**Current**: Ready for PR review.
 **Blockers**: None.
 
 ## Technical Context
@@ -38,8 +38,10 @@
 - Use "Select all" and "Clear all" as explicit bulk commands.
 - Keep row checkboxes because they are the most direct representation of source visibility.
 - Show source state in the collapsed header as `N/M visible`.
+- Count and bulk-control only selectable foreground sources. Background sources remain locked and always loaded.
+- Key source rows by source-selection mode so switching from checkboxes to radios remounts inputs with the correct checked state.
 
 ## Risks
 
-- Elements without source metadata remain visible when all configured sources are hidden. This is existing graph filtering behavior and should not be changed in this issue.
+- Elements without source metadata remain visible when all selectable sources are hidden. This is existing graph filtering behavior and should not be changed in this issue.
 - The repository has both app and library bundles; verification must include the bundled viewer path, not only PureScript compilation.

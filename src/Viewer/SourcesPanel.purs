@@ -6,9 +6,11 @@ import Data.Array as Array
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set as Set
 import Data.String as String
+import Data.Tuple (Tuple(..))
 import Graph.Types (Config, GraphSource)
 import Halogen as H
 import Halogen.HTML as HH
+import Halogen.HTML.Elements.Keyed as HHK
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Viewer.Helpers (cls)
@@ -34,6 +36,10 @@ renderSourcesPanel
 renderSourcesPanel state =
   let
     sources = configuredSources state.config
+    selectableSources = foregroundSources state.config
+    visibleCount = visibleSourceCount state selectableSources
+    selectableCount = Array.length selectableSources
+    backgroundCount = Array.length sources - selectableCount
   in
     if Array.null sources then HH.text ""
     else
@@ -45,16 +51,28 @@ renderSourcesPanel state =
             [ HH.span [ cls "sources-title" ]
                 [ HH.text "Sources" ]
             , HH.span [ cls "sources-count" ]
-                [ HH.text (show (Array.length sources)) ]
+                [ HH.text (sourceCountText visibleCount selectableCount) ]
+            , HH.span [ cls "sources-state" ]
+                [ HH.text
+                    ( sourceStateText
+                        state.sourceSelectionMode
+                        visibleCount
+                        selectableCount
+                        backgroundCount
+                    )
+                ]
             , HH.span [ cls "sources-chevron" ]
                 [ HH.text
                     if state.showSourcesPanel then "▾" else "▸"
                 ]
             ]
         , if state.showSourcesPanel then
-            HH.div [ cls "sources-list" ]
-              ( [ renderModeToggle state.sourceSelectionMode ]
-                  <> map (renderRow state) sources
+            HHK.div [ cls "sources-list" ]
+              ( [ Tuple "source-mode" (renderModeToggle state.sourceSelectionMode)
+                , Tuple "source-bulk-actions"
+                    (renderBulkActions visibleCount selectableCount)
+                ]
+                  <> map (renderKeyedRow state) sources
               )
           else HH.text ""
         ]
@@ -65,26 +83,77 @@ renderModeToggle
    . SourceSelectionMode
   -> H.ComponentHTML Action () m
 renderModeToggle mode =
-  HH.div [ cls "sources-mode-toggle" ]
-    [ HH.button
-        [ cls
-            ( if mode == Multi then "sources-mode-button active"
-              else "sources-mode-button"
-            )
-        , HP.title "Multi-select: each source has an independent checkbox"
-        , HE.onClick \_ -> SetSourceSelectionMode Multi
-        ]
-        [ HH.text "All" ]
-    , HH.button
-        [ cls
-            ( if mode == Solo then "sources-mode-button active"
-              else "sources-mode-button"
-            )
-        , HP.title "Single-select: clicking a source hides every other source"
-        , HE.onClick \_ -> SetSourceSelectionMode Solo
-        ]
-        [ HH.text "Single" ]
+  HH.div
+    [ cls "sources-mode-toggle"
+    , HP.attr (HH.AttrName "aria-label") "Source selection mode"
     ]
+    [ renderModeButton
+        mode
+        Multi
+        "Combined sources"
+        "Combine any number of source graphs"
+    , renderModeButton
+        mode
+        Solo
+        "Isolate one source"
+        "Show one selected source graph at a time"
+    ]
+
+renderModeButton
+  :: forall m
+   . SourceSelectionMode
+  -> SourceSelectionMode
+  -> String
+  -> String
+  -> H.ComponentHTML Action () m
+renderModeButton activeMode targetMode label title =
+  let
+    active = activeMode == targetMode
+  in
+    HH.button
+      [ cls
+          ( if active then "sources-mode-button active"
+            else "sources-mode-button"
+          )
+      , HP.title title
+      , HP.attr (HH.AttrName "aria-pressed")
+          (if active then "true" else "false")
+      , HE.onClick \_ -> SetSourceSelectionMode targetMode
+      ]
+      [ HH.text label ]
+
+renderBulkActions
+  :: forall m
+   . Int
+  -> Int
+  -> H.ComponentHTML Action () m
+renderBulkActions visibleCount selectableCount =
+  HH.div [ cls "sources-actions" ]
+    [ HH.button
+        [ cls "sources-action-button"
+        , HP.disabled (visibleCount == selectableCount)
+        , HP.title "Show every selectable source graph"
+        , HE.onClick \_ -> SelectAllSources
+        ]
+        [ HH.text "Select all" ]
+    , HH.button
+        [ cls "sources-action-button"
+        , HP.disabled (visibleCount == 0)
+        , HP.title "Hide every selectable source graph"
+        , HE.onClick \_ -> ClearAllSources
+        ]
+        [ HH.text "Clear all" ]
+    ]
+
+renderKeyedRow
+  :: forall m
+   . State
+  -> GraphSource
+  -> Tuple String (H.ComponentHTML Action () m)
+renderKeyedRow state source =
+  Tuple
+    (sourceSelectionModeId state.sourceSelectionMode <> ":" <> source.path)
+    (renderRow state source)
 
 renderRow
   :: forall m
@@ -124,6 +193,7 @@ renderRow state source =
           [ HH.input
               [ HP.type_ inputType
               , HP.name "gb-source"
+              , HP.value iri
               , HP.checked (not hidden)
               , HE.onChange onChangeAction
               ]
@@ -166,10 +236,45 @@ sourceDisplayName path =
     dropExt last suffixes
 
 dropExt :: String -> Array String -> String
-dropExt s suffixes =
-  case Array.head (Array.mapMaybe (\ext -> String.stripSuffix (String.Pattern ext) s) suffixes) of
+dropExt s extensions =
+  case Array.head (Array.mapMaybe (\ext -> String.stripSuffix (String.Pattern ext) s) extensions) of
     Just stripped -> stripped
     Nothing -> s
+
+visibleSourceCount :: State -> Array GraphSource -> Int
+visibleSourceCount state sources =
+  Array.length
+    ( Array.filter
+        (\source -> not (Set.member (sourceIriForPath source.path) state.hiddenSources))
+        sources
+    )
+
+sourceCountText :: Int -> Int -> String
+sourceCountText visibleCount selectableCount =
+  show visibleCount <> "/" <> show selectableCount <> " visible"
+
+sourceStateText :: SourceSelectionMode -> Int -> Int -> Int -> String
+sourceStateText mode visibleCount selectableCount backgroundCount =
+  let
+    base =
+      if selectableCount == 0 then "No selectable sources"
+      else if visibleCount == selectableCount then "All selectable sources visible"
+      else if visibleCount == 0 then "No selectable sources visible"
+      else if mode == Solo && visibleCount == 1 then "Isolating one source"
+      else "Custom source mix"
+
+    locked =
+      if backgroundCount > 0 then
+        " - " <> show backgroundCount <> " always on"
+      else
+        ""
+  in
+    base <> locked
+
+sourceSelectionModeId :: SourceSelectionMode -> String
+sourceSelectionModeId = case _ of
+  Multi -> "multi"
+  Solo -> "solo"
 
 suffixes :: Array String
 suffixes = [ ".ttl", ".nq", ".nt", ".trig", ".rdf", ".jsonld" ]

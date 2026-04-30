@@ -30,9 +30,9 @@ A graph reviewer needs labels that explain whether source checkboxes can be comb
 
 ### Functional Requirements
 
-- **FR-001**: The sources panel MUST display the number of visible configured sources out of the total configured sources.
-- **FR-002**: The sources panel MUST provide a one-click action to select all configured sources.
-- **FR-003**: The sources panel MUST provide a one-click action to clear all configured sources.
+- **FR-001**: The sources panel MUST display the number of visible selectable sources out of the total selectable sources.
+- **FR-002**: The sources panel MUST provide a one-click action to select all selectable sources.
+- **FR-003**: The sources panel MUST provide a one-click action to clear all selectable sources.
 - **FR-004**: Bulk actions MUST update the graph using the same filtering semantics as individual source checkboxes.
 - **FR-005**: The UI MUST keep existing individual source checkboxes.
 - **FR-006**: The UI MUST keep existing single-source isolation behavior.
@@ -40,17 +40,20 @@ A graph reviewer needs labels that explain whether source checkboxes can be comb
 - **FR-008**: The active source-selection mode MUST be visually indicated.
 - **FR-009**: The source state summary MUST remain visible when the sources list is collapsed.
 - **FR-010**: The controls MUST remain usable on narrow screens.
+- **FR-011**: Background sources MUST remain visible as locked, always-on sources and MUST NOT be affected by bulk source controls.
 
 ## Edge Cases
 
 - A graph with no configured sources continues to hide the sources panel.
-- Clearing all configured sources may still leave nodes or edges with no source metadata visible; the UI state still refers only to configured sources.
-- If a single source is isolated, clearing all returns to no configured source selected.
-- If every source is manually checked, the state summary reads as all configured sources visible.
+- Clearing all selectable sources may still leave nodes or edges with no source metadata visible; the UI state still refers only to selectable sources.
+- Clearing all selectable sources may still leave nodes or edges from background sources or without source metadata visible.
+- If a single source is isolated, clearing all returns to no selectable source selected.
+- If every selectable source is manually checked, the state summary reads as all selectable sources visible.
+  Background sources are reported separately as always on when present.
 
 ## Success Criteria
 
-- **SC-001**: A user can hide every configured source in one click.
-- **SC-002**: A user can restore every configured source in one click.
-- **SC-003**: A user can read the panel header and know how many configured sources are visible.
+- **SC-001**: A user can hide every selectable source in one click.
+- **SC-002**: A user can restore every selectable source in one click.
+- **SC-003**: A user can read the panel header and know how many selectable sources are visible.
 - **SC-004**: A user can identify whether the source panel is in combined-source mode or isolated-source mode.

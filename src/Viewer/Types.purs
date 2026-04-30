@@ -160,6 +160,8 @@ data Action
   | SetPanelTab PanelTab
   | ToggleSource String
   | SoloSource String
+  | SelectAllSources
+  | ClearAllSources
   | SetSourceSelectionMode SourceSelectionMode
   | ToggleSourcesPanel
   | ExpandNode String

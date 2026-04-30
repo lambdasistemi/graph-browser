@@ -275,6 +275,10 @@ renderToast state = case state.toast of
       ]
       [ HH.text t.message ]
 
+foregroundSourceIris :: Config -> Array String
+foregroundSourceIris config =
+  map (\s -> sourceIriForPath s.path) (foregroundSources config)
+
 renderSearchBox
   :: forall m. State -> H.ComponentHTML Action () m
 renderSearchBox state =
@@ -991,6 +995,44 @@ handleAction = case _ of
           Set.insert iri state.hiddenSources
     H.modify_ _ { hiddenSources = nextHidden }
     renderGraph
+
+  SelectAllSources -> do
+    state <- H.get
+    let
+      nextHidden =
+        foldl
+          (\hidden iri -> Set.delete iri hidden)
+          state.hiddenSources
+          (foregroundSourceIris state.config)
+    H.modify_ _
+      { hiddenSources = nextHidden
+      , sourceSelectionMode = Multi
+      , selected = Nothing
+      , hoveredNode = Nothing
+      , hoveredEdge = Nothing
+      , selectedEdge = Nothing
+      }
+    renderGraph
+    handleAction FitAll
+
+  ClearAllSources -> do
+    state <- H.get
+    let
+      nextHidden =
+        foldl
+          (\hidden iri -> Set.insert iri hidden)
+          state.hiddenSources
+          (foregroundSourceIris state.config)
+    H.modify_ _
+      { hiddenSources = nextHidden
+      , sourceSelectionMode = Multi
+      , selected = Nothing
+      , hoveredNode = Nothing
+      , hoveredEdge = Nothing
+      , selectedEdge = Nothing
+      }
+    renderGraph
+    handleAction FitAll
 
   SoloSource iri -> do
     state <- H.get

@@ -319,7 +319,8 @@
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0;
+    flex: 0 0 auto;
   }
   .sources-count {
     font-size: 11px;
@@ -327,6 +328,18 @@
     background: var(--bg-surface);
     padding: 1px 6px;
     border-radius: 10px;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+  .sources-state {
+    min-width: 0;
+    color: var(--text-faint);
+    font-size: 11px;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1 1 auto;
   }
   .sources-chevron {
     margin-left: auto;
@@ -337,6 +350,45 @@
     display: flex;
     flex-direction: column;
     padding: 4px 0;
+  }
+  .sources-mode-toggle,
+  .sources-actions {
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px 4px;
+  }
+  .sources-mode-button,
+  .sources-action-button {
+    min-width: 0;
+    flex: 1;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    line-height: 1.25;
+    padding: 6px 8px;
+    transition: all 0.15s ease;
+  }
+  .sources-mode-button:hover,
+  .sources-action-button:hover {
+    background: var(--border);
+    border-color: var(--text-muted);
+  }
+  .sources-mode-button.active {
+    background: var(--accent-bg);
+    border-color: var(--accent);
+    color: var(--accent-bright);
+  }
+  .sources-action-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+  .sources-action-button:disabled:hover {
+    background: var(--bg-raised);
+    border-color: var(--border);
   }
   .sources-row {
     display: flex;
@@ -354,10 +406,34 @@
     cursor: pointer;
     margin: 0;
   }
+  .sources-row input[type="radio"] {
+    accent-color: var(--accent);
+    cursor: pointer;
+    margin: 0;
+  }
   .sources-row-label {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .sources-row-background {
+    cursor: default;
+    color: var(--text-muted);
+  }
+  .sources-row-background:hover { background: transparent; }
+  .sources-row-lock {
+    width: 13px;
+    flex: 0 0 auto;
+    color: var(--text-faint);
+  }
+  .sources-row-label-locked {
+    color: var(--text-muted);
+  }
+  .sources-row-tag {
+    margin-left: auto;
+    color: var(--text-faint);
+    font-size: 10px;
+    white-space: nowrap;
   }
   .query-panel > * {
     direction: ltr;
