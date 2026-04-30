@@ -108,11 +108,15 @@ renderQueriesList state =
               ]
           ]
             <> Array.concatMap mkQueryEntry
-              (filterByText state.catalogFilter state.queryCatalog)
+              ( filterByText state.catalogFilter
+                  (Array.filter (not isTourOnlyQuery) state.queryCatalog)
+              )
         )
     , renderPromptBuilder state PromptQuery "New query"
     ]
   where
+  isTourOnlyQuery q = Array.elem "tour-only" q.tags
+
   isActive q = case state.activeQuery of
     Just aq -> aq.id == q.id
     Nothing -> false
