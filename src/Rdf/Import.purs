@@ -16,7 +16,7 @@ import Data.String.Pattern (Pattern(..))
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import FFI.Oxigraph (ImportedRdfQuad)
-import FFI.Uri (decodeUriComponent)
+import FFI.Uri (decodeUriComponent, hostnameFromUrl)
 import Graph.Build (buildGraph)
 import Graph.Types (Edge, Graph, KindDef, Link, Node, OntologyReference)
 import Ontology.Extract as Ontology
@@ -85,7 +85,8 @@ importGraph quads = do
 
 importInstanceGraph :: Array ImportedRdfQuad -> Either String Graph
 importInstanceGraph quads = do
-  nodeRecords <- traverse (importNode quads) (subjectsWithType gbNode quads)
+  let reifiedLinkLabels = reifiedLabelMap quads
+  nodeRecords <- traverse (importNode quads reifiedLinkLabels) (subjectsWithType gbNode quads)
   let
     nodeIdByIri =
       Map.fromFoldable
@@ -102,8 +103,8 @@ type NodeRecord =
   , node :: Node
   }
 
-importNode :: Array ImportedRdfQuad -> String -> Either String NodeRecord
-importNode quads iri = do
+importNode :: Array ImportedRdfQuad -> Map.Map String String -> String -> Either String NodeRecord
+importNode quads reifiedLinkLabels iri = do
   id <- requireLiteral quads iri gbNodeId "node id"
   label <- requireLiteral quads iri rdfsLabel "node label"
   kind <- case findKindIri quads iri of
@@ -114,7 +115,7 @@ importNode quads iri = do
     group = fromMaybe (decodeVocabularySuffix gbGroups groupIri)
       (literalValue quads groupIri gbGroupId)
     description = fromMaybe "" (literalValue quads iri dctermsDescription)
-    links = fallbackLinks quads iri
+    links = fallbackLinks quads reifiedLinkLabels iri
     ontologyRef = semanticTypeReference quads iri
     sources = subjectSources quads iri
   pure
@@ -144,18 +145,18 @@ subjectSources quads iri =
         quads
     )
 
-fallbackLinks :: Array ImportedRdfQuad -> String -> Array Link
-fallbackLinks quads subject =
+fallbackLinks :: Array ImportedRdfQuad -> Map.Map String String -> String -> Array Link
+fallbackLinks quads reifiedLinkLabels subject =
   dedupeLinks
-    ( Array.mapMaybe (namedLink quads foafPage) (namedObjectValues quads subject foafPage)
-        <> Array.mapMaybe (namedLink quads rdfsSeeAlso) (namedObjectValues quads subject rdfsSeeAlso)
+    ( Array.mapMaybe (namedLink reifiedLinkLabels subject foafPage) (namedObjectValues quads subject foafPage)
+        <> Array.mapMaybe (namedLink reifiedLinkLabels subject rdfsSeeAlso) (namedObjectValues quads subject rdfsSeeAlso)
     )
 
-namedLink :: Array ImportedRdfQuad -> String -> String -> Maybe Link
-namedLink quads predicate url =
+namedLink :: Map.Map String String -> String -> String -> String -> Maybe Link
+namedLink reifiedLinkLabels subject predicate url =
   if isAbsoluteIri url then
     Just
-      { label: fromMaybe (decodeVocabularySuffix "" predicate) (literalValue quads predicate rdfsLabel)
+      { label: fromMaybe (hostnameLabel url) (Map.lookup (edgeKey subject predicate url) reifiedLinkLabels)
       , url
       }
   else
@@ -244,11 +245,19 @@ guardNamedNodeRelation quad nodeIdByIri =
 
 reifiedDescriptionMap :: Array ImportedRdfQuad -> Map.Map String String
 reifiedDescriptionMap quads =
+  reifiedLiteralMap quads dctermsDescription
+
+reifiedLabelMap :: Array ImportedRdfQuad -> Map.Map String String
+reifiedLabelMap quads =
+  reifiedLiteralMap quads rdfsLabel
+
+reifiedLiteralMap :: Array ImportedRdfQuad -> String -> Map.Map String String
+reifiedLiteralMap quads literalPredicate =
   foldl insertDescription Map.empty (subjectsWithType rdfStatement quads)
   where
   insertDescription acc statementIri =
     case
-      literalValue quads statementIri dctermsDescription,
+      literalValue quads statementIri literalPredicate,
       Array.head (namedObjectValues quads statementIri rdfSubject),
       Array.head (namedObjectValues quads statementIri rdfPredicate),
       Array.head (namedObjectValues quads statementIri rdfObject)
@@ -389,6 +398,22 @@ isAbsoluteIri :: String -> Boolean
 isAbsoluteIri iri =
   String.take 7 iri == "http://"
     || String.take 8 iri == "https://"
+
+hostnameLabel :: String -> String
+hostnameLabel url =
+  case stripWww (hostnameFromUrl url) of
+    "" -> decodeVocabularySuffix "" url
+    hostname -> hostname
+
+stripWww :: String -> String
+stripWww host =
+  let
+    prefix = "www."
+  in
+    if String.take (String.length prefix) host == prefix then
+      String.drop (String.length prefix) host
+    else
+      host
 
 decodeVocabularySuffix :: String -> String -> String
 decodeVocabularySuffix prefix iri
