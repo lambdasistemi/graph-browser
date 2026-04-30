@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.0](https://github.com/lambdasistemi/graph-browser/compare/v1.0.0...v1.1.0) (2026-04-30)
+
+
+### Features
+
+* add selectable graph layouts ([#39](https://github.com/lambdasistemi/graph-browser/issues/39)) ([3b3346f](https://github.com/lambdasistemi/graph-browser/commit/3b3346fb0f090c124bd725746b24a8c99acab809))
+* **sources:** add 'background' flag for always-on, non-toggleable sources ([fc95136](https://github.com/lambdasistemi/graph-browser/commit/fc95136de1f71d1b8e6a6618f419dbf3d0ef3a3e))
+* **sources:** add Solo single-select mode to the Sources panel ([5f9d996](https://github.com/lambdasistemi/graph-browser/commit/5f9d996c439a4bb426eaaa8c74072e744f8f8ac1))
+* **sources:** show background sources as locked rows; refit on Solo ([521e448](https://github.com/lambdasistemi/graph-browser/commit/521e4481e9fb2398179b66063b69d37fa844afc1))
+
+
+### Bug Fixes
+
+* add visible theme toggle to viewer ([848e13c](https://github.com/lambdasistemi/graph-browser/commit/848e13cdf0f82afa16ab28e6d89975a5623eef89))
+
 ## 1.0.0 (2026-04-23)
 
 
