@@ -20,6 +20,10 @@ ex:knows a owl:ObjectProperty ;
 ex:advises a owl:ObjectProperty ;
   rdfs:label "advises" .
 
+foaf:page rdfs:label "source page" .
+
+rdfs:seeAlso rdfs:label "supporting evidence" .
+
 ex:alice a gb:Node, gbk:component, ex:Student ;
   gb:nodeId "alice" ;
   rdfs:label "Alice" ;
@@ -33,6 +37,12 @@ ex:bob a gb:Node, gbk:component, ex:Mentor ;
   gb:group gbg:instances ;
   dcterms:description "Standard Bob description" ;
   rdfs:seeAlso <https://example.org/bob-doc> .
+
+[] a rdf:Statement ;
+  rdf:subject ex:bob ;
+  rdf:predicate rdfs:seeAlso ;
+  rdf:object <https://example.org/bob-doc> ;
+  rdfs:label "Bob evidence page" .
 
 ex:carol a gb:Node, gbk:component, ex:Student ;
   gb:nodeId "carol" ;

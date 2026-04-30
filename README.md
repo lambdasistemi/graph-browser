@@ -95,6 +95,22 @@ In this mode:
 - the graph itself is imported from RDF
 - `graphSources` can merge instance RDF with ontology RDF at runtime
 
+External node links are imported from `foaf:page` and `rdfs:seeAlso`.
+The viewer labels those links from the URL hostname by default, so users
+see labels like `github.com` or `hydra-voting.intersectmbo.org` instead
+of generic predicate names. For a more precise label, add an
+`rdf:Statement` for the link triple with `rdfs:label`:
+
+```turtle
+ex:proposal rdfs:seeAlso <https://milestones.projectcatalyst.io/projects/1300132> .
+
+[] a rdf:Statement ;
+  rdf:subject ex:proposal ;
+  rdf:predicate rdfs:seeAlso ;
+  rdf:object <https://milestones.projectcatalyst.io/projects/1300132> ;
+  rdfs:label "Catalyst milestone tracker" .
+```
+
 ### `data/tutorials/index.json` (optional)
 
 ```json

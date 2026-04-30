@@ -35,13 +35,15 @@ spec = describe "RDF import standard metadata behavior" do
           Nothing -> fail "missing alice node"
           Just node -> do
             node.description `shouldEqual` "Standard Alice description"
-            map _.url node.links `shouldEqual` [ "https://example.org/alice-doc" ]
+            node.links `shouldEqual`
+              [ { label: "example.org", url: "https://example.org/alice-doc" } ]
             node.ontologyRef `shouldEqual`
               Just { label: "Student", iri: "https://example.org/standard#Student" }
         case bob of
           Nothing -> fail "missing bob node"
           Just node ->
-            map _.url node.links `shouldEqual` [ "https://example.org/bob-doc" ]
+            node.links `shouldEqual`
+              [ { label: "Bob evidence page", url: "https://example.org/bob-doc" } ]
         case knowsEdge of
           Nothing -> fail "missing knows edge"
           Just edge -> do

@@ -88,7 +88,7 @@ gb:GroupShape a sh:NodeShape ;
     sh:maxCount 1
   ] .
 
-gb:ReifiedEdgeDescriptionShape a sh:NodeShape ;
+gb:ReifiedStatementShape a sh:NodeShape ;
   sh:targetClass rdf:Statement ;
   sh:property [
     sh:path rdf:subject ;
@@ -104,19 +104,22 @@ gb:ReifiedEdgeDescriptionShape a sh:NodeShape ;
   ] ;
   sh:property [
     sh:path rdf:object ;
-    sh:class gb:Node ;
+    sh:nodeKind sh:IRI ;
     sh:minCount 1 ;
     sh:maxCount 1
   ] ;
   sh:property [
     sh:path gb:edgeIndex ;
     sh:datatype xsd:integer ;
-    sh:minCount 1 ;
     sh:maxCount 1
   ] ;
   sh:property [
     sh:path dcterms:description ;
     sh:datatype xsd:string ;
-    sh:minCount 1 ;
+    sh:maxCount 1
+  ] ;
+  sh:property [
+    sh:path rdfs:label ;
+    sh:datatype xsd:string ;
     sh:maxCount 1
   ] .
