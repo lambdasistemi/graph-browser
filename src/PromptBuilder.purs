@@ -183,6 +183,7 @@ queryCatalogSchemaBlock =
     <> "- `parameters`: optional `[{name, label, type, default}]`"
     <> " — type: `string` | `node` | `kind`\n"
     <> "- `tags`: optional — `\"view\"` for views,"
+    <> " `\"tour-only\"` to keep a query out of the Queries tab,"
     <> " `\"tour:tour-id\"` for tour stops\n"
     <> "- `layout`: optional — one of `fcose`, `elk`, `cola`,"
     <> " `dagre`, `concentric`; use it to set a default layout"
